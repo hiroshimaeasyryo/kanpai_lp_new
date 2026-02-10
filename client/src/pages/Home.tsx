@@ -9,11 +9,14 @@
 
 import { useEffect, useState } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import type { KanpaiEvent } from "@/types/events";
+import { getNextEvent } from "@/types/events";
 
 export default function Home() {
   useSmoothScroll();
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [nextEvent, setNextEvent] = useState<KanpaiEvent | null>(null);
   const [images, setImages] = useState({
     scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
     scene2: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-2_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTJfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEkucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=lP1zsaQVot3JZ8j1pmF~ZTduIn4rEbSCnxg5fviHYIMB7ecm2noJEeRqs8RnfQtGeFrNfisNWRxS2NXP6cKYNRTm1GKCiPhAH9uZmejxHHa2sRLjzNPtTkKqzNcLb3adMZF2cNijtcWuu04Up4elWVulYApVZE53c76-8zMGCKDeUFbn~S1DVMkfy-2a5ZvOxwlPDI9NwRiJxZonwhGvWYqkVfJ1uPSUllOTWLklnsJ5M14BPuqrsHcA1z8Hp~gurADg1vOWL5Iyv479l8pVFQeGLmvKubSI5K3ExuXg7neOEm8U7XZSBerh1wpI8EHyLKObaocXTo5hICAVnaPxnQ__",
@@ -22,15 +25,16 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
-    
+    setNextEvent(getNextEvent());
+
     // LocalStorageから画像を読み込む
     const scene1 = localStorage.getItem("kanpai_scene1");
     const scene2 = localStorage.getItem("kanpai_scene2");
     const scene3 = localStorage.getItem("kanpai_scene3");
     const logo = localStorage.getItem("kanpai_logo");
-    
+
     if (scene1 || scene2 || scene3) {
-      setImages(prev => ({
+      setImages((prev) => ({
         scene1: scene1 || prev.scene1,
         scene2: scene2 || prev.scene2,
         scene3: scene3 || prev.scene3,
@@ -75,13 +79,17 @@ export default function Home() {
           <div className="absolute w-48 h-48 top-20 left-10 rounded-full" style={{ background: 'radial-gradient(circle, rgba(244,213,190,.2) 0%, transparent 70%)' }}></div>
         </div>
         <div className="relative z-10 text-center max-w-2xl px-6">
-          <svg className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} viewBox="0 0 52 52" fill="none">
-            <path d="M12 38V16c0-3 2-5 4-6l3-2v30m0 0c0 0-2 0-2-2v-2" stroke="#5C3D2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M40 38V16c0-3-2-5-4-6l-3-2v30m0 0c0 0 2 0 2-2v-2" stroke="#5C3D2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M15 10l4-5m14 5l-4-5" stroke="#D4845A" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <h1 className="text-5xl md:text-6xl font-bold text-[#5C3D2E] mb-8 leading-tight opacity-0 animate-fadeUp" style={{ animationDelay: '0.4s', animationFillMode: 'forwards', fontFamily: "'Shippori Mincho', serif", wordSpacing: '9999px' }}>
-            見えないものに、触れる。
+          {logoUrl ? (
+            <img src={logoUrl} alt="KANPAI就活ロゴ" className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp object-contain" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} />
+          ) : (
+            <svg className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} viewBox="0 0 52 52" fill="none">
+              <path d="M12 38V16c0-3 2-5 4-6l3-2v30m0 0c0 0-2 0-2-2v-2" stroke="#5C3D2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M40 38V16c0-3-2-5-4-6l-3-2v30m0 0c0 0 2 0 2-2v-2" stroke="#5C3D2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 10l4-5m14 5l-4-5" stroke="#D4845A" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
+          <h1 className="text-5xl md:text-6xl font-bold text-[#5C3D2E] mb-8 leading-tight opacity-0 animate-fadeUp" style={{ animationDelay: '0.4s', animationFillMode: 'forwards', fontFamily: "'Shippori Mincho', serif" }}>
+            <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れる。</span>
           </h1>
           <p className="text-base md:text-lg text-[#875a3c] mb-11 leading-loose opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards', fontFamily: "'Shippori Mincho', serif" }}>
             普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
@@ -349,12 +357,21 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-9">
-            {[
-              { label: "参加学生", value: "先着20名" },
-              { label: "参加企業数", value: "4社" },
-              { label: "場所", value: "新宿近辺の居酒屋", note: "※詳細は参加確定後にご案内" },
-              { label: "時間", value: "16:00 – 20:00", note: "夕方〜夜にかけて" },
-            ].map((item, i) => (
+            {(
+              nextEvent
+                ? [
+                    { label: "参加学生", value: `先着${nextEvent.studentsCount}名` },
+                    { label: "参加企業数", value: `${nextEvent.companiesCount}社` },
+                    { label: "場所", value: nextEvent.location, note: nextEvent.locationNote ?? undefined },
+                    { label: "時間", value: nextEvent.timeRange || nextEvent.dateLabel, note: nextEvent.timeNote ?? undefined },
+                  ]
+                : [
+                    { label: "参加学生", value: "先着20名" },
+                    { label: "参加企業数", value: "4社" },
+                    { label: "場所", value: "新宿近辺の居酒屋", note: "※詳細は参加確定後にご案内" },
+                    { label: "時間", value: "16:00 – 20:00", note: "夕方〜夜にかけて" },
+                  ]
+            ).map((item, i) => (
               <div key={i} className="p-5 bg-white border border-[#ffd7c3] rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 <p className="text-xs text-[#d4844b] font-medium uppercase tracking-wider mb-1">{item.label}</p>
                 <p className="text-xl font-bold text-[#5C3D2E]" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.value}</p>
@@ -443,7 +460,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
             <h2 className="text-4xl md:text-5xl font-bold text-[#5C3D2E] mb-6 leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              見えないものに、触れてみよう。
+              <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れてみよう。</span>
             </h2>
           </div>
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
@@ -469,15 +486,89 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 次回イベント詳細 */}
+      <section id="event-detail" className="py-24 px-6 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute w-72 h-72 -top-20 -right-20 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, rgba(255,215,195,.3) 0%, transparent 70%)' }} />
+          <div className="absolute w-48 h-48 -bottom-10 -left-10 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, rgba(212,132,75,.08) 0%, transparent 70%)' }} />
+        </div>
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
+            <p className="text-xs font-medium text-[#d4844b] uppercase tracking-widest mb-2">Next Event</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#5C3D2E] leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              次回のイベント詳細
+            </h2>
+          </div>
+          <div className="rounded-2xl border border-[#ffd7c3] bg-[#fffaf5]/60 backdrop-blur-sm overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+            <div className="p-6 md:p-8 space-y-6">
+              <div className="flex items-start gap-4">
+                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#ffd7c3]/60 flex items-center justify-center text-[#d4844b]">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <div>
+                  <p className="text-xs font-medium text-[#d4844b] uppercase tracking-wide mb-0.5">日時</p>
+                  <p className="text-[#5C3D2E] font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {nextEvent?.dateLabel ?? "2025年3月15日（土）18:00〜21:00"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-[#ffd7c3]/60 flex items-center justify-center text-[#d4844b]">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <div>
+                  <p className="text-xs font-medium text-[#d4844b] uppercase tracking-wide mb-0.5">場所</p>
+                  <p className="text-[#5C3D2E] font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {nextEvent?.location ?? "東京都内（お申し込み後にご案内）"}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-[#ffd7c3]/60">
+                  <span className="text-2xl font-bold text-[#d4844b] tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {nextEvent?.companiesCount ?? 15}
+                  </span>
+                  <div>
+                    <p className="text-xs font-medium text-[#875a3c]">参加企業数</p>
+                    <p className="text-sm text-[#5C3D2E] font-medium">社</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-[#ffd7c3]/60">
+                  <span className="text-2xl font-bold text-[#d4844b] tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {nextEvent?.studentsCount ?? 40}
+                  </span>
+                  <div>
+                    <p className="text-xs font-medium text-[#875a3c]">募集学生数</p>
+                    <p className="text-sm text-[#5C3D2E] font-medium">名</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 md:px-8 pb-6 md:pb-8 pt-2">
+              <a href="#apply" className="block w-full text-center py-4 bg-[#d4844b] text-white rounded-full font-medium transition-all hover:bg-[#c47540] hover:shadow-lg hover:-translate-y-0.5">
+                参加申し込みをする
+                <svg className="inline-block w-4 h-4 ml-2 align-middle" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 9h10m-4-4l4 4-4 4"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-11 px-6 border-t border-[#ffd7c3] bg-white">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 text-[#5C3D2E]">
-            <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
-              <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 10l4-4m12 4l-4-4" stroke="#D4845A" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            {logoUrl ? (
+              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-5 w-auto object-contain" />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
+                <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 10l4-4m12 4l-4-4" stroke="#D4845A" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            )}
             <span className="font-bold text-sm tracking-wide">KANPAI就活</span>
           </div>
           <div className="text-center">

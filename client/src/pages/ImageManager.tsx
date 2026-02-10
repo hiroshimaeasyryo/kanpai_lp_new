@@ -149,7 +149,7 @@ export default function ImageManager() {
               ブランドロゴ
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              ヘッダーに表示されるロゴです。SVG・PNG・JPGに対応しています。未設定の場合はデフォルトのアイコンが表示されます。
+              ヘッダー・ヒーロー・フッターに表示されるロゴです。SVG・PNG・JPGに対応しています。未設定の場合はデフォルトのアイコンが表示されます。
             </p>
             <div className="max-w-xs">
               <ImageUploader
@@ -205,7 +205,7 @@ export default function ImageManager() {
             <ul className="space-y-2 text-sm text-[#875a3c]">
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
-                <span>ブランドロゴはヘッダーに表示されます。アップロードするとLP全体のロゴが差し替わります。「デフォルトのロゴに戻す」で元のアイコンに戻せます。</span>
+                <span>ブランドロゴはヘッダー・ヒーロー・フッターの全箇所に表示されます。アップロードするとLP全体のロゴが差し替わります。「デフォルトのロゴに戻す」で元のアイコンに戻せます。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">2.</span>

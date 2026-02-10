@@ -1,18 +1,27 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
-import ImageManager from "./pages/ImageManager";
 
+function ImageManagerRedirect() {
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    setLocation("/contents-manager");
+  }, [setLocation]);
+  return null;
+}
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/image-manager"} component={ImageManager} />
+      <Route path={"/contents-manager"} component={ContentsManager} />
+      <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,15 +1,28 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-/** 画像管理画面に入るためのアクセスコード */
+/** 画像管理画面に入るためのアクセスコード（後方互換・/image-manager リダイレクト用） */
 export const IMAGE_MANAGER_ACCESS_CODE = "image-manager";
-const SESSION_KEY = "image_manager_unlocked";
+
+/** コンテンツ管理画面（/contents-manager）に入るためのアクセスコード */
+export const CONTENTS_MANAGER_ACCESS_CODE = "contents-manager";
+
+const IMAGE_MANAGER_SESSION_KEY = "image_manager_unlocked";
+const CONTENTS_MANAGER_SESSION_KEY = "contents_manager_unlocked";
 
 export function isImageManagerUnlocked(): boolean {
-  return sessionStorage.getItem(SESSION_KEY) === "1";
+  return sessionStorage.getItem(IMAGE_MANAGER_SESSION_KEY) === "1";
 }
 
 export function setImageManagerUnlocked(): void {
-  sessionStorage.setItem(SESSION_KEY, "1");
+  sessionStorage.setItem(IMAGE_MANAGER_SESSION_KEY, "1");
+}
+
+export function isContentsManagerUnlocked(): boolean {
+  return sessionStorage.getItem(CONTENTS_MANAGER_SESSION_KEY) === "1";
+}
+
+export function setContentsManagerUnlocked(): void {
+  sessionStorage.setItem(CONTENTS_MANAGER_SESSION_KEY, "1");
 }
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
