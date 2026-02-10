@@ -13,6 +13,7 @@ import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 export default function Home() {
   useSmoothScroll();
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [images, setImages] = useState({
     scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
     scene2: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-2_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTJfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEkucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=lP1zsaQVot3JZ8j1pmF~ZTduIn4rEbSCnxg5fviHYIMB7ecm2noJEeRqs8RnfQtGeFrNfisNWRxS2NXP6cKYNRTm1GKCiPhAH9uZmejxHHa2sRLjzNPtTkKqzNcLb3adMZF2cNijtcWuu04Up4elWVulYApVZE53c76-8zMGCKDeUFbn~S1DVMkfy-2a5ZvOxwlPDI9NwRiJxZonwhGvWYqkVfJ1uPSUllOTWLklnsJ5M14BPuqrsHcA1z8Hp~gurADg1vOWL5Iyv479l8pVFQeGLmvKubSI5K3ExuXg7neOEm8U7XZSBerh1wpI8EHyLKObaocXTo5hICAVnaPxnQ__",
@@ -26,6 +27,7 @@ export default function Home() {
     const scene1 = localStorage.getItem("kanpai_scene1");
     const scene2 = localStorage.getItem("kanpai_scene2");
     const scene3 = localStorage.getItem("kanpai_scene3");
+    const logo = localStorage.getItem("kanpai_logo");
     
     if (scene1 || scene2 || scene3) {
       setImages(prev => ({
@@ -33,6 +35,10 @@ export default function Home() {
         scene2: scene2 || prev.scene2,
         scene3: scene3 || prev.scene3,
       }));
+    }
+
+    if (logo) {
+      setLogoUrl(logo);
     }
   }, []);
 
@@ -42,17 +48,18 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 text-[#5C3D2E] no-underline">
-            <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-              <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 10l4-4m12 4l-4-4" stroke="#D4845A" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            {logoUrl ? (
+              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-6 w-auto object-contain" />
+            ) : (
+              <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
+                <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 10l4-4m12 4l-4-4" stroke="#D4845A" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            )}
             <span className="font-bold text-sm tracking-wide">KANPAI就活</span>
           </a>
           <div className="flex items-center gap-3">
-            <a href="/image-manager" className="text-xs text-[#875a3c] hover:text-[#d4844b] transition-colors">
-              画像管理
-            </a>
             <a href="#apply" className="px-5 py-2 bg-[#d4844b] text-white text-xs font-medium rounded-full transition-colors hover:bg-[#c47540]">
               イベントに参加する
             </a>
