@@ -3,13 +3,81 @@
    - 温かみのある対話性: 手書き風要素とソフトなインタラクション
 */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  IMAGE_MANAGER_ACCESS_CODE,
+  isImageManagerUnlocked,
+  setImageManagerUnlocked,
+} from "@/const";
 import { useLocation } from "wouter";
 
 export default function ImageManager() {
   const [, setLocation] = useLocation();
+  const [unlocked, setUnlocked] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setUnlocked(isImageManagerUnlocked());
+  }, []);
+
+  const handleAccessSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (accessCode.trim() === IMAGE_MANAGER_ACCESS_CODE) {
+      setImageManagerUnlocked();
+      setUnlocked(true);
+    } else {
+      setError("アクセスコードが正しくありません");
+    }
+  };
+
+  if (!unlocked) {
+    return (
+      <div
+        className="min-h-screen bg-[#fffaf5] flex items-center justify-center px-6"
+        style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}
+      >
+        <div className="w-full max-w-sm p-8 bg-white rounded-2xl border border-[#ffd7c3] shadow-sm">
+          <h1
+            className="text-xl font-bold text-[#5C3D2E] mb-2 text-center"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            画像管理
+          </h1>
+          <p className="text-sm text-[#875a3c] mb-6 text-center">
+            アクセスコードを入力してください
+          </p>
+          <form onSubmit={handleAccessSubmit} className="space-y-4">
+            <Input
+              type="text"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value)}
+              placeholder="アクセスコード"
+              className="border-[#ffd7c3] focus-visible:ring-[#d4844b]"
+              autoFocus
+            />
+            {error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
+            <Button
+              type="submit"
+              className="w-full bg-[#d4844b] hover:bg-[#c47540] text-white"
+            >
+              入室する
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  const [logoUrl, setLogoUrl] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("kanpai_logo") : null
+  );
   const [images, setImages] = useState({
     scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
     scene2: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-2_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTJfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEkucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=lP1zsaQVot3JZ8j1pmF~ZTduIn4rEbSCnxg5fviHYIMB7ecm2noJEeRqs8RnfQtGeFrNfisNWRxS2NXP6cKYNRTm1GKCiPhAH9uZmejxHHa2sRLjzNPtTkKqzNcLb3adMZF2cNijtcWuu04Up4elWVulYApVZE53c76-8zMGCKDeUFbn~S1DVMkfy-2a5ZvOxwlPDI9NwRiJxZonwhGvWYqkVfJ1uPSUllOTWLklnsJ5M14BPuqrsHcA1z8Hp~gurADg1vOWL5Iyv479l8pVFQeGLmvKubSI5K3ExuXg7neOEm8U7XZSBerh1wpI8EHyLKObaocXTo5hICAVnaPxnQ__",
@@ -21,8 +89,17 @@ export default function ImageManager() {
       ...prev,
       [key]: url
     }));
-    // LocalStorageに保存
     localStorage.setItem(`kanpai_${key}`, url);
+  };
+
+  const handleLogoUpdate = (url: string) => {
+    setLogoUrl(url);
+    localStorage.setItem("kanpai_logo", url);
+  };
+
+  const handleLogoReset = () => {
+    setLogoUrl(null);
+    localStorage.removeItem("kanpai_logo");
   };
 
   return (
@@ -58,6 +135,34 @@ export default function ImageManager() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* ブランドロゴ */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold text-[#5C3D2E] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              ブランドロゴ
+            </h2>
+            <p className="text-sm text-[#875a3c] mb-4">
+              ヘッダーに表示されるロゴです。SVG・PNG・JPGに対応しています。未設定の場合はデフォルトのアイコンが表示されます。
+            </p>
+            <div className="max-w-xs">
+              <ImageUploader
+                label="ブランドロゴ"
+                currentImage={logoUrl ?? undefined}
+                onImageUpload={handleLogoUpdate}
+              />
+              {logoUrl && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                  onClick={handleLogoReset}
+                >
+                  デフォルトのロゴに戻す
+                </Button>
+              )}
+            </div>
+          </div>
+
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-[#5C3D2E] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               イベント画像の管理
@@ -92,19 +197,23 @@ export default function ImageManager() {
             <ul className="space-y-2 text-sm text-[#875a3c]">
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
-                <span>各画像カードの「画像を選択」ボタンをクリックして、アップロードしたい画像を選択します。</span>
+                <span>ブランドロゴはヘッダーに表示されます。アップロードするとLP全体のロゴが差し替わります。「デフォルトのロゴに戻す」で元のアイコンに戻せます。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">2.</span>
-                <span>画像は自動的にプレビューされ、ランディングページに反映されます。</span>
+                <span>各画像カードの「画像を選択」ボタンをクリックして、アップロードしたい画像を選択します。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">3.</span>
-                <span>「プレビューを見る」ボタンで実際のランディングページを確認できます。</span>
+                <span>画像は自動的にプレビューされ、ランディングページに反映されます。</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">4.</span>
-                <span>画像は最大5MBまで、JPG、PNG、GIF形式に対応しています。</span>
+                <span>「プレビューを見る」ボタンで実際のランディングページを確認できます。</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#d4844b] font-bold">5.</span>
+                <span>画像は最大5MBまで、JPG、PNG、GIF、SVG形式に対応しています。</span>
               </li>
             </ul>
           </div>

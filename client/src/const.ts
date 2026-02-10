@@ -1,5 +1,17 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+/** 画像管理画面に入るためのアクセスコード */
+export const IMAGE_MANAGER_ACCESS_CODE = "image-manager";
+const SESSION_KEY = "image_manager_unlocked";
+
+export function isImageManagerUnlocked(): boolean {
+  return sessionStorage.getItem(SESSION_KEY) === "1";
+}
+
+export function setImageManagerUnlocked(): void {
+  sessionStorage.setItem(SESSION_KEY, "1");
+}
+
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
