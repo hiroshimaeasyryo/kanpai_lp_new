@@ -13,6 +13,15 @@ import {
   isContentsManagerUnlocked,
   setContentsManagerUnlocked,
 } from "@/const";
+import { usePalette } from "@/contexts/PaletteContext";
+import type { EventImage } from "@/lib/content-settings";
+import {
+  generateImageId,
+  getStoredEventImages,
+  migrateOldImageFormat,
+  setStoredEventImages,
+} from "@/lib/content-settings";
+import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { KanpaiEvent } from "@/types/events";
 import {
   defaultEvents,
@@ -43,19 +52,20 @@ function createEmptyEvent(order: number): KanpaiEvent {
 
 export default function ContentsManager() {
   const [, setLocation] = useLocation();
+  const { paletteId, setPaletteId } = usePalette();
   const [unlocked, setUnlocked] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [error, setError] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("kanpai_logo") : null
   );
-  const [images, setImages] = useState(() => {
-    if (typeof window === "undefined") return DEFAULT_SCENES;
-    return {
-      scene1: localStorage.getItem("kanpai_scene1") || DEFAULT_SCENES.scene1,
-      scene2: localStorage.getItem("kanpai_scene2") || DEFAULT_SCENES.scene2,
-      scene3: localStorage.getItem("kanpai_scene3") || DEFAULT_SCENES.scene3,
-    };
+  const [eventImages, setEventImages] = useState<EventImage[]>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = getStoredEventImages();
+    if (stored) return stored;
+    const migrated = migrateOldImageFormat();
+    if (migrated) return migrated;
+    return [];
   });
   const [events, setEvents] = useState<KanpaiEvent[]>(() => getStoredEvents());
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -73,6 +83,11 @@ export default function ContentsManager() {
     setStoredEvents(next);
   };
 
+  const persistImages = (next: EventImage[]) => {
+    setEventImages(next);
+    setStoredEventImages(next);
+  };
+
   const handleAccessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -84,9 +99,23 @@ export default function ContentsManager() {
     }
   };
 
-  const handleImageUpdate = (key: string, url: string) => {
-    setImages((prev) => ({ ...prev, [key]: url }));
-    localStorage.setItem(`kanpai_${key}`, url);
+  const handleImageUpdate = (id: string, url: string) => {
+    const next = eventImages.map((img) =>
+      img.id === id ? { ...img, url } : img,
+    );
+    persistImages(next);
+  };
+
+  const handleAddImage = () => {
+    if (eventImages.length >= 6) return;
+    const next = [...eventImages, { id: generateImageId(), url: "" }];
+    persistImages(next);
+  };
+
+  const handleRemoveImage = (id: string) => {
+    if (eventImages.length <= 1) return;
+    const next = eventImages.filter((img) => img.id !== id);
+    persistImages(next);
   };
 
   const handleLogoUpdate = (url: string) => {
@@ -263,24 +292,91 @@ export default function ContentsManager() {
               イベント画像の管理
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              Aboutセクションに表示される3枚のイベント画像をアップロードして置換できます。
+              Aboutセクションに表示されるイベント画像をアップロードできます。画像の追加・削除も可能です（最大6枚）。
             </p>
             <div className="grid md:grid-cols-3 gap-6">
-              <ImageUploader
-                label="イベント画像 1"
-                currentImage={images.scene1}
-                onImageUpload={(url) => handleImageUpdate("scene1", url)}
-              />
-              <ImageUploader
-                label="イベント画像 2"
-                currentImage={images.scene2}
-                onImageUpload={(url) => handleImageUpdate("scene2", url)}
-              />
-              <ImageUploader
-                label="イベント画像 3"
-                currentImage={images.scene3}
-                onImageUpload={(url) => handleImageUpdate("scene3", url)}
-              />
+              {eventImages.map((img, i) => (
+                <div key={img.id} className="relative">
+                  <ImageUploader
+                    label={`イベント画像 ${i + 1}`}
+                    currentImage={img.url || undefined}
+                    onImageUpload={(url) => handleImageUpdate(img.id, url)}
+                  />
+                  {eventImages.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 w-full text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleRemoveImage(img.id)}
+                    >
+                      この画像を削除
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {eventImages.length < 6 && (
+                <button
+                  type="button"
+                  onClick={handleAddImage}
+                  className="border-2 border-dashed border-[#ffd7c3] rounded-xl flex flex-col items-center justify-center min-h-[200px] hover:border-[#d4844b] transition-colors gap-2"
+                >
+                  <svg className="w-8 h-8 text-[#d4844b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  <span className="text-sm text-[#d4844b] font-medium">画像を追加</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* テーマ（カラーパレット） */}
+          <div className="mb-10">
+            <h2
+              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              テーマ（カラーパレット）
+            </h2>
+            <p className="text-sm text-[#875a3c] mb-4">
+              LP全体の配色を切り替えることができます。選択するとプレビューに即時反映されます。
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {COLOR_PALETTES.map((palette) => (
+                <button
+                  key={palette.id}
+                  type="button"
+                  onClick={() => setPaletteId(palette.id)}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    paletteId === palette.id
+                      ? "border-[#d4844b] shadow-md ring-1 ring-[#d4844b]/30"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="flex gap-1.5 mb-2">
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-200"
+                      style={{ background: palette.colors.primary }}
+                    />
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-200"
+                      style={{ background: palette.colors.textHeading }}
+                    />
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-200"
+                      style={{ background: palette.colors.bgWarm }}
+                    />
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-200"
+                      style={{ background: palette.colors.border }}
+                    />
+                  </div>
+                  <p className="text-xs font-medium text-[#5C3D2E]">
+                    {palette.nameJa}
+                  </p>
+                  <p className="text-[10px] text-[#875a3c]">{palette.name}</p>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -405,11 +501,23 @@ export default function ContentsManager() {
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">2.</span>
                 <span>
-                  イベントは複数登録できます。一覧の先頭が「次回のイベント」として表示されます。編集・追加・削除で内容を更新してください。
+                  イベント画像は追加・削除が可能です（最大6枚）。ファイル名はプログラムが自動で管理するため、好きな画像を選ぶだけでOKです。
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">3.</span>
+                <span>
+                  テーマ（カラーパレット）を選択すると、LP全体の配色が即座に切り替わります。
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#d4844b] font-bold">4.</span>
+                <span>
+                  イベントは複数登録できます。一覧の先頭が「次回のイベント」として表示されます。
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#d4844b] font-bold">5.</span>
                 <span>
                   日時・場所・参加企業数・募集学生数を変更すると、イベント概要と次回イベント詳細の両方に反映されます。
                 </span>

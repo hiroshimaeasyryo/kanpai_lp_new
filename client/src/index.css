@@ -42,6 +42,18 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: 'Zen Kaku Gothic New', sans-serif;
   --font-serif: 'Shippori Mincho', serif;
+
+  /* LP カラーパレット（動的切り替え対応） */
+  --color-lp-primary: var(--lp-primary);
+  --color-lp-primary-hover: var(--lp-primary-hover);
+  --color-lp-text-heading: var(--lp-text-heading);
+  --color-lp-text-body: var(--lp-text-body);
+  --color-lp-text-muted: var(--lp-text-muted);
+  --color-lp-bg-warm: var(--lp-bg-warm);
+  --color-lp-bg-card: var(--lp-bg-card);
+  --color-lp-border: var(--lp-border);
+  --color-lp-accent-light: var(--lp-accent-light);
+  --color-lp-highlight: var(--lp-highlight);
 }
 
 /* Wa-Modern Minimalism Design System
@@ -52,6 +64,21 @@
 */
 
 :root {
+  /* LP Color Palette（applyPalette() で動的に上書き可能） */
+  --lp-primary: #d4844b;
+  --lp-primary-hover: #c47540;
+  --lp-text-heading: #5C3D2E;
+  --lp-text-body: #875a3c;
+  --lp-text-muted: #736964;
+  --lp-bg-warm: #fffaf5;
+  --lp-bg-card: #f5e6cd;
+  --lp-border: #ffd7c3;
+  --lp-accent-light: #E8A87C;
+  --lp-highlight: #ffd7c3;
+  --lp-cta-start: #FFFBF7;
+  --lp-cta-mid: #FFF3E8;
+  --lp-cta-end: #FFF5ED;
+
   /* Primary: 温かみのあるアンバー/ブラウントーン */
   --primary: oklch(0.55 0.12 45);
   --primary-foreground: oklch(0.98 0.01 45);
