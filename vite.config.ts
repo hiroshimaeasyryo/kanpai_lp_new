@@ -150,7 +150,34 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// =============================================================================
+// GitHub Pages: 404.html を index.html のコピーで出力（SPA の直接URLアクセス用）
+// 存在しないパス（例: /contents-manager）で 404 が出たときに 404.html が返り、
+// 同じ SPA が読み込まれてクライアントルーターが正しいページを表示する
+// =============================================================================
+function vitePluginGhPages404(): Plugin {
+  return {
+    name: "gh-pages-404",
+    apply: "build",
+    closeBundle() {
+      const outDir = path.resolve(PROJECT_ROOT, "dist/public");
+      const indexPath = path.join(outDir, "index.html");
+      const notFoundPath = path.join(outDir, "404.html");
+      if (fs.existsSync(indexPath)) {
+        fs.copyFileSync(indexPath, notFoundPath);
+      }
+    },
+  };
+}
+
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  vitePluginGhPages404(),
+];
 
 export default defineConfig({
   plugins,
