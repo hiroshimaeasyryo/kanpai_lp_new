@@ -28,7 +28,7 @@ import {
   getStoredEvents,
   setStoredEvents,
 } from "@/types/events";
-import { useLocation } from "wouter";
+import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
 
 const DEFAULT_SCENES = {
   scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
@@ -51,7 +51,7 @@ function createEmptyEvent(order: number): KanpaiEvent {
 }
 
 export default function ContentsManager() {
-  const [, setLocation] = useLocation();
+  const navigate = usePreserveQueryNavigate();
   const { paletteId, setPaletteId } = usePalette();
   const [unlocked, setUnlocked] = useState(false);
   const [accessCode, setAccessCode] = useState("");
@@ -240,7 +240,7 @@ export default function ContentsManager() {
               </div>
             </div>
             <Button
-              onClick={() => setLocation("/")}
+              onClick={() => navigate("/")}
               variant="outline"
               className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
             >

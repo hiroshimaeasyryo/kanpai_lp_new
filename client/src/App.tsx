@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, useLocation } from "wouter";
+import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
+import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { PaletteProvider } from "./contexts/PaletteContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -10,10 +11,10 @@ import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
 
 function ImageManagerRedirect() {
-  const [, setLocation] = useLocation();
+  const navigate = usePreserveQueryNavigate();
   useEffect(() => {
-    setLocation("/contents-manager");
-  }, [setLocation]);
+    navigate("/contents-manager");
+  }, [navigate]);
   return null;
 }
 
