@@ -36,11 +36,13 @@ export default function Home() {
       // デフォルト画像は空配列のまま（fallback は非表示）
     }
 
+    // ロゴ: 管理画面で設定されていればそれを使用、なければ public/logo.png を参照
     const logo = localStorage.getItem("kanpai_logo");
-    if (logo) {
-      setLogoUrl(logo);
-    }
+    setLogoUrl(logo || "/logo.png");
   }, []);
+
+  // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え
+  const handleLogoError = () => setLogoUrl(null);
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
@@ -49,7 +51,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 text-lp-text-heading no-underline">
             {logoUrl ? (
-              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-6 w-auto object-contain" />
+              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
             ) : (
               <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -76,7 +78,7 @@ export default function Home() {
         </div>
         <div className="relative z-10 text-center max-w-2xl px-6">
           {logoUrl ? (
-            <img src={logoUrl} alt="KANPAI就活ロゴ" className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp object-contain" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} />
+            <img src={logoUrl} alt="KANPAI就活ロゴ" className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp object-contain" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} onError={handleLogoError} />
           ) : (
             <svg className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} viewBox="0 0 52 52" fill="none">
               <path d="M12 38V16c0-3 2-5 4-6l3-2v30m0 0c0 0-2 0-2-2v-2" stroke="var(--lp-text-heading)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -555,7 +557,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 text-lp-text-heading">
             {logoUrl ? (
-              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-5 w-auto object-contain" />
+              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-5 w-auto object-contain" onError={handleLogoError} />
             ) : (
               <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -566,13 +568,20 @@ export default function Home() {
             <span className="font-bold text-sm tracking-wide">KANPAI就活</span>
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium text-lp-text-heading">株式会社ワークアズライフ（マイナビ出資企業）</p>
-            <p className="text-xs text-lp-text-body mt-0.5">マイナビが実現できない深い部分にこだわった就活支援</p>
+            <p className="text-xs font-medium text-lp-text-heading">
+              <a href="https://workaslife-inc.com/" target="_blank" rel="noopener noreferrer" className="text-lp-text-heading hover:text-lp-primary transition-colors underline">株式会社ワークアズライフ</a>（マイナビ出資企業）
+            </p>
+            <p className="text-xs text-lp-text-body mt-0.5">深い部分にこだわった就活支援</p>
           </div>
           <div className="flex gap-5 flex-wrap justify-center">
-            {["プライバシーポリシー", "利用規約", "お問い合わせ", "Instagram", "X (Twitter)"].map((link, i) => (
-              <a key={i} href="#" className="text-xs text-lp-text-body hover:text-lp-primary transition-colors">
-                {link}
+            {[
+              { label: "プライバシーポリシー", href: "#" },
+              { label: "利用規約", href: "#" },
+              { label: "お問い合わせ", href: "#" },
+              { label: "Instagram", href: "https://www.instagram.com/kanpai_hutte_career/" },
+            ].map((item, i) => (
+              <a key={i} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined} className="text-xs text-lp-text-body hover:text-lp-primary transition-colors">
+                {item.label}
               </a>
             ))}
           </div>
