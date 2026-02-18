@@ -6,6 +6,8 @@
 export interface EventImage {
   id: string;
   url: string;
+  /** EVENT FLOW カルーセル用の表示ラベル（例: 第1回）。未設定時はデフォルト 第1回/第7回/第13回 を使用 */
+  label?: string;
 }
 
 const EVENT_IMAGES_KEY = "kanpai_event_images";
@@ -60,6 +62,16 @@ const HERO_IMAGE_KEY = "kanpai_hero_image";
  * 詳細は client/public/README_hero.md を参照。
  */
 export const DEFAULT_HERO_IMAGE_PATH = "/hero.png";
+
+/**
+ * EVENT FLOW カルーセル用デフォルト画像パス（1〜3枚目）。
+ * client/public/event-flow-1.png, event-flow-2.png, event-flow-3.png にファイルを置くと、
+ * /contents-manager で未設定のときに使用される。詳細は docs/README_event_flow.md を参照。
+ */
+export const DEFAULT_EVENT_FLOW_IMAGE_PATHS = ["/event-flow-1.png", "/event-flow-2.png", "/event-flow-3.png"] as const;
+
+/** EVENT FLOW の1〜3枚目でラベル未設定時に使う表示文言 */
+export const DEFAULT_EVENT_FLOW_LABELS = ["第1回", "第7回", "第13回"] as const;
 
 /** localStorage からヒーロー画像 URL を取得 */
 export function getStoredHeroImage(): string | null {

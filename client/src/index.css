@@ -269,4 +269,39 @@
   .animate-float {
     animation: float 2.5s ease-in-out infinite;
   }
+
+  /* EVENT FLOW カルーセル: 1枚ずつ横スライド（6枚中50%移動でループ） */
+  @keyframes event-flow-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .event-flow-track {
+    animation: event-flow-scroll 24s linear infinite;
+  }
+
+  /* 各正方形内: 画像を枠いっぱい（object-cover）にしつつ、パンでなるべく全体が見えるように */
+  @keyframes event-flow-pan {
+    0% {
+      object-position: 20% 20%;
+    }
+    25% {
+      object-position: 80% 20%;
+    }
+    50% {
+      object-position: 80% 80%;
+    }
+    75% {
+      object-position: 20% 80%;
+    }
+    100% {
+      object-position: 20% 20%;
+    }
+  }
+  .event-flow-img-pan {
+    animation: event-flow-pan 14s ease-in-out infinite;
+  }
 }

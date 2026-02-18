@@ -9,7 +9,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
-import { DEFAULT_HERO_IMAGE_PATH, getStoredEventImages, getStoredHeroImage, migrateOldImageFormat } from "@/lib/content-settings";
+import {
+  DEFAULT_EVENT_FLOW_IMAGE_PATHS,
+  DEFAULT_EVENT_FLOW_LABELS,
+  DEFAULT_HERO_IMAGE_PATH,
+  getStoredEventImages,
+  getStoredHeroImage,
+  migrateOldImageFormat,
+} from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
 import { getNextEvent } from "@/types/events";
 
@@ -21,6 +28,8 @@ export default function Home() {
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvent, setNextEvent] = useState<KanpaiEvent | null>(null);
   const [eventImages, setEventImages] = useState<string[]>([]);
+  /** EVENT FLOW カルーセル用（1〜3枚目、ラベル付き）。管理画面 or デフォルトパスから構築 */
+  const [eventFlowItems, setEventFlowItems] = useState<{ url: string; label: string }[]>([]);
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const heroImageRef = useRef<HTMLImageElement | null>(null);
 
@@ -30,15 +39,20 @@ export default function Home() {
 
     // イベント画像を読み込む（新形式 → 旧形式 → デフォルト）
     const stored = getStoredEventImages();
-    if (stored && stored.length > 0) {
-      setEventImages(stored.map((img) => img.url));
-    } else {
-      const migrated = migrateOldImageFormat();
-      if (migrated && migrated.length > 0) {
-        setEventImages(migrated.map((img) => img.url));
-      }
-      // デフォルト画像は空配列のまま（fallback は非表示）
+    const list = stored && stored.length > 0 ? stored : migrateOldImageFormat() || [];
+    if (list.length > 0) {
+      setEventImages(list.map((img) => img.url));
     }
+    // EVENT FLOW カルーセル用: 1〜3枚目をラベル付きで構築（未設定時はデフォルトパス・デフォルト文言）
+    const flowItems: { url: string; label: string }[] = [];
+    for (let i = 0; i < 3; i++) {
+      const item = list[i];
+      flowItems.push({
+        url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
+        label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) as string,
+      });
+    }
+    setEventFlowItems(flowItems);
 
     // ロゴ: 管理画面で設定されていればそれを使用、なければ public/logo.png を参照
     const logo = localStorage.getItem("kanpai_logo");
@@ -329,6 +343,7 @@ export default function Home() {
               当日の過ごし方
             </h2>
           </div>
+
           <div className="relative">
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-lp-primary to-lp-accent-light"></div>
             {[
@@ -349,6 +364,44 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：04エンディングの後に表示 */}
+          {eventFlowItems.length > 0 && (
+            <div className="mt-14 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
+              <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
+                <div className="event-flow-track flex h-full absolute inset-0" style={{ width: '600%' }}>
+                  {[...eventFlowItems, ...eventFlowItems].map((item, i) => (
+                    <div
+                      key={`${i}-${item.url}`}
+                      className="flex-shrink-0 h-full flex flex-col px-2"
+                      style={{ width: '16.666%' }}
+                    >
+                      <div className="relative w-full h-full rounded-xl overflow-hidden border border-lp-border bg-lp-bg-card" style={{ borderWidth: '0.5px' }}>
+                        <img
+                          src={item.url}
+                          alt={`KANPAI就活の様子 ${item.label}`}
+                          className="event-flow-img-pan w-full h-full object-cover"
+                        />
+                        <div
+                          className="absolute bottom-0 left-0 right-0 py-2 px-3 flex justify-end"
+                          style={{
+                            background: 'linear-gradient(to top, rgba(92,61,46,0.75) 0%, transparent 100%)',
+                          }}
+                        >
+                          <span
+                            className="text-xs font-medium text-white/95 tracking-wider"
+                            style={{ fontFamily: "'Shippori Mincho', serif" }}
+                          >
+                            {item.label}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -365,13 +418,13 @@ export default function Home() {
             {[
               {
                 num: "01",
-                title: "ありきたりでちょっと退屈な開始直後の「企業紹介タイム」なし",
+                title: "ありきたりでちょっと退屈な「企業紹介タイム」なし",
                 body: "多くの就活イベントにある、10分弱の企業プレゼン。正直、採用サイトに書いてあることとほとんど同じで、あまり記憶に残らない。\n\nKANPAI就活では、その時間をすべて対話に充てています。会社名すら最初は伝えない。先入観なく「人」として出会うところから始まります。",
               },
               {
                 num: "02",
                 title: "最初はカジュアルに、話しやすく。就活版 ito",
-                body: "いきなり「自己紹介どうぞ」は、誰だって緊張する。\n\nKANPAI就活では、人気カードゲーム「ito」の就活版をアイスブレイクに導入。お互いの価値観や考え方が自然と見えてくるゲームで、発言のハードルを下げ、心理的安全性を高めた状態でフリートークに入れます。",
+                body: "いきなり「自己紹介どうぞ」は、誰だって緊張する。\n\nKANPAI就活では、企業研修でも使われているカードゲーム「ito」の就活版をアイスブレイクに導入。一人ひとりの価値観や考え方が自然と見えてくるゲームをすることで、肩肘張らずに、価値観や素に触れる対話ができるようになりました。",
               },
               {
                 num: "03",

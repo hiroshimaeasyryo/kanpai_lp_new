@@ -16,6 +16,7 @@ import {
 import { usePalette } from "@/contexts/PaletteContext";
 import type { EventImage } from "@/lib/content-settings";
 import {
+  DEFAULT_EVENT_FLOW_LABELS,
   generateImageId,
   getStoredEventImages,
   getStoredHeroImage,
@@ -107,6 +108,13 @@ export default function ContentsManager() {
   const handleImageUpdate = (id: string, url: string) => {
     const next = eventImages.map((img) =>
       img.id === id ? { ...img, url } : img,
+    );
+    persistImages(next);
+  };
+
+  const handleEventFlowLabelUpdate = (id: string, label: string) => {
+    const next = eventImages.map((img) =>
+      img.id === id ? { ...img, label: label.trim() || undefined } : img,
     );
     persistImages(next);
   };
@@ -337,8 +345,8 @@ export default function ContentsManager() {
             >
               イベント画像の管理
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
-              Aboutセクションに表示されるイベント画像をアップロードできます。画像の追加・削除も可能です（最大6枚）。
+<p className="text-sm text-[#875a3c] mb-4">
+               Aboutセクションに表示されるイベント画像をアップロードできます。1〜3枚目は「当日の過ごし方」のカルーセルにも使われます。表示ラベル（第1回・第7回・第13回など）は任意で変更できます。画像の追加・削除も可能です（最大6枚）。
             </p>
             <div className="grid md:grid-cols-3 gap-6">
               {eventImages.map((img, i) => (
@@ -348,6 +356,21 @@ export default function ContentsManager() {
                     currentImage={img.url || undefined}
                     onImageUpload={(url) => handleImageUpdate(img.id, url)}
                   />
+                  {i < 3 && (
+                    <div className="mt-3">
+                      <Label className="text-[#5C3D2E] text-xs">
+                        EVENT FLOW 表示ラベル（例: 第1回・第7回・第13回）
+                      </Label>
+                      <Input
+                        value={img.label ?? ""}
+                        onChange={(e) =>
+                          handleEventFlowLabelUpdate(img.id, e.target.value)
+                        }
+                        placeholder={DEFAULT_EVENT_FLOW_LABELS[i]}
+                        className="mt-1 border-[#ffd7c3] text-sm"
+                      />
+                    </div>
+                  )}
                   {eventImages.length > 1 && (
                     <Button
                       type="button"
