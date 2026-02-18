@@ -18,8 +18,10 @@ import type { EventImage } from "@/lib/content-settings";
 import {
   generateImageId,
   getStoredEventImages,
+  getStoredHeroImage,
   migrateOldImageFormat,
   setStoredEventImages,
+  setStoredHeroImage,
 } from "@/lib/content-settings";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { KanpaiEvent } from "@/types/events";
@@ -58,6 +60,9 @@ export default function ContentsManager() {
   const [error, setError] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("kanpai_logo") : null
+  );
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(() =>
+    typeof window !== "undefined" ? getStoredHeroImage() : null
   );
   const [eventImages, setEventImages] = useState<EventImage[]>(() => {
     if (typeof window === "undefined") return [];
@@ -126,6 +131,16 @@ export default function ContentsManager() {
   const handleLogoReset = () => {
     setLogoUrl(null);
     localStorage.removeItem("kanpai_logo");
+  };
+
+  const handleHeroImageUpdate = (url: string) => {
+    setHeroImageUrl(url);
+    setStoredHeroImage(url);
+  };
+
+  const handleHeroImageReset = () => {
+    setHeroImageUrl(null);
+    setStoredHeroImage(null);
   };
 
   const handleSaveEvent = (updated: KanpaiEvent) => {
@@ -261,7 +276,7 @@ export default function ContentsManager() {
               ブランドロゴ
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              ヘッダー・ヒーロー・フッターに表示されるロゴです。未設定の場合はデフォルトのアイコンが表示されます。
+              ヘッダー・フッターに表示されるロゴです。未設定の場合はデフォルトのアイコンが表示されます。
             </p>
             <div className="max-w-xs">
               <ImageUploader
@@ -278,6 +293,37 @@ export default function ContentsManager() {
                   onClick={handleLogoReset}
                 >
                   デフォルトのロゴに戻す
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* ヒーロー画像 */}
+          <div className="mb-10">
+            <h2
+              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              ヒーロー画像
+            </h2>
+            <p className="text-sm text-[#875a3c] mb-4">
+              トップのヒーローセクションに表示する画像です。未設定の場合はプレースホルダーが表示されます。16:10程度の横長画像がおすすめです。
+            </p>
+            <div className="max-w-md">
+              <ImageUploader
+                label="ヒーロー画像"
+                currentImage={heroImageUrl ?? undefined}
+                onImageUpload={handleHeroImageUpdate}
+              />
+              {heroImageUrl && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                  onClick={handleHeroImageReset}
+                >
+                  ヒーロー画像を削除
                 </Button>
               )}
             </div>
@@ -495,7 +541,7 @@ export default function ContentsManager() {
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
                 <span>
-                  ブランドロゴ・イベント画像はLP全体に反映されます。「プレビューを見る」で確認できます。
+                  ブランドロゴ・ヒーロー画像・イベント画像はLP全体に反映されます。「プレビューを見る」で確認できます。
                 </span>
               </li>
               <li className="flex items-start gap-2">

@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
-import { getStoredEventImages, migrateOldImageFormat } from "@/lib/content-settings";
+import { DEFAULT_HERO_IMAGE_PATH, getStoredEventImages, getStoredHeroImage, migrateOldImageFormat } from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
 import { getNextEvent } from "@/types/events";
 
@@ -17,6 +17,8 @@ export default function Home() {
   useSmoothScroll();
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvent, setNextEvent] = useState<KanpaiEvent | null>(null);
   const [eventImages, setEventImages] = useState<string[]>([]);
 
@@ -39,19 +41,27 @@ export default function Home() {
     // ロゴ: 管理画面で設定されていればそれを使用、なければ public/logo.png を参照
     const logo = localStorage.getItem("kanpai_logo");
     setLogoUrl(logo || "/logo.png");
+
+    // ヒーロー画像: 管理画面で設定されていればそれを使用、なければ public/hero.png を参照（README_hero.md 参照）
+    const hero = getStoredHeroImage();
+    setHeroImageUrl(hero ?? DEFAULT_HERO_IMAGE_PATH);
+    setHeroImageLoadError(false);
   }, []);
 
   // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え
   const handleLogoError = () => setLogoUrl(null);
+
+  // ヒーロー画像の読み込み失敗時は背景画像を外し、グラデーションのみ表示
+  const handleHeroImageError = () => setHeroImageLoadError(true);
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 text-lp-text-heading no-underline">
+          <a href="#" className="flex items-center text-lp-text-heading no-underline">
             {logoUrl ? (
-              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
+              <img src={logoUrl} alt="ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
             ) : (
               <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -59,7 +69,6 @@ export default function Home() {
                 <path d="M12 10l4-4m12 4l-4-4" stroke="var(--lp-primary)" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             )}
-            <span className="font-bold text-sm tracking-wide">KANPAI就活</span>
           </a>
           <div className="flex items-center gap-3">
             <a href="#apply" className="px-5 py-2 bg-lp-primary text-white text-xs font-medium rounded-full transition-colors hover:bg-lp-primary-hover">
@@ -69,37 +78,65 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section: 画面幅いっぱいの背景画像 + グラデーションオーバーレイ + コンテンツ */}
       <section className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <div className="absolute w-96 h-96 -top-10 -right-8 rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-accent-light) 20%, transparent) 0%, transparent 70%)' }}></div>
-          <div className="absolute w-64 h-64 -bottom-5 -left-5 rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-primary) 10%, transparent) 0%, transparent 70%)' }}></div>
-          <div className="absolute w-48 h-48 top-20 left-10 rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-bg-card) 35%, transparent) 0%, transparent 70%)' }}></div>
-        </div>
+        {/* 背景レイヤー1: ベースのグラデーション（画像なし・読み込み失敗時も自然な土台） */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, transparent) 100%)',
+          }}
+        />
+        {/* 背景レイヤー2: ヒーロー画像（管理画面 or client/public/hero.png）。読み込み失敗時は非表示 */}
+        {heroImageUrl && !heroImageLoadError && (
+          <img
+            src={heroImageUrl}
+            alt=""
+            className="absolute inset-0 z-0 w-full h-full object-cover"
+            onError={handleHeroImageError}
+          />
+        )}
+        {/* オーバーレイ: グラデーションでテキストの可読性と次のセクションへの自然なつながりを確保 */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, color-mix(in srgb, var(--lp-bg-warm) 88%, transparent) 88%, var(--lp-bg-warm) 100%)',
+          }}
+        />
+        {/* コンテンツ（ヒーロー画像上でも読みやすいよう控えめなドロップシャドウを付与） */}
         <div className="relative z-10 text-center max-w-2xl px-6">
-          {logoUrl ? (
-            <img src={logoUrl} alt="KANPAI就活ロゴ" className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp object-contain" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} onError={handleLogoError} />
-          ) : (
-            <svg className="w-12 h-12 mx-auto mb-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }} viewBox="0 0 52 52" fill="none">
-              <path d="M12 38V16c0-3 2-5 4-6l3-2v30m0 0c0 0-2 0-2-2v-2" stroke="var(--lp-text-heading)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M40 38V16c0-3-2-5-4-6l-3-2v30m0 0c0 0 2 0 2-2v-2" stroke="var(--lp-text-heading)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M15 10l4-5m14 5l-4-5" stroke="var(--lp-primary)" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          )}
-          <h1 className="text-5xl md:text-6xl font-bold text-lp-text-heading mb-8 leading-tight opacity-0 animate-fadeUp" style={{ animationDelay: '0.4s', animationFillMode: 'forwards', fontFamily: "'Shippori Mincho', serif" }}>
+          <h1
+            className="text-5xl md:text-6xl font-bold mb-8 leading-tight opacity-0 animate-fadeUp"
+            style={{
+              animationDelay: '0.2s',
+              animationFillMode: 'forwards',
+              fontFamily: "'Shippori Mincho', serif",
+              color: 'var(--lp-bg-warm)',
+              textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
+            }}
+          >
             <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れる。</span>
           </h1>
-          <p className="text-base md:text-lg text-lp-text-body mb-11 leading-loose opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards', fontFamily: "'Shippori Mincho', serif" }}>
+          <p
+            className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp"
+            style={{
+              animationDelay: '0.4s',
+              animationFillMode: 'forwards',
+              fontFamily: "'Shippori Mincho', serif",
+              color: 'var(--lp-bg-warm)',
+              textShadow: '0 1px 3px rgba(92,61,46,0.55), 0 2px 8px rgba(0,0,0,0.4), 0 18px 18px rgba(0,0,0,0.6)',
+            }}
+          >
             普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
           </p>
-          <a href="#apply" className="inline-flex items-center gap-2 px-10 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+          <a href="#apply" className="inline-flex items-center gap-2 px-10 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
             次回のイベントを見る
             <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 8h10m-4-4l4 4-4 4"/>
             </svg>
           </a>
         </div>
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 opacity-0 animate-fadeIn" style={{ animationDelay: '1.4s', animationFillMode: 'forwards' }}>
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
         </div>
       </section>
@@ -555,9 +592,9 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-11 px-6 border-t border-lp-border bg-white">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 text-lp-text-heading">
+          <div className="flex items-center text-lp-text-heading">
             {logoUrl ? (
-              <img src={logoUrl} alt="KANPAI就活ロゴ" className="h-5 w-auto object-contain" onError={handleLogoError} />
+              <img src={logoUrl} alt="ロゴ" className="h-5 w-auto object-contain" onError={handleLogoError} />
             ) : (
               <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -565,7 +602,6 @@ export default function Home() {
                 <path d="M12 10l4-4m12 4l-4-4" stroke="var(--lp-primary)" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             )}
-            <span className="font-bold text-sm tracking-wide">KANPAI就活</span>
           </div>
           <div className="text-center">
             <p className="text-xs font-medium text-lp-text-heading">

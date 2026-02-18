@@ -51,3 +51,28 @@ export function migrateOldImageFormat(): EventImage[] | null {
 export function generateImageId(): string {
   return `img-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
+
+const HERO_IMAGE_KEY = "kanpai_hero_image";
+
+/**
+ * エンジニアがローカルでデフォルトのヒーロー画像を設定する場合のパス。
+ * client/public/hero.png にファイルを置くと、/contents-manager で未設定のときに使用される。
+ * 詳細は client/public/README_hero.md を参照。
+ */
+export const DEFAULT_HERO_IMAGE_PATH = "/hero.png";
+
+/** localStorage からヒーロー画像 URL を取得 */
+export function getStoredHeroImage(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(HERO_IMAGE_KEY);
+}
+
+/** ヒーロー画像 URL を localStorage に保存 */
+export function setStoredHeroImage(url: string | null): void {
+  if (typeof window === "undefined") return;
+  if (url) {
+    localStorage.setItem(HERO_IMAGE_KEY, url);
+  } else {
+    localStorage.removeItem(HERO_IMAGE_KEY);
+  }
+}
