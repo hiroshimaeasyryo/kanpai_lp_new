@@ -7,7 +7,7 @@
    - タイポグラフィ: Shippori Mincho (見出し) + Zen Kaku Gothic New (本文)
 */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { DEFAULT_HERO_IMAGE_PATH, getStoredEventImages, getStoredHeroImage, migrateOldImageFormat } from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
@@ -21,6 +21,8 @@ export default function Home() {
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvent, setNextEvent] = useState<KanpaiEvent | null>(null);
   const [eventImages, setEventImages] = useState<string[]>([]);
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const heroImageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -48,6 +50,49 @@ export default function Home() {
     setHeroImageLoadError(false);
   }, []);
 
+  // ヒーロー画像: スクロールに合わせて「見える位置（object-position）」を右端→左端へ移動
+  useEffect(() => {
+    let rafId = 0;
+
+    const update = () => {
+      rafId = 0;
+      const sectionEl = heroSectionRef.current;
+      const imgEl = heroImageRef.current;
+      if (!sectionEl || !imgEl) return;
+
+      const rect = sectionEl.getBoundingClientRect();
+      const sectionH = rect.height || 1;
+      const progress = Math.min(1, Math.max(0, -rect.top / sectionH));
+
+      // start 右端 (100%) -> end 左端 (0%)
+      const startX = 100;
+      const endX = 0;
+      const startY = 50;
+      const endY = 50;
+
+      const x = startX + (endX - startX) * progress;
+      const y = startY + (endY - startY) * progress;
+
+      imgEl.style.objectPosition = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+    };
+
+    const onScrollOrResize = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(update);
+    };
+
+    // 初期位置反映
+    update();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え
   const handleLogoError = () => setLogoUrl(null);
 
@@ -71,7 +116,10 @@ export default function Home() {
             )}
           </a>
           <div className="flex items-center gap-3">
-            <a href="#apply" className="px-5 py-2 bg-lp-primary text-white text-xs font-medium rounded-full transition-colors hover:bg-lp-primary-hover">
+            <a
+              href="#apply"
+              className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover"
+            >
               イベントに参加する
             </a>
           </div>
@@ -79,7 +127,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section: 画面幅いっぱいの背景画像 + グラデーションオーバーレイ + コンテンツ */}
-      <section className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
+      <section ref={heroSectionRef} className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
         {/* 背景レイヤー1: ベースのグラデーション（画像なし・読み込み失敗時も自然な土台） */}
         <div
           className="absolute inset-0 z-0"
@@ -90,9 +138,11 @@ export default function Home() {
         {/* 背景レイヤー2: ヒーロー画像（管理画面 or client/public/hero.png）。読み込み失敗時は非表示 */}
         {heroImageUrl && !heroImageLoadError && (
           <img
+            ref={heroImageRef}
             src={heroImageUrl}
             alt=""
             className="absolute inset-0 z-0 w-full h-full object-cover"
+            style={{ objectPosition: "100% 50%" }}
             onError={handleHeroImageError}
           />
         )}
@@ -107,16 +157,18 @@ export default function Home() {
         <div className="relative z-10 max-w-2xl px-8 md:px-6">
           <div className="text-center mb-8">
             <h1
-              className="text-5xl md:text-6xl font-bold leading-tight opacity-0 animate-fadeUp"
+              className="font-bold leading-[1.2] opacity-0 animate-fadeUp"
               style={{
                 animationDelay: '0.2s',
                 animationFillMode: 'forwards',
                 fontFamily: "'Shippori Mincho', serif",
                 color: 'var(--lp-bg-warm)',
                 textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
+                // 極小デバイスでも一定サイズを維持（改行可）
+                fontSize: 'clamp(2.25rem, 10vw, 3.75rem)',
               }}
             >
-              <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れる。</span>
+              見えないものに、触れる。
             </h1>
           </div>
           <div className="text-left md:text-center mx-6 md:mx-0">
@@ -132,12 +184,18 @@ export default function Home() {
             >
               普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
             </p>
-            <a href="#apply" className="inline-flex items-center gap-2 px-10 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              次回のイベントを見る
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 8h10m-4-4l4 4-4 4"/>
-              </svg>
-            </a>
+            <div className="flex justify-center md:justify-center">
+              <a
+                href="#apply"
+                className="inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 bg-lp-primary text-white rounded-full font-medium whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.05rem)] transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp"
+                style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
+              >
+                次回のイベントを見る
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 8h10m-4-4l4 4-4 4"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
@@ -219,22 +277,35 @@ export default function Home() {
                 num: "02",
                 label: "自分の「本音」",
                 title: "しっくりこない就活軸の、その先へ。",
-                body: "さまざまな社会人の「やりがい」や「こだわり」に触れる中で、自分が共感する部分、違和感を覚える部分が見えてくる。\n\n誰かに整理してもらうのではなく、対話を通じて、自分の中から見つかる。それが、KANPAI就活で起きている自己発見です。",
-                note: "対話の中で見つかった気づきは、メッセージカードとして形に残ります。",
+                body: "さまざまな社会人の「やりがい」や「こだわり」に触れる中で、自分が共感する部分、違和感を覚える部分が見えてくる。\n\n誰かに評価されるためではなく、対話を通じて、見つかる本音。それが「人」として出会うからこそ出会い直せる自分です。",
+                note: "対話の中で見つかった気づきは、メッセージカードとして持ち帰ることができます。",
               },
               {
                 num: "03",
                 label: "信頼できる人事",
                 title: "厳しい参加要件を満たした、信頼して話せる人事との出会い。",
-                body: "KANPAI就活に参加できる企業には、厳格な基準があります。\n\n学生を対等に見てくれるか。一人ひとりの声に耳を傾けられるか。自社の課題も含め、等身大の姿を見せられるか。温かみのある関係性を大切にしているか。\n\nこの基準を満たした人事だけが、この場にいます。だから、安心して本音で話せる。尊敬できる社会人の先輩との出会いは、就活のその先まで続く財産になるはずです。",
+                body: "KANPAI就活に参加できる企業には、厳格な基準があります。\n\n学生を対等に見てくれるか。一人ひとりの声に耳を傾けられるか。自社の課題も含め、等身大の姿を見せられるか。温かみのある関係性を大切にしているか。リスペクトのあるフィードバックを学生にできるか。\n\nこの基準を満たした人事だけが、この場にいます。尊敬できる社会人の先輩との出会いは、就活のその先まで続く財産になるはずです。",
               },
             ].map((item, i) => (
               <div key={i} className="bg-white border border-lp-border rounded-3xl p-10 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
-                <div className="flex gap-6 mb-6">
-                  <div className="text-4xl font-bold text-[#ffd7c3]" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.num}</div>
-                  <div className="flex-1">
+                {/* モバイル: 上段に番号と見出し、下段に本文を全幅表示 */}
+                <div className="flex flex-wrap gap-6">
+                  <div className="text-4xl font-bold text-[#ffd7c3] shrink-0" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.num}</div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-1">{item.label}</p>
-                    <h3 className="text-xl font-bold text-lp-text-heading leading-tight mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
+                    <h3 className="text-xl font-bold text-lp-text-heading leading-tight md:mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
+                    {/* デスクトップでは右カラム内に本文を表示 */}
+                    <div className="hidden md:block mt-3">
+                      <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
+                      {item.note && (
+                        <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
+                          <p className="text-sm text-lp-text-heading">{item.note}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* モバイルでは下段で本文を全幅表示 */}
+                  <div className="w-full md:hidden">
                     <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
                     {item.note && (
                       <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
