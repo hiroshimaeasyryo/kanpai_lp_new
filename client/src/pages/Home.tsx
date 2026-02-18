@@ -104,37 +104,41 @@ export default function Home() {
           }}
         />
         {/* コンテンツ（ヒーロー画像上でも読みやすいよう控えめなドロップシャドウを付与） */}
-        <div className="relative z-10 text-center max-w-2xl px-6">
-          <h1
-            className="text-5xl md:text-6xl font-bold mb-8 leading-tight opacity-0 animate-fadeUp"
-            style={{
-              animationDelay: '0.2s',
-              animationFillMode: 'forwards',
-              fontFamily: "'Shippori Mincho', serif",
-              color: 'var(--lp-bg-warm)',
-              textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
-            }}
-          >
-            <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れる。</span>
-          </h1>
-          <p
-            className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp"
-            style={{
-              animationDelay: '0.4s',
-              animationFillMode: 'forwards',
-              fontFamily: "'Shippori Mincho', serif",
-              color: 'var(--lp-bg-warm)',
-              textShadow: '0 1px 3px rgba(92,61,46,0.55), 0 2px 8px rgba(0,0,0,0.4), 0 18px 18px rgba(0,0,0,0.6)',
-            }}
-          >
-            普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
-          </p>
-          <a href="#apply" className="inline-flex items-center gap-2 px-10 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-            次回のイベントを見る
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 8h10m-4-4l4 4-4 4"/>
-            </svg>
-          </a>
+        <div className="relative z-10 max-w-2xl px-8 md:px-6">
+          <div className="text-center mb-8">
+            <h1
+              className="text-5xl md:text-6xl font-bold leading-tight opacity-0 animate-fadeUp"
+              style={{
+                animationDelay: '0.2s',
+                animationFillMode: 'forwards',
+                fontFamily: "'Shippori Mincho', serif",
+                color: 'var(--lp-bg-warm)',
+                textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
+              }}
+            >
+              <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れる。</span>
+            </h1>
+          </div>
+          <div className="text-left md:text-center mx-6 md:mx-0">
+            <p
+              className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp"
+              style={{
+                animationDelay: '0.4s',
+                animationFillMode: 'forwards',
+                fontFamily: "'Shippori Mincho', serif",
+                color: 'var(--lp-bg-warm)',
+                textShadow: '0 1px 3px rgba(92,61,46,0.55), 0 2px 8px rgba(0,0,0,0.4), 0 18px 18px rgba(0,0,0,0.6)',
+              }}
+            >
+              普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
+            </p>
+            <a href="#apply" className="inline-flex items-center gap-2 px-10 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              次回のイベントを見る
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8h10m-4-4l4 4-4 4"/>
+              </svg>
+            </a>
+          </div>
         </div>
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
@@ -142,30 +146,32 @@ export default function Home() {
       </section>
 
       {/* Problem Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-2xl mx-auto text-center">
+      <section className="py-24 px-8 md:px-6">
+        <div className="max-w-2xl mx-auto text-left md:text-center">
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0s', animationFillMode: 'forwards' }}>
-            <p className="text-lg md:text-2xl text-lp-text-heading leading-relaxed" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <p className="text-lg md:text-2xl text-lp-text-heading leading-relaxed text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               どこを選べばいいのか、<em className="font-bold bg-gradient-to-r from-transparent via-[#ffd7c3] to-transparent bg-no-repeat bg-[length:100%_60%] bg-[position:0_60%]" style={{ fontStyle: 'normal' }}>「正解」がわからない。</em>
             </p>
           </div>
-          <div className="w-12 h-0.5 bg-lp-primary rounded mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-            <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              説明会やサイトで企業を見ても、<br/>そこで語られるのは、給料、年間休日、福利厚生のような「条件」や企業の良い面だけ。<br/><br/>企業で働く人の、等身大の声や葛藤は包み隠されたまま。<br/>それでは、自分に合うかどうか、確信が持てない。
-            </p>
-          </div>
-          <div className="w-12 h-0.5 bg-lp-primary rounded mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.36s', animationFillMode: 'forwards' }}>
-            <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              自己分析もやった。就活軸も整理した。<br/>周りには「いいんじゃない？」と言われる。選考も通る。<br/>でも、なんかしっくりこない。<br/><br/><em className="font-bold" style={{ fontStyle: 'normal' }}>まだ自分が気づいていない、大事にしている何かがある気がする。</em>
-            </p>
+          <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
+          <div className="mx-6 md:mx-0">
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                説明会やサイトで企業を見ても、<br/>そこで語られるのは、給料、年間休日、福利厚生のような「条件」や企業の良い面だけ。<br/><br/>企業で働く人の、等身大の声や葛藤は包み隠されたまま。<br/>それでは、自分に合うかどうか、確信が持てない。
+              </p>
+            </div>
+            <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.36s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                自己分析もやった。就活軸も整理した。<br/>周りには「いいんじゃない？」と言われる。選考も通る。<br/>でも、なんかしっくりこない。<br/><br/><em className="font-bold" style={{ fontStyle: 'normal' }}>まだ自分が気づいていない、大事にしている何かがある気がする。</em>
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="py-24 px-6 bg-lp-bg-warm">
+      <section className="py-24 px-8 md:px-6 bg-lp-bg-warm">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
             <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">About</p>
@@ -173,25 +179,27 @@ export default function Home() {
               KANPAI就活は、<br/>「見えないもの」に触れる場所。
             </h2>
           </div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-            <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>その先にある本質に、触れる時間です。
-            </p>
-          </div>
-          {eventImages.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              {eventImages.map((url, i) => (
-                <div key={i} className="aspect-video bg-lp-bg-card rounded-lg overflow-hidden">
-                  <img src={url} alt={`KANPAI就活イベントの様子${i + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
+          <div className="mx-6 md:mx-0">
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>その先にある本質に、触れる時間です。
+              </p>
             </div>
-          )}
+            {eventImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
+                {eventImages.map((url, i) => (
+                  <div key={i} className="aspect-video bg-lp-bg-card rounded-lg overflow-hidden">
+                    <img src={url} alt={`KANPAI就活イベントの様子${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-8 md:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
             <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Values</p>
