@@ -1,5 +1,8 @@
 # GitHub Pages へのデプロイ（カスタムドメイン: l.careerevent.kanpai-hutte.com）
 # Source が GitHub Actions の場合、このワークフローがビルド〜公開まで担当します。
+#
+# configure-pages は省略（Pages メタデータ取得用のため。Bad credentials が出る環境では
+# このステップを外し、upload-pages-artifact + deploy-pages のみでデプロイする）
 
 name: Deploy to GitHub Pages
 
@@ -40,9 +43,6 @@ jobs:
       - name: Build client (static site only)
         run: pnpm exec vite build
         # 出力先: dist/public（vite.config.ts の build.outDir）
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
