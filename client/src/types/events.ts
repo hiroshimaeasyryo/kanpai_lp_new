@@ -1,6 +1,10 @@
 /** 次回イベントで表示する1件のイベント情報 */
 export interface KanpaiEvent {
   id: string;
+  /** 回次（表示用・例: 1→「第1回」）。未指定時は表示順で第1回・第2回… */
+  eventNumber?: number;
+  /** 回の備考（例: 大規模特別回）。未指定時は非表示 */
+  eventNote?: string;
   /** 表示用日時（例: 2025年3月15日（土）18:00〜21:00） */
   dateLabel: string;
   /** 時間帯の短い表示（例: 16:00 – 20:00）。未指定なら dateLabel を使用 */
@@ -13,9 +17,9 @@ export interface KanpaiEvent {
   locationNote?: string;
   /** 参加企業数 */
   companiesCount: number;
-  /** 募集学生数 */
+  /** 参加学生数 */
   studentsCount: number;
-  /** 表示順（小さいほど先頭）。次回表示は先頭1件 */
+  /** 表示順（小さいほど先頭）。次回表示は先頭3件 */
   order: number;
 }
 
@@ -24,13 +28,14 @@ const STORAGE_KEY = "kanpai_events";
 const defaultEvents: KanpaiEvent[] = [
   {
     id: "default-1",
-    dateLabel: "2025年3月15日（土）18:00〜21:00",
-    timeRange: "16:00 – 20:00",
-    timeNote: "夕方〜夜にかけて",
-    location: "東京都内（お申し込み後にご案内）",
+    eventNumber: 16,
+    dateLabel: "2025年3月4日（水）13:00〜17:00",
+    timeRange: "13:00 – 17:00",
+    timeNote: "昼間〜夜にかけて",
+    location: "新宿（お申し込み後にご案内）",
     locationNote: "",
-    companiesCount: 15,
-    studentsCount: 40,
+    companiesCount: 4,
+    studentsCount: 24,
     order: 0,
   },
 ];
@@ -45,7 +50,7 @@ function parseStored(raw: string | null): KanpaiEvent[] {
   }
 }
 
-/** localStorage からイベント一覧を取得。先頭1件が「次回のイベント」として表示される */
+/** localStorage からイベント一覧を取得。先頭から最大3件が「次回のイベント詳細」に表示される */
 export function getStoredEvents(): KanpaiEvent[] {
   if (typeof window === "undefined") return defaultEvents;
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -59,10 +64,10 @@ export function setStoredEvents(events: KanpaiEvent[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
 }
 
-/** 次回表示用のイベント1件を取得（先頭） */
-export function getNextEvent(): KanpaiEvent | null {
+/** 次回表示用のイベントを最大 limit 件取得（先頭から）。回次は表示順で第1回・第2回… */
+export function getNextEvents(limit: number = 3): KanpaiEvent[] {
   const list = getStoredEvents();
-  return list.length > 0 ? list[0] : null;
+  return list.slice(0, Math.max(0, limit));
 }
 
 export { STORAGE_KEY as EVENTS_STORAGE_KEY, defaultEvents };

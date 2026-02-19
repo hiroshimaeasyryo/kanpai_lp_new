@@ -18,7 +18,7 @@ import {
   migrateOldImageFormat,
 } from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
-import { getNextEvent } from "@/types/events";
+import { defaultEvents, getNextEvents } from "@/types/events";
 
 export default function Home() {
   useSmoothScroll();
@@ -26,7 +26,7 @@ export default function Home() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
-  const [nextEvent, setNextEvent] = useState<KanpaiEvent | null>(null);
+  const [nextEvents, setNextEvents] = useState<KanpaiEvent[]>([]);
   const [eventImages, setEventImages] = useState<string[]>([]);
   /** EVENT FLOW カルーセル用（1〜3枚目、ラベル付き）。管理画面 or デフォルトパスから構築 */
   const [eventFlowItems, setEventFlowItems] = useState<{ url: string; label: string }[]>([]);
@@ -35,7 +35,7 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
-    setNextEvent(getNextEvent());
+    setNextEvents(getNextEvents(3));
 
     // イベント画像を読み込む（新形式 → 旧形式 → デフォルト）
     const stored = getStoredEventImages();
@@ -178,8 +178,8 @@ export default function Home() {
                 fontFamily: "'Shippori Mincho', serif",
                 color: 'var(--lp-bg-warm)',
                 textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
-                // 極小デバイスでも一定サイズを維持（改行可）
-                fontSize: 'clamp(2.25rem, 10vw, 3.75rem)',
+                // モバイルでやや大きく、極小デバイスでも可読性を確保（改行可）
+                fontSize: 'clamp(3rem, 11vw, 3.75rem)',
               }}
             >
               見えないものに、触れる。
@@ -363,22 +363,22 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：04エンディングの後に表示 */}
+          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：04エンディングの後に表示・左右余白なしで全幅表示 */}
           {eventFlowItems.length > 0 && (
-            <div className="mt-14 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
+            <div className="mt-14 -mx-6 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
               <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
                 <div className="event-flow-track flex h-full absolute inset-0" style={{ width: '600%' }}>
                   {[...eventFlowItems, ...eventFlowItems].map((item, i) => (
                     <div
                       key={`${i}-${item.url}`}
-                      className="flex-shrink-0 h-full flex flex-col px-2"
+                      className="flex-shrink-0 h-full flex flex-col"
                       style={{ width: '16.666%' }}
                     >
-                      <div className="relative w-full h-full rounded-xl overflow-hidden border border-lp-border bg-lp-bg-card" style={{ borderWidth: '0.5px' }}>
+                      <div className="relative w-full h-full overflow-hidden bg-lp-bg-card" style={{ borderWidth: 0 }}>
                         <img
                           src={item.url}
                           alt={`KANPAI就活の様子 ${item.label}`}
-                          className="event-flow-img-pan w-full h-full object-cover"
+                          className="event-flow-img-pan block w-full h-full object-cover"
                         />
                         <div
                           className="absolute bottom-0 left-0 right-0 py-2 px-3 flex justify-end"
@@ -635,52 +635,66 @@ export default function Home() {
               次回のイベント詳細
             </h2>
           </div>
-          <div className="rounded-2xl border border-lp-border bg-lp-bg-warm/60 backdrop-blur-sm overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
-            <div className="p-6 md:p-8 space-y-6">
-              <div className="flex items-start gap-4">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </span>
-                <div>
-                  <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">日時</p>
-                  <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    {nextEvent?.dateLabel ?? "2025年3月15日（土）18:00〜21:00"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                </span>
-                <div>
-                  <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">場所</p>
-                  <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    {nextEvent?.location ?? "東京都内（お申し込み後にご案内）"}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
-                  <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    {nextEvent?.companiesCount ?? 15}
-                  </span>
-                  <div>
-                    <p className="text-xs font-medium text-lp-text-body">参加企業数</p>
-                    <p className="text-sm text-lp-text-heading font-medium">社</p>
+          <div className="space-y-6 opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+            {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((ev, idx) => (
+              <div key={ev.id || `default-${idx}`} className="rounded-2xl border border-lp-border bg-lp-bg-warm/60 backdrop-blur-sm overflow-hidden">
+                <div className="p-6 md:p-8 space-y-6">
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium bg-lp-primary/15 text-lp-primary" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                      第{ev.eventNumber ?? idx + 1}回
+                    </span>
+                    {ev.eventNote?.trim() && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-lp-border/40 text-lp-text-heading">
+                        {ev.eventNote.trim()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    <div>
+                      <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">日時</p>
+                      <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {ev.dateLabel}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </span>
+                    <div>
+                      <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">場所</p>
+                      <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {ev.location}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
+                      <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {ev.companiesCount}
+                      </span>
+                      <div>
+                        <p className="text-xs font-medium text-lp-text-body">参加企業数</p>
+                        <p className="text-sm text-lp-text-heading font-medium">社</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
+                      <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {ev.studentsCount}
+                      </span>
+                      <div>
+                        <p className="text-xs font-medium text-lp-text-body">参加学生数</p>
+                        <p className="text-sm text-lp-text-heading font-medium">名</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
-                  <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    {nextEvent?.studentsCount ?? 40}
-                  </span>
-                  <div>
-                    <p className="text-xs font-medium text-lp-text-body">募集学生数</p>
-                    <p className="text-sm text-lp-text-heading font-medium">名</p>
-                  </div>
-                </div>
               </div>
-            </div>
-            <div className="px-6 md:px-8 pb-6 md:pb-8 pt-2">
+            ))}
+            <div className="pt-2">
               <a href="#apply" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
                 参加申し込みをする
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
@@ -708,19 +722,6 @@ export default function Home() {
             <p className="text-xs font-medium text-lp-text-heading">
               <a href="https://workaslife-inc.com/" target="_blank" rel="noopener noreferrer" className="text-lp-text-heading hover:text-lp-primary transition-colors underline">株式会社ワークアズライフ</a>（マイナビ出資企業）
             </p>
-            <p className="text-xs text-lp-text-body mt-0.5">深い部分にこだわった就活支援</p>
-          </div>
-          <div className="flex gap-5 flex-wrap justify-center">
-            {[
-              { label: "プライバシーポリシー", href: "#" },
-              { label: "利用規約", href: "#" },
-              { label: "お問い合わせ", href: "#" },
-              { label: "Instagram", href: "https://www.instagram.com/kanpai_hutte_career/" },
-            ].map((item, i) => (
-              <a key={i} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined} className="text-xs text-lp-text-body hover:text-lp-primary transition-colors">
-                {item.label}
-              </a>
-            ))}
           </div>
           <p className="text-xs text-lp-text-body opacity-50">
             &copy; {currentYear} Work As Life, Inc. All rights reserved.

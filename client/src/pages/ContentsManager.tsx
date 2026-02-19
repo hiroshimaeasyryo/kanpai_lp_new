@@ -458,7 +458,7 @@ export default function ContentsManager() {
               イベント管理
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭のイベントが次回イベントとして表示されます。
+              「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭から最大3件がLPに表示され、表示順に第1回・第2回・第3回として回次が付きます。
             </p>
 
             <div className="space-y-4 mb-6">
@@ -478,6 +478,11 @@ export default function ContentsManager() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <p className="font-medium text-[#5C3D2E]">
+                          {[
+                            ev.eventNumber != null && `第${ev.eventNumber}回`,
+                            ev.eventNote?.trim(),
+                          ].filter(Boolean).join(" ")}
+                          {(ev.eventNumber != null || ev.eventNote?.trim()) ? " — " : ""}
                           {ev.dateLabel || "（日時未設定）"}
                         </p>
                         <p className="text-sm text-[#875a3c]">
@@ -485,7 +490,7 @@ export default function ContentsManager() {
                           {ev.locationNote ? ` ${ev.locationNote}` : ""}
                         </p>
                         <p className="text-xs text-[#875a3c] mt-1">
-                          参加企業 {ev.companiesCount}社 / 募集学生 {ev.studentsCount}名
+                          参加企業 {ev.companiesCount}社 / 参加学生 {ev.studentsCount}名
                         </p>
                       </div>
                       <Button
@@ -582,13 +587,13 @@ export default function ContentsManager() {
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">4.</span>
                 <span>
-                  イベントは複数登録できます。一覧の先頭が「次回のイベント」として表示されます。
+                  イベントは複数登録できます。一覧の先頭から3件が「次回のイベント詳細」に第1回・第2回・第3回として表示されます。
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">5.</span>
                 <span>
-                  日時・場所・参加企業数・募集学生数を変更すると、次回イベント詳細に反映されます。
+                  日時・場所・参加企業数・参加学生数を変更すると、次回イベント詳細に反映されます。
                 </span>
               </li>
             </ul>
@@ -624,6 +629,29 @@ function EventForm({
 
   return (
     <div className="space-y-4">
+      <div>
+        <Label className="text-[#5C3D2E]">回次（表示用）</Label>
+        <Input
+          type="number"
+          min={1}
+          value={form.eventNumber ?? ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            update({ eventNumber: v === "" ? undefined : Math.max(1, parseInt(v, 10) || 1) });
+          }}
+          placeholder="例: 1（未入力時は表示順で第1回・第2回…）"
+          className="mt-1 border-[#ffd7c3]"
+        />
+      </div>
+      <div>
+        <Label className="text-[#5C3D2E]">回の備考（任意）</Label>
+        <Input
+          value={form.eventNote ?? ""}
+          onChange={(e) => update({ eventNote: e.target.value || undefined })}
+          placeholder="例: 大規模特別回（未入力時はLPに表示しません）"
+          className="mt-1 border-[#ffd7c3]"
+        />
+      </div>
       <div>
         <Label className="text-[#5C3D2E]">日時（表示用）</Label>
         <Input
@@ -685,7 +713,7 @@ function EventForm({
           />
         </div>
         <div>
-          <Label className="text-[#5C3D2E]">募集学生数（名）</Label>
+          <Label className="text-[#5C3D2E]">参加学生数（名）</Label>
           <Input
             type="number"
             min={1}
