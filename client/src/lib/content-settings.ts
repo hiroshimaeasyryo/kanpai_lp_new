@@ -88,3 +88,79 @@ export function setStoredHeroImage(url: string | null): void {
     localStorage.removeItem(HERO_IMAGE_KEY);
   }
 }
+
+/**
+ * Unique Features セクションの1件分（見出し・本文・任意の画像）
+ * 管理画面から3件まとめて編集可能。画像は client/public/feature-1.png など未設定時に使用。
+ */
+export interface FeatureItem {
+  title: string;
+  body: string;
+  /** 未設定時はデフォルトパス（/feature-1.png 等）も使わず表示しない。空文字は未設定扱い */
+  imageUrl?: string | null;
+}
+
+const FEATURES_KEY = "kanpai_features";
+
+/** デフォルトの特徴画像パス（1〜3）。client/public/feature-1.png 等に置くと未設定時に使われる */
+export const DEFAULT_FEATURE_IMAGE_PATHS = ["/feature-1.png", "/feature-2.png", "/feature-3.png"] as const;
+
+/** デフォルトの3つの特徴（見出し・本文・画像URL）。画像は2・3枚目のみデフォルトパスあり */
+export const DEFAULT_FEATURES: FeatureItem[] = [
+  {
+    title: "ありきたりでちょっと退屈な「企業紹介タイム」なし",
+    body: "多くの就活イベントにある、10分弱の企業プレゼン。正直、採用サイトに書いてあることとほとんど同じで、あまり記憶に残らない。\n\nKANPAI就活では、その時間をすべて対話に充てています。会社名すら最初は伝えない。先入観なく「人」として出会うところから始まります。",
+    imageUrl: null,
+  },
+  {
+    title: "最初はカジュアルに、話しやすく。就活版 ito",
+    body: "いきなり「自己紹介どうぞ」は、誰だって緊張する。\n\nKANPAI就活では、企業研修でも使われているカードゲーム「ito」の就活版をアイスブレイクに導入。一人ひとりの価値観や考え方が自然と見えてくるゲームをすることで、肩肘張らずに、価値観や素に触れる対話ができるようになりました。",
+    imageUrl: DEFAULT_FEATURE_IMAGE_PATHS[1],
+  },
+  {
+    title: "対話の余韻を、形に残す。メッセージカードの交換",
+    body: "各KANPAIの最後に、企業の人事と学生が手書きのメッセージを交換します。\n\n対話の中で感じた「あなたの良さ」や「気づき」が、言葉として手元に残る。良い時間の余韻を壊さず、温かみのある形で次の出会いにつながっていきます。",
+    imageUrl: DEFAULT_FEATURE_IMAGE_PATHS[2],
+  },
+];
+
+/** localStorage から特徴3件を取得。未保存時は旧キー(ito/messageCard)を移行してからデフォルトを返す */
+export function getStoredFeatures(): FeatureItem[] {
+  if (typeof window === "undefined") return [...DEFAULT_FEATURES];
+  const stored = localStorage.getItem(FEATURES_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length >= 3) {
+        return parsed.slice(0, 3).map((item: unknown, i: number) => {
+          const o = item && typeof item === "object" ? item as Record<string, unknown> : {};
+          return {
+            title: typeof o.title === "string" ? o.title : DEFAULT_FEATURES[i].title,
+            body: typeof o.body === "string" ? o.body : DEFAULT_FEATURES[i].body,
+            imageUrl: o.imageUrl === null || (typeof o.imageUrl === "string" && o.imageUrl.trim() !== "") ? (o.imageUrl as string | null) ?? null : (DEFAULT_FEATURES[i].imageUrl ?? null),
+          };
+        });
+      }
+    } catch {
+      /* fallback to default */
+    }
+  }
+  // 旧キーから画像だけ移行
+  const ito = localStorage.getItem("kanpai_ito_image");
+  const msg = localStorage.getItem("kanpai_message_card_image");
+  const base = [...DEFAULT_FEATURES];
+  if (ito) base[1] = { ...base[1], imageUrl: ito };
+  if (msg) base[2] = { ...base[2], imageUrl: msg };
+  return base;
+}
+
+/** 特徴3件を localStorage に保存 */
+export function setStoredFeatures(features: FeatureItem[]): void {
+  if (typeof window === "undefined") return;
+  const payload = features.slice(0, 3).map((f) => ({
+    title: f.title,
+    body: f.body,
+    imageUrl: f.imageUrl ?? null,
+  }));
+  localStorage.setItem(FEATURES_KEY, JSON.stringify(payload));
+}

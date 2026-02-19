@@ -8,20 +8,25 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   CONTENTS_MANAGER_ACCESS_CODE,
   isContentsManagerUnlocked,
   setContentsManagerUnlocked,
 } from "@/const";
 import { usePalette } from "@/contexts/PaletteContext";
-import type { EventImage } from "@/lib/content-settings";
+import type { EventImage, FeatureItem } from "@/lib/content-settings";
 import {
+  DEFAULT_FEATURE_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
+  DEFAULT_FEATURES,
   generateImageId,
   getStoredEventImages,
+  getStoredFeatures,
   getStoredHeroImage,
   migrateOldImageFormat,
   setStoredEventImages,
+  setStoredFeatures,
   setStoredHeroImage,
 } from "@/lib/content-settings";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
@@ -64,6 +69,9 @@ export default function ContentsManager() {
   );
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(() =>
     typeof window !== "undefined" ? getStoredHeroImage() : null
+  );
+  const [features, setFeatures] = useState<FeatureItem[]>(() =>
+    typeof window !== "undefined" ? getStoredFeatures() : [...DEFAULT_FEATURES]
   );
   const [eventImages, setEventImages] = useState<EventImage[]>(() => {
     if (typeof window === "undefined") return [];
@@ -149,6 +157,16 @@ export default function ContentsManager() {
   const handleHeroImageReset = () => {
     setHeroImageUrl(null);
     setStoredHeroImage(null);
+  };
+
+  const persistFeatures = (next: FeatureItem[]) => {
+    setFeatures(next);
+    setStoredFeatures(next);
+  };
+
+  const handleFeatureUpdate = (index: number, patch: Partial<FeatureItem>) => {
+    const next = features.slice(0, 3).map((f, i) => (i === index ? { ...f, ...patch } : f));
+    persistFeatures(next);
   };
 
   const handleSaveEvent = (updated: KanpaiEvent) => {
@@ -335,6 +353,95 @@ export default function ContentsManager() {
                 </Button>
               )}
             </div>
+          </div>
+
+          {/* Unique Features（3つの特徴） */}
+          <div className="mb-10">
+            <h2
+              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Unique Features（3つの特徴）
+            </h2>
+            <p className="text-sm text-[#875a3c] mb-4">
+              「他の就活イベントにはない、3つの特徴」の見出し・本文・画像を編集できます。画像は任意です。未設定時は client/public/feature-1.png 〜 feature-3.png が使われます。
+            </p>
+            <div className="space-y-8">
+              {[0, 1, 2].map((index) => {
+                const item = features[index] ?? DEFAULT_FEATURES[index];
+                const defaultImagePath = DEFAULT_FEATURE_IMAGE_PATHS[index];
+                return (
+                  <div
+                    key={index}
+                    className="p-6 bg-white border border-[#ffd7c3] rounded-2xl"
+                  >
+                    <h3 className="text-lg font-bold text-[#5C3D2E] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                      特徴 {index + 1}
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-[#5C3D2E]">見出し</Label>
+                        <Input
+                          value={item.title}
+                          onChange={(e) => handleFeatureUpdate(index, { title: e.target.value })}
+                          placeholder="例: 最初はカジュアルに、話しやすく。"
+                          className="mt-1 border-[#ffd7c3]"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[#5C3D2E]">本文</Label>
+                        <Textarea
+                          value={item.body}
+                          onChange={(e) => handleFeatureUpdate(index, { body: e.target.value })}
+                          placeholder="本文（改行はそのまま反映されます）"
+                          className="mt-1 border-[#ffd7c3] min-h-[120px]"
+                          rows={5}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[#5C3D2E]">画像（任意）</Label>
+                        <div className="mt-2 max-w-xs">
+                          <ImageUploader
+                            label={`特徴 ${index + 1} の画像`}
+                            currentImage={item.imageUrl?.trim() ? item.imageUrl : undefined}
+                            onImageUpload={(url) => handleFeatureUpdate(index, { imageUrl: url })}
+                          />
+                          {(item.imageUrl && item.imageUrl.trim() !== "") && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="mt-2 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                              onClick={() => handleFeatureUpdate(index, { imageUrl: defaultImagePath })}
+                            >
+                              デフォルト（{defaultImagePath.replace("/", "")}）に戻す
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 w-full text-[#875a3c] hover:text-[#5C3D2E]"
+                            onClick={() => handleFeatureUpdate(index, { imageUrl: null })}
+                          >
+                            画像を削除
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-4 text-[#875a3c] hover:text-[#5C3D2E]"
+              onClick={() => persistFeatures([...DEFAULT_FEATURES])}
+            >
+              3つの特徴をデフォルトに戻す
+            </Button>
           </div>
 
           {/* イベント画像 */}
@@ -569,7 +676,7 @@ export default function ContentsManager() {
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
                 <span>
-                  ブランドロゴ・ヒーロー画像・イベント画像はLP全体に反映されます。「プレビューを見る」で確認できます。
+                  ブランドロゴ・ヒーロー画像・3つの特徴（見出し・本文・画像）・イベント画像はLP全体に反映されます。「プレビューを見る」で確認できます。
                 </span>
               </li>
               <li className="flex items-start gap-2">

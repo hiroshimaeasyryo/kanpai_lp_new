@@ -193,9 +193,9 @@
     font-family: 'Shippori Mincho', serif;
   }
 
-  /* スマホ表示時は見出しを 16px に統一（大きすぎるのを防ぐ） */
+  /* スマホ表示時は見出しを 16px に統一（大きすぎるのを防ぐ）。ヒーロー見出しは除外 */
   @media (max-width: 639px) {
-    h1, h2, h3, h4, h5, h6 {
+    h1:not(.lp-hero-title), h2, h3, h4, h5, h6 {
       font-size: 16px !important;
       line-height: 1.5;
     }

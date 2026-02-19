@@ -14,6 +14,7 @@ import {
   DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_HERO_IMAGE_PATH,
   getStoredEventImages,
+  getStoredFeatures,
   getStoredHeroImage,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
@@ -30,6 +31,13 @@ export default function Home() {
   const [eventImages, setEventImages] = useState<string[]>([]);
   /** EVENT FLOW カルーセル用（1〜3枚目、ラベル付き）。管理画面 or デフォルトパスから構築 */
   const [eventFlowItems, setEventFlowItems] = useState<{ url: string; label: string }[]>([]);
+  /** Unique Features の3件（見出し・本文・画像）。管理画面 or デフォルトから構築 */
+  const [features, setFeatures] = useState<{ title: string; body: string; imageUrl?: string | null }[]>(() => getStoredFeatures());
+  /** 特徴画像の読み込み失敗したインデックス。失敗したら画像ブロックごと非表示 */
+  const [featureImageErrors, setFeatureImageErrors] = useState<Set<number>>(new Set());
+  /** ヒーロー直下の「NEXT EVENT」カルーセルで表示中のインデックス（0〜2） */
+  const [nextEventCarouselIndex, setNextEventCarouselIndex] = useState(0);
+  const nextEventCarouselTouchStartX = useRef<number | null>(null);
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const heroImageRef = useRef<HTMLImageElement | null>(null);
 
@@ -62,6 +70,10 @@ export default function Home() {
     const hero = getStoredHeroImage();
     setHeroImageUrl(hero ?? DEFAULT_HERO_IMAGE_PATH);
     setHeroImageLoadError(false);
+
+    // Unique Features 3件（管理画面 or デフォルト）
+    setFeatures(getStoredFeatures());
+    setFeatureImageErrors(new Set());
   }, []);
 
   // ヒーロー画像: スクロールに合わせて「見える位置（object-position）」を右端→左端へ移動
@@ -171,7 +183,7 @@ export default function Home() {
         <div className="relative z-10 max-w-2xl px-8 md:px-6">
           <div className="text-center mb-8">
             <h1
-              className="font-bold leading-[1.2] opacity-0 animate-fadeUp"
+              className="lp-hero-title font-bold leading-[1.2] opacity-0 animate-fadeUp md:whitespace-nowrap"
               style={{
                 animationDelay: '0.2s',
                 animationFillMode: 'forwards',
@@ -179,7 +191,7 @@ export default function Home() {
                 color: 'var(--lp-bg-warm)',
                 textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
                 // モバイルでやや大きく、極小デバイスでも可読性を確保（改行可）
-                fontSize: 'clamp(3rem, 11vw, 3.75rem)',
+                fontSize: 'clamp(2.25rem, 11vw, 3.75rem)',
               }}
             >
               見えないものに、触れる。
@@ -212,6 +224,146 @@ export default function Home() {
         </div>
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
+        </div>
+      </section>
+
+      {/* NEXT EVENT 次回のイベント詳細（ヒーロー直下・直近3イベントの手動カルーセル） */}
+      <section className="py-16 px-6 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute w-72 h-72 -top-20 -right-20 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-border) 35%, transparent) 0%, transparent 70%)' }} />
+          <div className="absolute w-48 h-48 -bottom-10 -left-10 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-primary) 10%, transparent) 0%, transparent 70%)' }} />
+        </div>
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="text-center mb-10 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Next Event</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              次回のイベント詳細
+            </h2>
+          </div>
+          {/* 直近3イベントの手動カルーセル（ボタン・ドット・横スワイプ対応） */}
+          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
+            <div className="relative overflow-hidden">
+              <div
+                className="flex transition-transform duration-300 ease-out touch-pan-y"
+                style={{ transform: `translateX(-${nextEventCarouselIndex * 100}%)` }}
+                onTouchStart={(e) => { nextEventCarouselTouchStartX.current = e.targetTouches[0].clientX; }}
+                onTouchEnd={(e) => {
+                  const start = nextEventCarouselTouchStartX.current;
+                  if (start == null) return;
+                  const end = e.changedTouches[0].clientX;
+                  const diff = start - end;
+                  const list = nextEvents.length > 0 ? nextEvents : [defaultEvents[0]];
+                  if (list.length <= 1) return;
+                  if (diff > 40) setNextEventCarouselIndex((i) => (i >= list.length - 1 ? 0 : i + 1));
+                  else if (diff < -40) setNextEventCarouselIndex((i) => (i <= 0 ? list.length - 1 : i - 1));
+                  nextEventCarouselTouchStartX.current = null;
+                }}
+              >
+                {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((ev, idx) => (
+                  <div key={ev.id || `carousel-${idx}`} className="flex-shrink-0 w-full min-w-0 px-1">
+                    <div className="rounded-2xl border border-lp-border bg-lp-bg-warm/60 backdrop-blur-sm overflow-hidden">
+                      <div className="p-6 md:p-8 space-y-6">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium bg-lp-primary/15 text-lp-primary" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                            第{ev.eventNumber ?? idx + 1}回
+                          </span>
+                          {ev.eventNote?.trim() && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-lp-border/40 text-lp-text-heading">
+                              {ev.eventNote.trim()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-start gap-4">
+                          <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                          </span>
+                          <div>
+                            <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">日時</p>
+                            <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                              {ev.dateLabel}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-4">
+                          <span className="flex-shrink-0 w-10 h-10 rounded-full bg-lp-border/60 flex items-center justify-center text-lp-primary">
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                          </span>
+                          <div>
+                            <p className="text-xs font-medium text-lp-primary uppercase tracking-wide mb-0.5">場所</p>
+                            <p className="text-lp-text-heading font-medium" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                              {ev.location}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
+                            <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                              {ev.companiesCount}
+                            </span>
+                            <div>
+                              <p className="text-xs font-medium text-lp-text-body">参加企業数</p>
+                              <p className="text-sm text-lp-text-heading font-medium">社</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
+                            <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                              {ev.studentsCount}
+                            </span>
+                            <div>
+                              <p className="text-xs font-medium text-lp-text-body">参加学生数</p>
+                              <p className="text-sm text-lp-text-heading font-medium">名</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* 前へ・次へボタン（3件以上あるときのみ表示） */}
+              {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setNextEventCarouselIndex((i) => (i <= 0 ? (nextEvents.length || 1) - 1 : i - 1))}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-11 h-11 rounded-full bg-white/95 border border-lp-border shadow-md flex items-center justify-center text-lp-primary hover:bg-lp-bg-warm transition-colors z-10"
+                    aria-label="前のイベント"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNextEventCarouselIndex((i) => (i >= (nextEvents.length || 1) - 1 ? 0 : i + 1))}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-11 h-11 rounded-full bg-white/95 border border-lp-border shadow-md flex items-center justify-center text-lp-primary hover:bg-lp-bg-warm transition-colors z-10"
+                    aria-label="次のイベント"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </>
+              )}
+              {/* インジケーター（ドット） */}
+              {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).length > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                  {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setNextEventCarouselIndex(i)}
+                      className={`w-2.5 h-2.5 rounded-full transition-colors ${nextEventCarouselIndex === i ? 'bg-lp-primary' : 'bg-lp-border hover:bg-lp-primary/60'}`}
+                      aria-label={`イベント${i + 1}を表示`}
+                      aria-current={nextEventCarouselIndex === i ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="pt-6">
+              <a href="#apply" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+                参加申し込みをする
+                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -251,7 +403,7 @@ export default function Home() {
           </div>
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>その先にある本質に、触れる時間です。
               </p>
             </div>
@@ -306,15 +458,15 @@ export default function Home() {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-1">{item.label}</p>
                     <h3 className="text-xl font-bold text-lp-text-heading leading-tight md:mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
-                    {/* デスクトップでは右カラム内に本文を表示 */}
-                    <div className="hidden md:block mt-3">
-                      <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
-                      {item.note && (
-                        <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
-                          <p className="text-sm text-lp-text-heading">{item.note}</p>
-                        </div>
-                      )}
-                    </div>
+                  </div>
+                  {/* PCでもカード全幅で本文を表示（flexで次の行に折り返し） */}
+                  <div className="w-full hidden md:block">
+                    <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
+                    {item.note && (
+                      <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
+                        <p className="text-sm text-lp-text-heading">{item.note}</p>
+                      </div>
+                    )}
                   </div>
                   {/* モバイルでは下段で本文を全幅表示 */}
                   <div className="w-full md:hidden">
@@ -413,31 +565,34 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                num: "01",
-                title: "ありきたりでちょっと退屈な「企業紹介タイム」なし",
-                body: "多くの就活イベントにある、10分弱の企業プレゼン。正直、採用サイトに書いてあることとほとんど同じで、あまり記憶に残らない。\n\nKANPAI就活では、その時間をすべて対話に充てています。会社名すら最初は伝えない。先入観なく「人」として出会うところから始まります。",
-              },
-              {
-                num: "02",
-                title: "最初はカジュアルに、話しやすく。就活版 ito",
-                body: "いきなり「自己紹介どうぞ」は、誰だって緊張する。\n\nKANPAI就活では、企業研修でも使われているカードゲーム「ito」の就活版をアイスブレイクに導入。一人ひとりの価値観や考え方が自然と見えてくるゲームをすることで、肩肘張らずに、価値観や素に触れる対話ができるようになりました。",
-              },
-              {
-                num: "03",
-                title: "対話の余韻を、形に残す。メッセージカードの交換",
-                body: "各KANPAIの最後に、企業の人事と学生が手書きのメッセージを交換します。\n\n対話の中で感じた「あなたの良さ」や「気づき」が、言葉として手元に残る。良い時間の余韻を壊さず、温かみのある形で次の出会いにつながっていきます。",
-              },
-            ].map((item, i) => (
-              <div key={i} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+            {features.length === 0 ? null : features.slice(0, 3).map((item, i) => {
+              const hasImage = item.imageUrl != null && item.imageUrl.trim() !== "" && !featureImageErrors.has(i);
+              return (
+              <div key={i} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp overflow-hidden" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+                {hasImage && (
+                  <div className="-mx-8 -mt-8 mb-6 h-[180px] overflow-hidden bg-lp-bg-warm shadow-lg ring-1 ring-black/5 relative">
+                    <img
+                      src={item.imageUrl!}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={() => setFeatureImageErrors((prev) => new Set(prev).add(i))}
+                    />
+                    {/* 画像下部をカードに自然になじむグラデーション */}
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to bottom, transparent 30%, rgba(255,250,245,0.4) 70%, color-mix(in srgb, var(--lp-bg-warm) 85%, transparent) 100%)",
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lp-primary to-lp-primary-hover flex items-center justify-center text-white font-bold text-sm mb-4 shadow-md" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {item.num}
+                  {String(i + 1).padStart(2, "0")}
                 </div>
                 <h3 className="text-lg font-bold text-lp-text-heading leading-tight mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
                 <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
               </div>
-            ))}
+            );})}
           </div>
         </div>
       </section>
@@ -601,7 +756,7 @@ export default function Home() {
               </h2>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose text-left" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose text-left md:text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 この時間、この出会いだけで「正解」はわからないかもしれない。<br/>でも、あなたなりの正解の手がかりは、きっと見つかる。
               </p>
             </div>
