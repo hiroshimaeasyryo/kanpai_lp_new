@@ -132,7 +132,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <a
               href="#apply"
-              className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover"
+              className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
               イベントに参加する
             </a>
@@ -205,9 +205,7 @@ export default function Home() {
                 style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
               >
                 次回のイベントを見る
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 8h10m-4-4l4 4-4 4"/>
-                </svg>
+                <img src="/line-logo.png" alt="LINE" className="w-8 h-8 shrink-0 object-contain" />
               </a>
             </div>
           </div>
@@ -455,17 +453,16 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              "自分が気づいていなかった価値観に気づけた。人事の方の「仕事への葛藤」を聞いて、自分が本当に大事にしたいことが少し見えた気がします。",
-              "説明会では絶対聞けない話が聞けた。会社の良い面だけでなく、今の課題を正直に話してくれたことに信頼を感じました。",
-              "人事の方が本当に一人ひとりを見てくれていた。メッセージカードに書かれた言葉を読んで、思わず泣きそうになりました。",
-              "就活イベントのイメージが変わった。「使われている感」がゼロ。対等に話してくれる空気感が心地よかったです。",
-              "知らなかったけど「いい会社」に出会えた。就活サイトでは絶対見つけられない企業を、人を通じて知れるのが良かった。",
-              "もらったメッセージカードを、今でも手帳に挟んでいます。就活で初めて「温かい」と思えた経験でした。",
-            ].map((quote, i) => (
+              { quote: "自分が気づいていなかった価値観に気づけた。人事の方の「仕事への葛藤」を聞いて、自分が本当に大事にしたいことが少し見えた気がします。", label: "早稲田大学 社会科学部 3年" },
+              { quote: "説明会では教えてくれない生々しい話が聞けました。会社の課題や、会社の理念に対して、社員が実際にどう感じているのか聞けて興味を持った。", label: "明治大学 商学部 3年" },
+              { quote: "人事の方が本当に一人ひとりを見てくれた。「途中参加でも、積極的に会話に入っていった姿を見て、会社で活躍している姿が浮かんだ」とメッセージカードをもらい、「こんな感じでいいんだ」と思えた。", label: "順天堂大学大学院 スポーツ健康科学研究科" },
+              { quote: "知らなかったけど「いい会社」に出会えた。就活サイトでは見落としていた企業だが、「こんな風に仕事をしたい」と思えた。", label: "國學院大学 経済学部 3年" },
+              { quote: "人事の人に「ito」のルールを教えるところからフリートークが始まって、その後も一緒にほろ酔いになって打ち解けられたので、面接でまた人事の人と話せるのが楽しみになりました。", label: "日本大学 法学部 3年" },
+            ].map((item, i) => (
               <div key={i} className="bg-white border border-lp-border rounded-2xl p-6 opacity-0 animate-fadeUp" style={{ animationDelay: `${(i % 3) * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
-                <p className="text-sm text-lp-text-muted leading-relaxed mb-4 border-l-3 border-lp-primary pl-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>{quote}</p>
+                <p className="text-sm text-lp-text-muted leading-relaxed mb-4 border-l-3 border-lp-primary pl-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.quote}</p>
                 <p className="text-xs text-lp-text-body font-medium">
-                  {["早稲田大学 社会科学部 3年", "明治大学 商学部 3年", "青山学院大学 経営学部 3年", "法政大学 社会学部 3年", "慶應義塾大学 経済学部 3年", "立教大学 文学部 3年"][i]}
+                  {item.label}
                 </p>
               </div>
             ))}
@@ -474,7 +471,7 @@ export default function Home() {
       </section>
 
       {/* Screening Section */}
-      <section className="py-24 px-6 bg-white">
+      <section className="py-24 px-8 md:px-6 bg-white">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
             <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Screening</p>
@@ -482,17 +479,19 @@ export default function Home() {
               すべての企業に、<br/>私たちの基準があります。
             </h2>
           </div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-            <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-9">
-              KANPAI就活は、どんな企業でも参加できるわけではありません。<br/>私たちが大切にしている価値観に共感し、<br/>学生一人ひとりと誠実に向き合える企業だけをお迎えしています。
-            </p>
-          </div>
-          <div className="space-y-3 mb-9">
+          <div className="mx-6 md:mx-0">
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-9">
+                KANPAI就活は、どんな企業でも参加できるわけではありません。<br/>私たちが大切にしている価値観に共感し、<br/>学生一人ひとりと誠実に向き合える企業だけをお迎えしています。
+              </p>
+            </div>
+            <div className="space-y-3 mb-9">
             {[
               "学生を対等な存在として向き合える",
               "一人ひとりの声に、丁寧に耳を傾けられる",
               "自社の課題も含め、等身大の姿を見せられる",
               "温かみのある関係性を大切にしている",
+              "リスペクトのあるフィードバックを学生にできる"
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.12 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center text-lp-primary mt-0.5">
@@ -503,11 +502,12 @@ export default function Home() {
                 <p className="text-sm text-lp-text-heading pt-0.5">{item}</p>
               </div>
             ))}
-          </div>
-          <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-            <p className="text-sm text-lp-text-heading">
-              運営元は、マイナビ出資企業である<strong>株式会社ワークアズライフ</strong>。<br/>マイナビが実現できない深い部分にこだわった就活支援を行っています。<br/>上場企業も参加する、信頼のあるイベントです。
-            </p>
+            </div>
+            <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              <p className="text-sm text-lp-text-heading">
+                運営元は、マイナビ出資企業である<strong>株式会社ワークアズライフ</strong>。<br/>マイナビが実現できない深い部分にこだわった就活支援を行っています。<br/>上場企業も参加する、信頼のあるイベントです。
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -515,35 +515,6 @@ export default function Home() {
       {/* Event Overview Section */}
       <section className="py-24 px-6 bg-lp-bg-warm">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Event Overview</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              イベント概要
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3 mb-9">
-            {(
-              nextEvent
-                ? [
-                    { label: "参加学生", value: `先着${nextEvent.studentsCount}名` },
-                    { label: "参加企業数", value: `${nextEvent.companiesCount}社` },
-                    { label: "場所", value: nextEvent.location, note: nextEvent.locationNote ?? undefined },
-                    { label: "時間", value: nextEvent.timeRange || nextEvent.dateLabel, note: nextEvent.timeNote ?? undefined },
-                  ]
-                : [
-                    { label: "参加学生", value: "先着20名" },
-                    { label: "参加企業数", value: "4社" },
-                    { label: "場所", value: "新宿近辺の居酒屋", note: "※詳細は参加確定後にご案内" },
-                    { label: "時間", value: "16:00 – 20:00", note: "夕方〜夜にかけて" },
-                  ]
-            ).map((item, i) => (
-              <div key={i} className="p-5 bg-white border border-lp-border rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
-                <p className="text-xs text-lp-primary font-medium uppercase tracking-wider mb-1">{item.label}</p>
-                <p className="text-xl font-bold text-lp-text-heading" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.value}</p>
-                {item.note && <p className="text-xs text-lp-primary mt-1">{item.note}</p>}
-              </div>
-            ))}
-          </div>
           <div>
             <h3 className="text-lg font-bold text-lp-text-heading text-center mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>安全開催のための取り組み</h3>
             <p className="text-xs text-lp-primary text-center mb-5">安心して参加いただくために、以下のルールを設けています。</p>
@@ -621,32 +592,32 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section id="apply" className="py-28 px-6 text-center relative overflow-hidden" style={{ background: 'linear-gradient(180deg, var(--lp-cta-start) 0%, var(--lp-cta-mid) 50%, var(--lp-cta-end) 100%)' }}>
+      <section id="apply" className="py-28 px-8 md:px-6 text-center relative overflow-hidden" style={{ background: 'linear-gradient(180deg, var(--lp-cta-start) 0%, var(--lp-cta-mid) 50%, var(--lp-cta-end) 100%)' }}>
         <div className="max-w-2xl mx-auto relative z-10">
-          <div className="opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <h2 className="text-4xl md:text-5xl font-bold text-lp-text-heading mb-6 leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れてみよう。</span>
-            </h2>
-          </div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-            <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              この時間、この出会いだけで「正解」はわからないかもしれない。<br/>でも、あなたなりの正解の手がかりは、きっと見つかる。
-            </p>
-          </div>
-          <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-            <a href="#apply" className="inline-flex items-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
-              次回のイベントに参加する
-              <svg className="w-4 h-4" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 9h10m-4-4l4 4-4 4"/>
-              </svg>
-            </a>
-            <p className="text-xs text-lp-primary font-medium tracking-wide">
-              <span>参加費無料</span>
-              <span className="mx-1">・</span>
-              <span>私服OK</span>
-              <span className="mx-1">・</span>
-              <span>1人参加歓迎</span>
-            </p>
+          <div className="mx-6 md:mx-0">
+            <div className="opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
+              <h2 className="text-4xl md:text-5xl font-bold text-lp-text-heading mb-6 leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れてみよう。</span>
+              </h2>
+            </div>
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose text-left" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                この時間、この出会いだけで「正解」はわからないかもしれない。<br/>でも、あなたなりの正解の手がかりは、きっと見つかる。
+              </p>
+            </div>
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
+              <a href="#apply" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
+                次回のイベントに参加する
+                <img src="/line-logo.png" alt="LINE" className="w-9 h-9 object-contain shrink-0" />
+              </a>
+              <p className="text-xs text-lp-primary font-medium tracking-wide">
+                <span>参加費無料</span>
+                <span className="mx-1">・</span>
+                <span>私服OK</span>
+                <span className="mx-1">・</span>
+                <span>1人参加歓迎</span>
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -712,9 +683,7 @@ export default function Home() {
             <div className="px-6 md:px-8 pb-6 md:pb-8 pt-2">
               <a href="#apply" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
                 参加申し込みをする
-                <svg className="inline-block w-4 h-4 ml-2 align-middle" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 9h10m-4-4l4 4-4 4"/>
-                </svg>
+                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
               </a>
             </div>
           </div>

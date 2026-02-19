@@ -458,7 +458,7 @@ export default function ContentsManager() {
               イベント管理
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              「イベント概要」「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭のイベントが次回イベントとして表示されます。
+              「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭のイベントが次回イベントとして表示されます。
             </p>
 
             <div className="space-y-4 mb-6">
@@ -588,7 +588,7 @@ export default function ContentsManager() {
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">5.</span>
                 <span>
-                  日時・場所・参加企業数・募集学生数を変更すると、イベント概要と次回イベント詳細の両方に反映されます。
+                  日時・場所・参加企業数・募集学生数を変更すると、次回イベント詳細に反映されます。
                 </span>
               </li>
             </ul>
