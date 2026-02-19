@@ -55,6 +55,7 @@ export function generateImageId(): string {
 }
 
 const HERO_IMAGE_KEY = "kanpai_hero_image";
+const HERO_IMAGE_MOBILE_KEY = "kanpai_hero_image_mobile";
 
 /**
  * エンジニアがローカルでデフォルトのヒーロー画像を設定する場合のパス。
@@ -62,6 +63,13 @@ const HERO_IMAGE_KEY = "kanpai_hero_image";
  * 詳細は client/public/README_hero.md を参照。
  */
 export const DEFAULT_HERO_IMAGE_PATH = "/hero.png";
+
+/**
+ * モバイル用デフォルトヒーロー画像パス。
+ * client/public/hero-mobile.png にファイルを置くと、モバイル表示で未設定時に使用される。
+ * 未設定時はPC用（hero.png）をフォールバックとして使用する。
+ */
+export const DEFAULT_HERO_IMAGE_PATH_MOBILE = "/hero-mobile.png";
 
 /**
  * EVENT FLOW カルーセル用デフォルト画像パス（1〜3枚目）。
@@ -86,6 +94,22 @@ export function setStoredHeroImage(url: string | null): void {
     localStorage.setItem(HERO_IMAGE_KEY, url);
   } else {
     localStorage.removeItem(HERO_IMAGE_KEY);
+  }
+}
+
+/** localStorage からモバイル用ヒーロー画像 URL を取得（未設定時は null） */
+export function getStoredHeroImageMobile(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(HERO_IMAGE_MOBILE_KEY);
+}
+
+/** モバイル用ヒーロー画像 URL を localStorage に保存 */
+export function setStoredHeroImageMobile(url: string | null): void {
+  if (typeof window === "undefined") return;
+  if (url) {
+    localStorage.setItem(HERO_IMAGE_MOBILE_KEY, url);
+  } else {
+    localStorage.removeItem(HERO_IMAGE_MOBILE_KEY);
   }
 }
 

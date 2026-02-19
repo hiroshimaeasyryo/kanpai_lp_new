@@ -24,10 +24,12 @@ import {
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
+  getStoredHeroImageMobile,
   migrateOldImageFormat,
   setStoredEventImages,
   setStoredFeatures,
   setStoredHeroImage,
+  setStoredHeroImageMobile,
 } from "@/lib/content-settings";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { KanpaiEvent } from "@/types/events";
@@ -69,6 +71,9 @@ export default function ContentsManager() {
   );
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(() =>
     typeof window !== "undefined" ? getStoredHeroImage() : null
+  );
+  const [heroImageUrlMobile, setHeroImageUrlMobile] = useState<string | null>(() =>
+    typeof window !== "undefined" ? getStoredHeroImageMobile() : null
   );
   const [features, setFeatures] = useState<FeatureItem[]>(() =>
     typeof window !== "undefined" ? getStoredFeatures() : [...DEFAULT_FEATURES]
@@ -157,6 +162,16 @@ export default function ContentsManager() {
   const handleHeroImageReset = () => {
     setHeroImageUrl(null);
     setStoredHeroImage(null);
+  };
+
+  const handleHeroImageMobileUpdate = (url: string) => {
+    setHeroImageUrlMobile(url);
+    setStoredHeroImageMobile(url);
+  };
+
+  const handleHeroImageMobileReset = () => {
+    setHeroImageUrlMobile(null);
+    setStoredHeroImageMobile(null);
   };
 
   const persistFeatures = (next: FeatureItem[]) => {
@@ -333,25 +348,48 @@ export default function ContentsManager() {
               ヒーロー画像
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              トップのヒーローセクションに表示する画像です。未設定の場合はプレースホルダーが表示されます。16:10程度の横長画像がおすすめです。
+              トップのヒーローセクションに表示する画像です。未設定の場合はプレースホルダーが表示されます。16:10程度の横長画像がおすすめです。PC用とモバイル用を分けると、スマホでは軽い画像だけ読み込まれて表示が速くなります。
             </p>
-            <div className="max-w-md">
-              <ImageUploader
-                label="ヒーロー画像"
-                currentImage={heroImageUrl ?? undefined}
-                onImageUpload={handleHeroImageUpdate}
-              />
-              {heroImageUrl && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                  onClick={handleHeroImageReset}
-                >
-                  ヒーロー画像を削除
-                </Button>
-              )}
+            <div className="max-w-md space-y-6">
+              <div>
+                <ImageUploader
+                  label="ヒーロー画像（PC）"
+                  currentImage={heroImageUrl ?? undefined}
+                  onImageUpload={handleHeroImageUpdate}
+                />
+                {heroImageUrl && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                    onClick={handleHeroImageReset}
+                  >
+                    ヒーロー画像（PC）を削除
+                  </Button>
+                )}
+              </div>
+              <div>
+                <ImageUploader
+                  label="ヒーロー画像（モバイル）"
+                  currentImage={heroImageUrlMobile ?? undefined}
+                  onImageUpload={handleHeroImageMobileUpdate}
+                />
+                <p className="text-xs text-[#875a3c] mt-1 mb-2">
+                  未設定の場合はPC用画像（または hero-mobile.png）が使われます。縦長・小さい解像度でOKです。
+                </p>
+                {heroImageUrlMobile && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                    onClick={handleHeroImageMobileReset}
+                  >
+                    ヒーロー画像（モバイル）を削除
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 

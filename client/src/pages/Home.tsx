@@ -13,9 +13,11 @@ import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_HERO_IMAGE_PATH,
+  DEFAULT_HERO_IMAGE_PATH_MOBILE,
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
+  getStoredHeroImageMobile,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
@@ -26,6 +28,7 @@ export default function Home() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [heroImageUrlMobile, setHeroImageUrlMobile] = useState<string | null>(null);
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvents, setNextEvents] = useState<KanpaiEvent[]>([]);
   const [eventImages, setEventImages] = useState<string[]>([]);
@@ -69,6 +72,8 @@ export default function Home() {
     // ヒーロー画像: 管理画面で設定されていればそれを使用、なければ public/hero.png を参照（README_hero.md 参照）
     const hero = getStoredHeroImage();
     setHeroImageUrl(hero ?? DEFAULT_HERO_IMAGE_PATH);
+    const heroMobile = getStoredHeroImageMobile();
+    setHeroImageUrlMobile(heroMobile);
     setHeroImageLoadError(false);
 
     // Unique Features 3件（管理画面 or デフォルト）
@@ -161,16 +166,26 @@ export default function Home() {
             background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, transparent) 100%)',
           }}
         />
-        {/* 背景レイヤー2: ヒーロー画像（管理画面 or client/public/hero.png）。読み込み失敗時は非表示 */}
-        {heroImageUrl && !heroImageLoadError && (
-          <img
-            ref={heroImageRef}
-            src={heroImageUrl}
-            alt=""
-            className="absolute inset-0 z-0 w-full h-full object-cover"
-            style={{ objectPosition: "100% 50%" }}
-            onError={handleHeroImageError}
-          />
+        {/* 背景レイヤー2: ヒーロー画像（モバイル/PC で出し分け、管理画面 or client/public/hero.png, hero-mobile.png）。読み込み失敗時は非表示 */}
+        {(heroImageUrl || heroImageUrlMobile) && !heroImageLoadError && (
+          <picture className="absolute inset-0 z-0 block w-full h-full">
+            <source
+              media="(max-width: 767px)"
+              srcSet={heroImageUrlMobile ?? heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH_MOBILE}
+            />
+            <source
+              media="(min-width: 768px)"
+              srcSet={heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH}
+            />
+            <img
+              ref={heroImageRef}
+              src={heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH}
+              alt=""
+              className="absolute inset-0 z-0 w-full h-full object-cover"
+              style={{ objectPosition: "100% 50%" }}
+              onError={handleHeroImageError}
+            />
+          </picture>
         )}
         {/* オーバーレイ: グラデーションでテキストの可読性と次のセクションへの自然なつながりを確保 */}
         <div
@@ -228,7 +243,7 @@ export default function Home() {
       </section>
 
       {/* NEXT EVENT 次回のイベント詳細（ヒーロー直下・直近3イベントの手動カルーセル） */}
-      <section className="py-16 px-6 bg-white relative overflow-hidden">
+      <section className="py-16 px-4 md:px-6 bg-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute w-72 h-72 -top-20 -right-20 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-border) 35%, transparent) 0%, transparent 70%)' }} />
           <div className="absolute w-48 h-48 -bottom-10 -left-10 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-primary) 10%, transparent) 0%, transparent 70%)' }} />
@@ -240,27 +255,28 @@ export default function Home() {
               次回のイベント詳細
             </h2>
           </div>
-          {/* 直近3イベントの手動カルーセル（ボタン・ドット・横スワイプ対応） */}
+          {/* 直近3イベントの手動カルーセル（ボタン・ドット・横スワイプ対応）※モバイルはカード幅優先でボタンは重ねて表示 */}
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
-            <div className="relative overflow-hidden">
-              <div
-                className="flex transition-transform duration-300 ease-out touch-pan-y"
-                style={{ transform: `translateX(-${nextEventCarouselIndex * 100}%)` }}
-                onTouchStart={(e) => { nextEventCarouselTouchStartX.current = e.targetTouches[0].clientX; }}
-                onTouchEnd={(e) => {
-                  const start = nextEventCarouselTouchStartX.current;
-                  if (start == null) return;
-                  const end = e.changedTouches[0].clientX;
-                  const diff = start - end;
-                  const list = nextEvents.length > 0 ? nextEvents : [defaultEvents[0]];
-                  if (list.length <= 1) return;
-                  if (diff > 40) setNextEventCarouselIndex((i) => (i >= list.length - 1 ? 0 : i + 1));
-                  else if (diff < -40) setNextEventCarouselIndex((i) => (i <= 0 ? list.length - 1 : i - 1));
-                  nextEventCarouselTouchStartX.current = null;
-                }}
-              >
-                {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((ev, idx) => (
-                  <div key={ev.id || `carousel-${idx}`} className="flex-shrink-0 w-full min-w-0 px-1">
+            <div className="relative px-2 md:px-14">
+              <div className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-300 ease-out touch-pan-y"
+                  style={{ transform: `translateX(-${nextEventCarouselIndex * 100}%)` }}
+                  onTouchStart={(e) => { nextEventCarouselTouchStartX.current = e.targetTouches[0].clientX; }}
+                  onTouchEnd={(e) => {
+                    const start = nextEventCarouselTouchStartX.current;
+                    if (start == null) return;
+                    const end = e.changedTouches[0].clientX;
+                    const diff = start - end;
+                    const list = nextEvents.length > 0 ? nextEvents : [defaultEvents[0]];
+                    if (list.length <= 1) return;
+                    if (diff > 40) setNextEventCarouselIndex((i) => (i >= list.length - 1 ? 0 : i + 1));
+                    else if (diff < -40) setNextEventCarouselIndex((i) => (i <= 0 ? list.length - 1 : i - 1));
+                    nextEventCarouselTouchStartX.current = null;
+                  }}
+                >
+                  {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((ev, idx) => (
+                    <div key={ev.id || `carousel-${idx}`} className="flex-shrink-0 w-full min-w-0 px-1">
                     <div className="rounded-2xl border border-lp-border bg-lp-bg-warm/60 backdrop-blur-sm overflow-hidden">
                       <div className="p-6 md:p-8 space-y-6">
                         <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -319,8 +335,9 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
-              {/* 前へ・次へボタン（3件以上あるときのみ表示） */}
+              {/* 前へ・次へボタン（overflow-hidden の外に配置して見切れ防止） */}
               {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).length > 1 && (
                 <>
                   <button
@@ -341,7 +358,8 @@ export default function Home() {
                   </button>
                 </>
               )}
-              {/* インジケーター（ドット） */}
+            </div>
+            {/* インジケーター（ドット） */}
               {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).length > 1 && (
                 <div className="flex justify-center gap-2 mt-6">
                   {(nextEvents.length > 0 ? nextEvents : [defaultEvents[0]]).map((_, i) => (
@@ -363,7 +381,6 @@ export default function Home() {
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
               </a>
             </div>
-          </div>
         </div>
       </section>
 
@@ -372,7 +389,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto text-left md:text-center">
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0s', animationFillMode: 'forwards' }}>
             <p className="text-lg md:text-2xl text-lp-text-heading leading-relaxed text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              どこを選べばいいのか、<em className="font-bold bg-gradient-to-r from-transparent via-[#ffd7c3] to-transparent bg-no-repeat bg-[length:100%_60%] bg-[position:0_60%]" style={{ fontStyle: 'normal' }}>「正解」がわからない。</em>
+              どこを選べばいいのか、<br className="md:hidden" /><em className="font-bold bg-gradient-to-r from-transparent via-[#ffd7c3] to-transparent bg-no-repeat bg-[length:100%_60%] bg-[position:0_60%]" style={{ fontStyle: 'normal' }}>「正解」がわからない。</em>
             </p>
           </div>
           <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
@@ -485,8 +502,8 @@ export default function Home() {
       </section>
 
       {/* Event Flow Section */}
-      <section className="py-24 px-6 bg-white">
-        <div className="max-w-2xl mx-auto">
+      <section className="py-24 px-8 md:px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
             <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Event Flow</p>
             <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
@@ -515,9 +532,9 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：04エンディングの後に表示・左右余白なしで全幅表示 */}
+          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：VALUESセクションと同じ幅（max-w-6xl）で表示 */}
           {eventFlowItems.length > 0 && (
-            <div className="mt-14 -mx-6 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
+            <div className="mt-14 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
               <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
                 <div className="event-flow-track flex h-full absolute inset-0" style={{ width: '600%' }}>
                   {[...eventFlowItems, ...eventFlowItems].map((item, i) => (
