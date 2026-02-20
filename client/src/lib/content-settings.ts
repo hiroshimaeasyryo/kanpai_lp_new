@@ -71,6 +71,28 @@ export const DEFAULT_HERO_IMAGE_PATH = "/hero.png";
  */
 export const DEFAULT_HERO_IMAGE_PATH_MOBILE = "/hero-mobile.png";
 
+/** デフォルトヒーロー画像の WebP 版（pnpm run optimize-images で生成） */
+export const DEFAULT_HERO_IMAGE_PATH_WEBP = "/hero.webp";
+export const DEFAULT_HERO_IMAGE_PATH_MOBILE_WEBP = "/hero-mobile.webp";
+
+/**
+ * デフォルトのヒーロー画像パスかどうか（同一オリジンのデフォルトのみ WebP を出し分けするため）
+ */
+export function isDefaultHeroPath(url: string | null): url is string {
+  if (!url || typeof url !== "string") return false;
+  return url === DEFAULT_HERO_IMAGE_PATH || url === DEFAULT_HERO_IMAGE_PATH_MOBILE;
+}
+
+/**
+ * デフォルトヒーロー用の WebP パス。デフォルト以外の URL は null。
+ */
+export function getDefaultHeroWebpPath(url: string | null): string | null {
+  if (!url) return null;
+  if (url === DEFAULT_HERO_IMAGE_PATH) return DEFAULT_HERO_IMAGE_PATH_WEBP;
+  if (url === DEFAULT_HERO_IMAGE_PATH_MOBILE) return DEFAULT_HERO_IMAGE_PATH_MOBILE_WEBP;
+  return null;
+}
+
 /**
  * EVENT FLOW カルーセル用デフォルト画像パス（1〜3枚目）。
  * client/public/event-flow-1.png, event-flow-2.png, event-flow-3.png にファイルを置くと、

@@ -14,6 +14,7 @@ import {
   DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_HERO_IMAGE_PATH,
   DEFAULT_HERO_IMAGE_PATH_MOBILE,
+  getDefaultHeroWebpPath,
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
@@ -130,6 +131,36 @@ export default function Home() {
   // ヒーロー画像の読み込み失敗時は背景画像を外し、グラデーションのみ表示
   const handleHeroImageError = () => setHeroImageLoadError(true);
 
+  // ヒーロー画像の preload: URL 確定後に <link rel="preload"> を head に追加（LCP 短縮）
+  useEffect(() => {
+    if (!heroImageUrl && !heroImageUrlMobile) return;
+    const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
+    const mobileUrl = heroImageUrlMobile ?? DEFAULT_HERO_IMAGE_PATH_MOBILE ?? pcUrl;
+    const head = document.head;
+
+    const linkPc = document.createElement("link");
+    linkPc.rel = "preload";
+    linkPc.as = "image";
+    linkPc.href = pcUrl;
+    linkPc.setAttribute("media", "(min-width: 768px)");
+    head.appendChild(linkPc);
+
+    let linkMobile: HTMLLinkElement | null = null;
+    if (mobileUrl !== pcUrl) {
+      linkMobile = document.createElement("link");
+      linkMobile.rel = "preload";
+      linkMobile.as = "image";
+      linkMobile.href = mobileUrl;
+      linkMobile.setAttribute("media", "(max-width: 767px)");
+      head.appendChild(linkMobile);
+    }
+
+    return () => {
+      linkPc.remove();
+      linkMobile?.remove();
+    };
+  }, [heroImageUrl, heroImageUrlMobile]);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
       {/* Navigation */}
@@ -166,16 +197,23 @@ export default function Home() {
             background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, transparent) 100%)',
           }}
         />
-        {/* 背景レイヤー2: ヒーロー画像（モバイル/PC で出し分け、管理画面 or client/public/hero.png, hero-mobile.png）。読み込み失敗時は非表示 */}
-        {(heroImageUrl || heroImageUrlMobile) && !heroImageLoadError && (
+        {/* 背景レイヤー2: ヒーロー画像（モバイル/PC で出し分け、管理画面 or client/public/hero.png, hero-mobile.png）。WebP 対応・読み込み失敗時は非表示 */}
+        {(heroImageUrl || heroImageUrlMobile) && !heroImageLoadError && (() => {
+          const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
+          const mobileUrl = heroImageUrlMobile ?? DEFAULT_HERO_IMAGE_PATH_MOBILE ?? heroImageUrl;
+          const pcWebp = getDefaultHeroWebpPath(pcUrl);
+          const mobileWebp = getDefaultHeroWebpPath(mobileUrl);
+          return (
           <picture className="absolute inset-0 z-0 block w-full h-full">
+            {mobileWebp && <source type="image/webp" media="(max-width: 767px)" srcSet={mobileWebp} />}
+            {pcWebp && <source type="image/webp" media="(min-width: 768px)" srcSet={pcWebp} />}
             <source
               media="(max-width: 767px)"
-              srcSet={heroImageUrlMobile ?? heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH_MOBILE}
+              srcSet={mobileUrl}
             />
             <source
               media="(min-width: 768px)"
-              srcSet={heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH}
+              srcSet={pcUrl}
             />
             <img
               ref={heroImageRef}
@@ -183,10 +221,12 @@ export default function Home() {
               alt=""
               className="absolute inset-0 z-0 w-full h-full object-cover"
               style={{ objectPosition: "100% 50%" }}
+              fetchPriority="high"
               onError={handleHeroImageError}
             />
           </picture>
-        )}
+          );
+        })()}
         {/* オーバーレイ: グラデーションでテキストの可読性と次のセクションへの自然なつながりを確保 */}
         <div
           className="absolute inset-0 z-[1] pointer-events-none"
@@ -227,7 +267,9 @@ export default function Home() {
             </p>
             <div className="flex justify-center md:justify-center">
               <a
-                href="#apply"
+                href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 bg-lp-primary text-white rounded-full font-medium whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.05rem)] transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp"
                 style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
               >
@@ -376,9 +418,9 @@ export default function Home() {
               )}
             </div>
             <div className="pt-6">
-              <a href="#apply" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
                 参加申し込みをする
-                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
+                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
             </div>
         </div>
@@ -428,7 +470,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
                 {eventImages.map((url, i) => (
                   <div key={i} className="aspect-video bg-lp-bg-card rounded-lg overflow-hidden">
-                    <img src={url} alt={`KANPAI就活イベントの様子${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={url} alt={`KANPAI就活イベントの様子${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
                   </div>
                 ))}
               </div>
@@ -548,6 +590,7 @@ export default function Home() {
                           src={item.url}
                           alt={`KANPAI就活の様子 ${item.label}`}
                           className="event-flow-img-pan block w-full h-full object-cover"
+                          loading="lazy"
                         />
                         <div
                           className="absolute bottom-0 left-0 right-0 py-2 px-3 flex justify-end"
@@ -592,6 +635,7 @@ export default function Home() {
                       src={item.imageUrl!}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
                       onError={() => setFeatureImageErrors((prev) => new Set(prev).add(i))}
                     />
                     {/* 画像下部をカードに自然になじむグラデーション */}
@@ -778,9 +822,9 @@ export default function Home() {
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              <a href="#apply" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
+              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
                 次回のイベントに参加する
-                <img src="/line-logo.png" alt="LINE" className="w-9 h-9 object-contain shrink-0" />
+                <img src="/line-logo.png" alt="LINE" className="w-9 h-9 object-contain shrink-0" loading="lazy" />
               </a>
               <p className="text-xs text-lp-primary font-medium tracking-wide">
                 <span>参加費無料</span>
@@ -867,9 +911,9 @@ export default function Home() {
               </div>
             ))}
             <div className="pt-2">
-              <a href="#apply" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
                 参加申し込みをする
-                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" />
+                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
             </div>
           </div>
@@ -881,7 +925,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
           <div className="flex items-center text-lp-text-heading">
             {logoUrl ? (
-              <img src={logoUrl} alt="ロゴ" className="h-5 w-auto object-contain" onError={handleLogoError} />
+              <img src={logoUrl} alt="ロゴ" className="h-5 w-auto object-contain" loading="lazy" onError={handleLogoError} />
             ) : (
               <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
