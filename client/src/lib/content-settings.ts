@@ -151,12 +151,22 @@ const FEATURES_KEY = "kanpai_features";
 /** デフォルトの特徴画像パス（1〜3）。client/public/feature-1.png 等に置くと未設定時に使われる */
 export const DEFAULT_FEATURE_IMAGE_PATHS = ["/feature-1.png", "/feature-2.png", "/feature-3.png"] as const;
 
-/** デフォルトの3つの特徴（見出し・本文・画像URL）。画像は2・3枚目のみデフォルトパスあり */
+/** デフォルトの特徴画像の WebP 版（feature-1.webp 等） */
+export const DEFAULT_FEATURE_IMAGE_PATHS_WEBP = ["/feature-1.webp", "/feature-2.webp", "/feature-3.webp"] as const;
+
+/** デフォルト特徴画像用の WebP パス。デフォルトパス以外は null */
+export function getDefaultFeatureWebpPath(url: string | null): string | null {
+  if (!url) return null;
+  const i = (DEFAULT_FEATURE_IMAGE_PATHS as readonly string[]).indexOf(url);
+  return i >= 0 ? DEFAULT_FEATURE_IMAGE_PATHS_WEBP[i] : null;
+}
+
+/** デフォルトの3つの特徴（見出し・本文・画像URL）。画像は1〜3枚目でデフォルトパスを使用 */
 export const DEFAULT_FEATURES: FeatureItem[] = [
   {
     title: "ありきたりでちょっと退屈な「企業紹介タイム」なし",
     body: "多くの就活イベントにある、10分弱の企業プレゼン。正直、採用サイトに書いてあることとほとんど同じで、あまり記憶に残らない。\n\nKANPAI就活では、その時間をすべて対話に充てています。会社名すら最初は伝えない。先入観なく「人」として出会うところから始まります。",
-    imageUrl: null,
+    imageUrl: DEFAULT_FEATURE_IMAGE_PATHS[0],
   },
   {
     title: "最初はカジュアルに、話しやすく。就活版 ito",

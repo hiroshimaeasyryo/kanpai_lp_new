@@ -13,12 +13,11 @@ import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_HERO_IMAGE_PATH,
-  DEFAULT_HERO_IMAGE_PATH_MOBILE,
+  getDefaultFeatureWebpPath,
   getDefaultHeroWebpPath,
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
-  getStoredHeroImageMobile,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
 import type { KanpaiEvent } from "@/types/events";
@@ -29,7 +28,6 @@ export default function Home() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
-  const [heroImageUrlMobile, setHeroImageUrlMobile] = useState<string | null>(null);
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvents, setNextEvents] = useState<KanpaiEvent[]>([]);
   const [eventImages, setEventImages] = useState<string[]>([]);
@@ -70,11 +68,9 @@ export default function Home() {
     const logo = localStorage.getItem("kanpai_logo");
     setLogoUrl(logo || "/logo.png");
 
-    // ヒーロー画像: 管理画面で設定されていればそれを使用、なければ public/hero.png を参照（README_hero.md 参照）
+    // ヒーロー画像: PC・モバイル共通で1枚（管理画面で設定されていればそれを使用、なければ public/hero.png）
     const hero = getStoredHeroImage();
     setHeroImageUrl(hero ?? DEFAULT_HERO_IMAGE_PATH);
-    const heroMobile = getStoredHeroImageMobile();
-    setHeroImageUrlMobile(heroMobile);
     setHeroImageLoadError(false);
 
     // Unique Features 3件（管理画面 or デフォルト）
@@ -131,35 +127,17 @@ export default function Home() {
   // ヒーロー画像の読み込み失敗時は背景画像を外し、グラデーションのみ表示
   const handleHeroImageError = () => setHeroImageLoadError(true);
 
-  // ヒーロー画像の preload: URL 確定後に <link rel="preload"> を head に追加（LCP 短縮）
+  // ヒーロー画像の preload: PC・モバイル共通1枚のため1リンクで LCP 短縮
   useEffect(() => {
-    if (!heroImageUrl && !heroImageUrlMobile) return;
-    const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
-    const mobileUrl = heroImageUrlMobile ?? DEFAULT_HERO_IMAGE_PATH_MOBILE ?? pcUrl;
-    const head = document.head;
-
-    const linkPc = document.createElement("link");
-    linkPc.rel = "preload";
-    linkPc.as = "image";
-    linkPc.href = pcUrl;
-    linkPc.setAttribute("media", "(min-width: 768px)");
-    head.appendChild(linkPc);
-
-    let linkMobile: HTMLLinkElement | null = null;
-    if (mobileUrl !== pcUrl) {
-      linkMobile = document.createElement("link");
-      linkMobile.rel = "preload";
-      linkMobile.as = "image";
-      linkMobile.href = mobileUrl;
-      linkMobile.setAttribute("media", "(max-width: 767px)");
-      head.appendChild(linkMobile);
-    }
-
-    return () => {
-      linkPc.remove();
-      linkMobile?.remove();
-    };
-  }, [heroImageUrl, heroImageUrlMobile]);
+    if (!heroImageUrl) return;
+    const url = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = url;
+    document.head.appendChild(link);
+    return () => link.remove();
+  }, [heroImageUrl]);
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
@@ -188,98 +166,94 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section: 画面幅いっぱいの背景画像 + グラデーションオーバーレイ + コンテンツ */}
-      <section ref={heroSectionRef} className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
-        {/* 背景レイヤー1: ベースのグラデーション（画像なし・読み込み失敗時も自然な土台） */}
+      {/* Hero Section: PC=背景画像+オーバーレイ+テキスト / モバイル=テキストブロック(グラデ背景)+その下に画像 */}
+      <section ref={heroSectionRef} className="min-h-screen flex flex-col md:flex-row md:items-center md:justify-center relative pt-14 pb-20 overflow-hidden">
+        {/* 背景レイヤー1: ベースのグラデーション。モバイル=テキストエリア高さのみ（その直下から画像なので下地が出ない）／PC=全面 */}
         <div
-          className="absolute inset-0 z-0"
+          className="absolute top-0 left-0 right-0 h-[44vh] z-0 md:inset-0 md:h-auto"
           style={{
-            background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, transparent) 100%)',
+            background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, var(--lp-bg-warm)) 85%, var(--lp-bg-warm) 100%)',
           }}
         />
-        {/* 背景レイヤー2: ヒーロー画像（モバイル/PC で出し分け、管理画面 or client/public/hero.png, hero-mobile.png）。WebP 対応・読み込み失敗時は非表示 */}
-        {(heroImageUrl || heroImageUrlMobile) && !heroImageLoadError && (() => {
+        {/* 背景レイヤー2: ヒーロー画像（PC・モバイル共通で1枚。PC=全面配置 / モバイル=テキスト下にブロック配置＋グラデオーバーレイで洗練） */}
+        {heroImageUrl && !heroImageLoadError && (() => {
           const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
-          const mobileUrl = heroImageUrlMobile ?? DEFAULT_HERO_IMAGE_PATH_MOBILE ?? heroImageUrl;
           const pcWebp = getDefaultHeroWebpPath(pcUrl);
-          const mobileWebp = getDefaultHeroWebpPath(mobileUrl);
           return (
-          <picture className="absolute inset-0 z-0 block w-full h-full">
-            {mobileWebp && <source type="image/webp" media="(max-width: 767px)" srcSet={mobileWebp} />}
-            {pcWebp && <source type="image/webp" media="(min-width: 768px)" srcSet={pcWebp} />}
-            <source
-              media="(max-width: 767px)"
-              srcSet={mobileUrl}
+          <div className="order-2 relative flex-1 min-h-0 w-full md:flex-none md:absolute md:inset-0 md:order-none md:z-0">
+            <picture className="absolute inset-0 block w-full h-full">
+              {pcWebp && <source type="image/webp" srcSet={pcWebp} />}
+              <img
+                ref={heroImageRef}
+                src={pcUrl}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ objectPosition: "100% 50%" }}
+                fetchPriority="high"
+                onError={handleHeroImageError}
+              />
+            </picture>
+            {/* モバイルのみ: 画像にグラデーションオーバーレイで洗練（上=テキストブロックと融合、下=次セクションへ自然に） */}
+            <div
+              className="absolute inset-0 pointer-events-none md:hidden"
+              style={{
+                background: 'linear-gradient(to bottom, color-mix(in srgb, var(--lp-accent-light) 22%, transparent) 0%, transparent 28%, transparent 55%, color-mix(in srgb, var(--lp-bg-warm) 35%, transparent) 85%, color-mix(in srgb, var(--lp-bg-warm) 92%, transparent) 100%)',
+                boxShadow: 'inset 0 0 80px 20px rgba(255,250,245,0.12)',
+              }}
             />
-            <source
-              media="(min-width: 768px)"
-              srcSet={pcUrl}
-            />
-            <img
-              ref={heroImageRef}
-              src={heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH}
-              alt=""
-              className="absolute inset-0 z-0 w-full h-full object-cover"
-              style={{ objectPosition: "100% 50%" }}
-              fetchPriority="high"
-              onError={handleHeroImageError}
-            />
-          </picture>
+          </div>
           );
         })()}
-        {/* オーバーレイ: グラデーションでテキストの可読性と次のセクションへの自然なつながりを確保 */}
+        {/* オーバーレイ: PC用（テキスト可読性・次セクションへのつながり）。モバイルはテキストがグラデ上なので不要 */}
         <div
-          className="absolute inset-0 z-[1] pointer-events-none"
+          className="absolute inset-0 z-[1] pointer-events-none hidden md:block"
           style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, color-mix(in srgb, var(--lp-bg-warm) 88%, transparent) 88%, var(--lp-bg-warm) 100%)',
           }}
         />
-        {/* コンテンツ（ヒーロー画像上でも読みやすいよう控えめなドロップシャドウを付与） */}
-        <div className="relative z-10 max-w-2xl px-8 md:px-6">
-          <div className="text-center mb-8">
-            <h1
-              className="lp-hero-title font-bold leading-[1.2] opacity-0 animate-fadeUp md:whitespace-nowrap"
-              style={{
-                animationDelay: '0.2s',
-                animationFillMode: 'forwards',
-                fontFamily: "'Shippori Mincho', serif",
-                color: 'var(--lp-bg-warm)',
-                textShadow: '0 1px 3px rgba(92,61,46,0.6), 0 2px 10px rgba(0,0,0,0.45), 0 4px 20px rgba(0,0,0,0.35), 0 6px 28px rgba(0,0,0,0.25)',
-                // モバイルでやや大きく、極小デバイスでも可読性を確保（改行可）
-                fontSize: 'clamp(2.25rem, 11vw, 3.75rem)',
-              }}
-            >
-              見えないものに、触れる。
-            </h1>
-          </div>
-          <div className="text-left md:text-center mx-6 md:mx-0">
-            <p
-              className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp"
-              style={{
-                animationDelay: '0.4s',
-                animationFillMode: 'forwards',
-                fontFamily: "'Shippori Mincho', serif",
-                color: 'var(--lp-bg-warm)',
-                textShadow: '0 1px 3px rgba(92,61,46,0.55), 0 2px 8px rgba(0,0,0,0.4), 0 18px 18px rgba(0,0,0,0.6)',
-              }}
-            >
-              普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
-            </p>
-            <div className="flex justify-center md:justify-center">
-              <a
-                href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 bg-lp-primary text-white rounded-full font-medium whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.05rem)] transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp"
-                style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
+        {/* コンテンツ: モバイル=グラデ背景のテキストブロック（文字は濃い色で可読性確保）、PC=従来どおり画像上の明るい文字+シャドウ */}
+        <div className="relative z-10 order-1 flex flex-col justify-center min-h-[44vh] flex-shrink-0 md:min-h-0 md:flex-initial max-w-2xl px-8 md:px-6 hero-mobile-text-bg md:bg-transparent">
+          <div className="flex flex-1 flex-col justify-center py-8 md:py-0">
+            <div className="text-center mb-8">
+              <h1
+                className="lp-hero-title font-bold leading-[1.2] opacity-0 animate-fadeUp md:whitespace-nowrap text-lp-text-heading md:text-[var(--lp-bg-warm)] [text-shadow:none] md:[text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)]"
+                style={{
+                  animationDelay: '0.2s',
+                  animationFillMode: 'forwards',
+                  fontFamily: "'Shippori Mincho', serif",
+                  fontSize: 'clamp(2.25rem, 11vw, 3.75rem)',
+                }}
               >
-                次回のイベントを見る
-                <img src="/line-logo.png" alt="LINE" className="w-8 h-8 shrink-0 object-contain" />
-              </a>
+                見えないものに、触れる。
+              </h1>
+            </div>
+            <div className="text-left md:text-center mx-6 md:mx-0">
+              <p
+                className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp text-lp-text-body md:text-[var(--lp-bg-warm)] [text-shadow:none] md:[text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
+                style={{
+                  animationDelay: '0.4s',
+                  animationFillMode: 'forwards',
+                  fontFamily: "'Shippori Mincho', serif",
+                }}
+              >
+                普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
+              </p>
+              <div className="flex justify-center md:justify-center">
+                <a
+                  href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 bg-lp-primary text-white rounded-full font-medium whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.05rem)] transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp"
+                  style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
+                >
+                  次回のイベントを見る
+                  <img src="/line-logo.png" alt="LINE" className="w-8 h-8 shrink-0 object-contain" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
         </div>
       </section>
@@ -574,9 +548,12 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：VALUESセクションと同じ幅（max-w-6xl）で表示 */}
+          {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：モバイルは全幅、PCはmax-w-6xl */}
           {eventFlowItems.length > 0 && (
-            <div className="mt-14 overflow-hidden opacity-0 animate-fadeUp" style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}>
+            <div
+              className="mt-14 overflow-hidden opacity-0 animate-fadeUp w-[100vw] max-w-[100vw] relative left-1/2 -translate-x-1/2 md:w-full md:max-w-none md:left-auto md:translate-x-0"
+              style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}
+            >
               <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
                 <div className="event-flow-track flex h-full absolute inset-0" style={{ width: '600%' }}>
                   {[...eventFlowItems, ...eventFlowItems].map((item, i) => (
@@ -631,13 +608,18 @@ export default function Home() {
               <div key={i} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp overflow-hidden" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 {hasImage && (
                   <div className="-mx-8 -mt-8 mb-6 h-[180px] overflow-hidden bg-lp-bg-warm shadow-lg ring-1 ring-black/5 relative">
-                    <img
-                      src={item.imageUrl!}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                      onError={() => setFeatureImageErrors((prev) => new Set(prev).add(i))}
-                    />
+                    <picture className="absolute inset-0 block w-full h-full">
+                      {getDefaultFeatureWebpPath(item.imageUrl!) && (
+                        <source type="image/webp" srcSet={getDefaultFeatureWebpPath(item.imageUrl!)!} />
+                      )}
+                      <img
+                        src={item.imageUrl!}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                        onError={() => setFeatureImageErrors((prev) => new Set(prev).add(i))}
+                      />
+                    </picture>
                     {/* 画像下部をカードに自然になじむグラデーション */}
                     <div
                       className="absolute inset-0 pointer-events-none"

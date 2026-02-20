@@ -216,6 +216,18 @@
     min-width: 0;
   }
 
+  /* ヒーロー・モバイル: テキストブロック用の調和グラデ（画像は下に配置するためテキスト部分のみ） */
+  @media (max-width: 767px) {
+    .hero-mobile-text-bg {
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--lp-bg-warm) 98%, white) 0%,
+        color-mix(in srgb, var(--lp-bg-card) 85%, var(--lp-bg-warm)) 45%,
+        color-mix(in srgb, var(--lp-accent-light) 18%, var(--lp-bg-warm)) 100%
+      );
+    }
+  }
+
   @media (min-width: 640px) {
     .container {
       padding-left: 1.5rem;
