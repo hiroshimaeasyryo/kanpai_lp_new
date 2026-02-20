@@ -238,18 +238,6 @@ export default function Home() {
               >
                 普段見えない、企業の素と、自分の本音。<br/>互いが飾らず語らう中で<br/>あなたなりの正解の手がかりが、見つかる場所。
               </p>
-              <div className="flex justify-center md:justify-center">
-                <a
-                  href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 bg-lp-primary text-white rounded-full font-medium whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.05rem)] transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 opacity-0 animate-fadeUp"
-                  style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
-                >
-                  次回のイベントを見る
-                  <img src="/line-logo.png" alt="LINE" className="w-8 h-8 shrink-0 object-contain" />
-                </a>
-              </div>
             </div>
           </div>
         </div>
@@ -259,7 +247,7 @@ export default function Home() {
       </section>
 
       {/* NEXT EVENT 次回のイベント詳細（ヒーロー直下・直近3イベントの手動カルーセル） */}
-      <section className="py-16 px-4 md:px-6 bg-white relative overflow-hidden">
+      <section id="next-event" className="py-16 px-4 md:px-6 bg-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute w-72 h-72 -top-20 -right-20 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-border) 35%, transparent) 0%, transparent 70%)' }} />
           <div className="absolute w-48 h-48 -bottom-10 -left-10 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-primary) 10%, transparent) 0%, transparent 70%)' }} />
