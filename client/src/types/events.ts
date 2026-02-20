@@ -38,6 +38,17 @@ const defaultEvents: KanpaiEvent[] = [
     studentsCount: 24,
     order: 0,
   },
+  {
+    id: "default-2",
+    eventNumber: 17,
+    eventNote: "大規模特別回",
+    dateLabel: "2026年3月18日（水）16:00〜20:00",
+    timeRange: "16:00 – 20:00",
+    location: "新宿（お申し込み後にご案内）",
+    companiesCount: 8,
+    studentsCount: 40,
+    order: 1,
+  },
 ];
 
 function parseStored(raw: string | null): KanpaiEvent[] {

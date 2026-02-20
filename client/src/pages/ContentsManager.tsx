@@ -308,6 +308,14 @@ export default function ContentsManager() {
 
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* 端末間で同期されない旨の注意 */}
+          <div
+            className="mb-8 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900"
+            role="status"
+          >
+            <strong>ご注意：</strong>
+            設定内容はこの端末（ブラウザ）のローカルにのみ保存されます。別のスマートフォン・PC・ブラウザでは反映されません。LP を更新したい端末で、その端末からコンテンツ管理画面で設定してください。
+          </div>
           {/* ブランドロゴ */}
           <div className="mb-10">
             <h2
