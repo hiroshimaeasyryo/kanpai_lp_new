@@ -31,7 +31,10 @@ import {
   setStoredHeroImage,
   setStoredHeroImageMobile,
 } from "@/lib/content-settings";
+import { applyContentToLocalStorage, fetchContent } from "@/lib/content-loader";
+import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi } from "@/lib/github-content-api";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
+import type { ContentPayload } from "@/types/content-payload";
 import type { KanpaiEvent } from "@/types/events";
 import {
   defaultEvents,
@@ -92,10 +95,34 @@ export default function ContentsManager() {
   const [newEventForm, setNewEventForm] = useState<KanpaiEvent>(() =>
     createEmptyEvent(events.length)
   );
+  const [repoConfig, setRepoConfig] = useState<{ owner: string; repo: string; branch?: string } | null>(null);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [githubToken, setGithubToken] = useState("");
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
   }, []);
+
+  useEffect(() => {
+    if (!unlocked) return;
+    (async () => {
+      const [config, payload] = await Promise.all([fetchRepoConfig(), fetchContent()]);
+      setRepoConfig(config);
+      if (payload) {
+        setLogoUrl(payload.logo ?? null);
+        setHeroImageUrl(payload.hero ?? null);
+        setHeroImageUrlMobile(payload.heroMobile ?? null);
+        setFeatures(payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : [...DEFAULT_FEATURES]);
+        setEventImages(payload.eventImages && payload.eventImages.length > 0 ? payload.eventImages : []);
+        setEvents(
+          (payload.events ?? []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+        );
+        if (payload.paletteId) setPaletteId(payload.paletteId);
+        applyContentToLocalStorage(payload);
+      }
+    })();
+  }, [unlocked, setPaletteId]);
 
   const persistEvents = (next: KanpaiEvent[]) => {
     setEvents(next);
@@ -210,6 +237,60 @@ export default function ContentsManager() {
     setAddingNew(false);
   };
 
+  const buildPayload = (): ContentPayload => ({
+    logo: logoUrl ?? null,
+    hero: heroImageUrl ?? null,
+    heroMobile: heroImageUrlMobile ?? null,
+    eventImages: eventImages.length > 0 ? eventImages : undefined,
+    events: events.length > 0 ? events : undefined,
+    features: features.slice(0, 3),
+    paletteId: paletteId ?? null,
+  });
+
+  const handleDownloadJson = () => {
+    const payload = buildPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "content.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setSaveError("");
+    setSaveMessage("content.json をダウンロードしました。リポジトリの client/public/content.json に置いてコミット・push するとサイトに反映されます。");
+    setTimeout(() => setSaveMessage(""), 6000);
+  };
+
+  const useSaveApi = Boolean(
+    repoConfig?.saveApiUrl?.trim() && repoConfig?.saveApiSecret?.trim(),
+  );
+
+  const handleSaveToGitHub = async () => {
+    if (!repoConfig) {
+      setSaveError("repo-config.json が未設定です。client/public/repo-config.json に owner / repo を設定してください。");
+      return;
+    }
+    setSaveError("");
+    setSaveMessage("保存中…");
+    try {
+      if (useSaveApi) {
+        await saveContentViaApi(buildPayload(), repoConfig);
+      } else {
+        const token = githubToken.trim();
+        if (!token) {
+          setSaveError("GitHub トークンを入力してください。");
+          setSaveMessage("");
+          return;
+        }
+        await saveContentToGitHub(buildPayload(), token, repoConfig);
+      }
+      setSaveMessage("保存しました。push により数分以内にサイトに反映されます。");
+      setTimeout(() => setSaveMessage(""), 6000);
+    } catch (e) {
+      setSaveMessage("");
+      setSaveError(e instanceof Error ? e.message : "保存に失敗しました");
+    }
+  };
+
   if (!unlocked) {
     return (
       <div
@@ -308,13 +389,60 @@ export default function ContentsManager() {
 
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          {/* 端末間で同期されない旨の注意 */}
-          <div
-            className="mb-8 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900"
-            role="status"
-          >
-            <strong>ご注意：</strong>
-            設定内容はこの端末（ブラウザ）のローカルにのみ保存されます。別のスマートフォン・PC・ブラウザでは反映されません。LP を更新したい端末で、その端末からコンテンツ管理画面で設定してください。
+          {/* 保存して反映（端末間同期） */}
+          <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
+            <h2
+              className="text-xl font-bold text-[#5C3D2E] mb-2"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              保存して反映
+            </h2>
+            <p className="text-sm text-[#875a3c] mb-4">
+              編集内容は <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content.json</code> として保存すると、どの端末から開いても同じ LP に反映されます。どちらか一方を選んでください。
+            </p>
+            <div className="flex flex-wrap gap-3 items-center mb-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+                onClick={handleDownloadJson}
+              >
+                JSONをダウンロード
+              </Button>
+              <span className="text-sm text-[#875a3c]">
+                ダウンロードした content.json をリポジトリの <code className="bg-[#fffaf5] px-1 rounded text-xs">client/public/content.json</code> に置き、コミット・push するとサイトに反映されます（トークン不要）。
+              </span>
+            </div>
+            {useSaveApi ? (
+              <p className="text-sm text-[#875a3c] mb-3">
+                保存 API が設定されています。トークン入力は不要です。下のボタンでそのまま保存してデプロイできます。
+              </p>
+            ) : (
+              <div className="space-y-2 mb-2">
+                <Label className="text-[#5C3D2E] text-sm">GitHub トークン（保存してデプロイする場合のみ）</Label>
+                <Input
+                  type="password"
+                  placeholder="ghp_xxxx..."
+                  value={githubToken}
+                  onChange={(e) => setGithubToken(e.target.value)}
+                  className="max-w-md border-[#ffd7c3]"
+                />
+                <p className="text-xs text-[#875a3c]">
+                  トークンはこの画面でのみ使用し、保存されません。非エンジニア向けには、GCP に保存 API を1回デプロイし、repo-config に saveApiUrl / saveApiSecret を設定するとトークン入力不要になります。
+                </p>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-3 items-center">
+              <Button
+                type="button"
+                className="bg-[#d4844b] hover:bg-[#c47540] text-white"
+                onClick={handleSaveToGitHub}
+              >
+                {useSaveApi ? "保存してデプロイ" : "保存してデプロイ（GitHub）"}
+              </Button>
+              {saveMessage && <span className="text-sm text-green-700">{saveMessage}</span>}
+              {saveError && <span className="text-sm text-red-600">{saveError}</span>}
+            </div>
           </div>
           {/* ブランドロゴ */}
           <div className="mb-10">

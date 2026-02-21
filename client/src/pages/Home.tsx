@@ -20,6 +20,7 @@ import {
   getStoredHeroImage,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
+import { fetchContent, getContentFromLocalStorage } from "@/lib/content-loader";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 
@@ -45,37 +46,67 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
-    setNextEvents(getNextEvents(3));
 
-    // イベント画像を読み込む（新形式 → 旧形式 → デフォルト）
-    const stored = getStoredEventImages();
-    const list = stored && stored.length > 0 ? stored : migrateOldImageFormat() || [];
-    if (list.length > 0) {
-      setEventImages(list.map((img) => img.url));
-    }
-    // EVENT FLOW カルーセル用: 1〜3枚目をラベル付きで構築（未設定時はデフォルトパス・デフォルト文言）
-    const flowItems: { url: string; label: string }[] = [];
-    for (let i = 0; i < 3; i++) {
-      const item = list[i];
-      flowItems.push({
-        url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
-        label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) as string,
-      });
-    }
-    setEventFlowItems(flowItems);
+    let cancelled = false;
 
-    // ロゴ: 管理画面で設定されていればそれを使用、なければ public/logo.png を参照
-    const logo = localStorage.getItem("kanpai_logo");
-    setLogoUrl(logo || "/logo.png");
+    (async () => {
+      const payload = await fetchContent();
+      if (cancelled) return;
 
-    // ヒーロー画像: PC・モバイル共通で1枚（管理画面で設定されていればそれを使用、なければ public/hero.png）
-    const hero = getStoredHeroImage();
-    setHeroImageUrl(hero ?? DEFAULT_HERO_IMAGE_PATH);
-    setHeroImageLoadError(false);
+      if (payload) {
+        // 端末間同期: content.json を正として表示
+        const events = (payload.events ?? [])
+          .slice()
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setNextEvents(events.slice(0, 3));
+        const list = payload.eventImages ?? [];
+        if (list.length > 0) {
+          setEventImages(list.map((img) => img.url));
+        }
+        const flowItems: { url: string; label: string }[] = [];
+        for (let i = 0; i < 3; i++) {
+          const item = list[i];
+          flowItems.push({
+            url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
+            label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) ?? DEFAULT_EVENT_FLOW_LABELS[i],
+          });
+        }
+        setEventFlowItems(flowItems);
+        setLogoUrl(payload.logo || "/logo.png");
+        setHeroImageUrl(payload.hero ?? DEFAULT_HERO_IMAGE_PATH);
+        setHeroImageLoadError(false);
+        setFeatures(payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : getStoredFeatures());
+        setFeatureImageErrors(new Set());
+        return;
+      }
 
-    // Unique Features 3件（管理画面 or デフォルト）
-    setFeatures(getStoredFeatures());
-    setFeatureImageErrors(new Set());
+      // フォールバック: localStorage（従来どおり）
+      setNextEvents(getNextEvents(3));
+      const stored = getStoredEventImages();
+      const list = stored && stored.length > 0 ? stored : migrateOldImageFormat() || [];
+      if (list.length > 0) {
+        setEventImages(list.map((img) => img.url));
+      }
+      const flowItems: { url: string; label: string }[] = [];
+      for (let i = 0; i < 3; i++) {
+        const item = list[i];
+        flowItems.push({
+          url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
+          label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) as string,
+        });
+      }
+      setEventFlowItems(flowItems);
+      const local = getContentFromLocalStorage();
+      setLogoUrl(local.logo || "/logo.png");
+      setHeroImageUrl(local.hero ?? DEFAULT_HERO_IMAGE_PATH);
+      setHeroImageLoadError(false);
+      setFeatures(local.features && local.features.length >= 3 ? local.features.slice(0, 3) : getStoredFeatures());
+      setFeatureImageErrors(new Set());
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // ヒーロー画像: スクロールに合わせて「見える位置（object-position）」を右端→左端へ移動

@@ -1,0 +1,7 @@
+{
+  "owner": "hiroshimaeasyryo",
+  "repo": "kanpai_lp_new",
+  "branch": "main",
+  "saveApiUrl": "https://asia-northeast1-amazing-centaur-468005-b0.cloudfunctions.net/saveContent",
+  "saveApiSecret": "my-kanpai-save-secret-2025"
+}

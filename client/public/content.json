@@ -1,0 +1,49 @@
+{
+  "logo": null,
+  "hero": null,
+  "heroMobile": null,
+  "eventImages": [],
+  "events": [
+    {
+      "id": "default-1",
+      "eventNumber": 16,
+      "dateLabel": "2025年3月4日（水）13:00〜17:00",
+      "timeRange": "13:00 – 17:00",
+      "timeNote": "昼間〜夜にかけて",
+      "location": "新宿（お申し込み後にご案内）",
+      "locationNote": "",
+      "companiesCount": 4,
+      "studentsCount": 24,
+      "order": 0
+    },
+    {
+      "id": "default-2",
+      "eventNumber": 17,
+      "eventNote": "大規模特別回",
+      "dateLabel": "2026年3月18日（水）16:00〜20:00",
+      "timeRange": "16:00 – 20:00",
+      "location": "新宿（お申し込み後にご案内）",
+      "companiesCount": 8,
+      "studentsCount": 40,
+      "order": 1
+    }
+  ],
+  "features": [
+    {
+      "title": "ありきたりでちょっと退屈な「企業紹介タイム」なし",
+      "body": "多くの就活イベントにある、10分弱の企業プレゼン。正直、採用サイトに書いてあることとほとんど同じで、あまり記憶に残らない。\n\nKANPAI就活では、その時間をすべて対話に充てています。会社名すら最初は伝えない。先入観なく「人」として出会うところから始まります。",
+      "imageUrl": "/feature-1.png"
+    },
+    {
+      "title": "最初はカジュアルに、話しやすく。就活版 ito",
+      "body": "いきなり「自己紹介どうぞ」は、誰だって緊張する。\n\nKANPAI就活では、企業研修でも使われているカードゲーム「ito」の就活版をアイスブレイクに導入。一人ひとりの価値観や考え方が自然と見えてくるゲームをすることで、肩肘張らずに、価値観や素に触れる対話ができるようになりました。",
+      "imageUrl": "/feature-2.png"
+    },
+    {
+      "title": "対話の余韻を、形に残す。メッセージカードの交換",
+      "body": "各KANPAIの最後に、企業の人事と学生が手書きのメッセージを交換します。\n\n対話の中で感じた「あなたの良さ」や「気づき」が、言葉として手元に残る。良い時間の余韻を壊さず、温かみのある形で次の出会いにつながっていきます。",
+      "imageUrl": "/feature-3.png"
+    }
+  ],
+  "paletteId": "amber"
+}
