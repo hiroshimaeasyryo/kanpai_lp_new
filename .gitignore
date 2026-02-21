@@ -109,3 +109,4 @@ temp/
 .webdev/
 
 docs/*
+client/public/repo-config.json

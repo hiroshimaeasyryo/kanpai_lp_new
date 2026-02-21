@@ -40,6 +40,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # リポジトリ情報 + 任意で Secrets から save API 設定を注入（repo-config.json は .gitignore 済み）
+      - name: Generate repo-config.json
+        env:
+          SAVE_API_URL: ${{ secrets.SAVE_API_URL }}
+          SAVE_API_SECRET: ${{ secrets.SAVE_API_SECRET }}
+        run: |
+          node -e "
+          const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+          const branch = process.env.GITHUB_REF_NAME || 'main';
+          const saveApiUrl = (process.env.SAVE_API_URL || '').trim();
+          const saveApiSecret = (process.env.SAVE_API_SECRET || '').trim();
+          const config = { owner, repo, branch };
+          if (saveApiUrl && saveApiSecret) {
+            config.saveApiUrl = saveApiUrl;
+            config.saveApiSecret = saveApiSecret;
+          }
+          const fs = require('fs');
+          const path = 'client/public/repo-config.json';
+          fs.mkdirSync(require('path').dirname(path), { recursive: true });
+          fs.writeFileSync(path, JSON.stringify(config));
+          "
+        # GITHUB_REPOSITORY / GITHUB_REF_NAME は Actions のデフォルト env で利用可能
+
       - name: Build client (static site only)
         run: pnpm exec vite build
         # 出力先: dist/public（vite.config.ts の build.outDir）

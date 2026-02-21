@@ -56,6 +56,10 @@ gcloud functions deploy saveContent \
 
 **今やること**
 
+- **GitHub Actions で GitHub Pages にデプロイしている場合**  
+  → シークレットをリポジトリに載せずに済む方法は **[GITHUB_PAGES_REPO_CONFIG.md](../GITHUB_PAGES_REPO_CONFIG.md)** を参照（Secrets からビルド時に `repo-config.json` を生成する手順）。
+
+- **手動で repo-config を置く場合**  
 1. リポジトリの **`client/public/repo-config.json`** を開く（なければ `client/public/repo-config.json.example` をコピーして `repo-config.json` を作成）。
 
 2. 次の 5 項目が正しく入っているか確認・編集する：
