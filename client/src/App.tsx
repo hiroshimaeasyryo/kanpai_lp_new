@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import ThanksKs from "@/pages/ThanksKs";
 import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -22,6 +23,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/thanks_ks"} component={ThanksKs} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
