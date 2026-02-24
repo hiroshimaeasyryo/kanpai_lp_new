@@ -823,7 +823,6 @@ export default function Home() {
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
               <a href="#event-detail" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
                 次回のイベントに参加する
-                <img src="/line-logo.png" alt="LINE" className="w-9 h-9 object-contain shrink-0" loading="lazy" />
               </a>
               <p className="text-xs text-lp-primary font-medium tracking-wide">
                 <span>参加費無料</span>
