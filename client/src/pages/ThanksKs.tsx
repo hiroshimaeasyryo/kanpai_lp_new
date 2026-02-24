@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { LoadingDots } from "@/components/LoadingDots";
 
 const REDIRECT_URL =
   "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027";
@@ -61,43 +62,5 @@ fbq('track', 'PageView');
     return () => clearTimeout(t);
   }, []);
 
-  return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-background"
-      aria-label="読み込み中"
-    >
-      {/* 同じ大きさの球が5つ、順番にバウンド */}
-      <div className="flex items-end gap-2">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <span
-            key={i}
-            className="block w-8 h-8 rounded-full bg-primary/90 animate-[blob-bounce_0.9s_ease-in-out_infinite]"
-            style={{
-              transformOrigin: "center bottom",
-              animationDelay: `${i * 0.18}s`,
-            }}
-          />
-        ))}
-      </div>
-      <style>{`
-        @keyframes blob-bounce {
-          0%, 100% {
-            transform: translateY(0) scaleX(1) scaleY(1);
-          }
-          18% {
-            transform: translateY(-32px) scaleX(0.88) scaleY(1.18);
-          }
-          36% {
-            transform: translateY(0) scaleX(1.24) scaleY(0.76);
-          }
-          54% {
-            transform: translateY(-12px) scaleX(0.96) scaleY(1.06);
-          }
-          72% {
-            transform: translateY(0) scaleX(1.08) scaleY(0.92);
-          }
-        }
-      `}</style>
-    </div>
-  );
+  return <LoadingDots />;
 }

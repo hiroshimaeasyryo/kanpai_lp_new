@@ -25,6 +25,7 @@ import {
 } from "@/lib/content-settings";
 import { fetchContent, getContentFromLocalStorage } from "@/lib/content-loader";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
+import { LoadingDots } from "@/components/LoadingDots";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 
@@ -47,6 +48,10 @@ export default function Home() {
   const [nextEventCarouselIndex, setNextEventCarouselIndex] = useState(0);
   const nextEventCarouselTouchStartX = useRef<number | null>(null);
   const heroSectionRef = useRef<HTMLElement | null>(null);
+  /** ヒーロー画像の img onLoad が発火したか（重い画像の読み込み完了の目安） */
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  /** ページ全体の読み込みが完了し、ローディングを外してよいか */
+  const [isPageReady, setIsPageReady] = useState(false);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -154,8 +159,21 @@ export default function Home() {
     return () => link.remove();
   }, [heroImageUrl]);
 
+  // コンテンツ取得済み & (ヒーローなし or ヒーロー画像読み込み済み) → ローディングを外す
+  useEffect(() => {
+    if (!heroImageUrl) return;
+    const heroReady = heroImageLoadError || heroImageLoaded;
+    if (heroReady) setIsPageReady(true);
+  }, [heroImageUrl, heroImageLoadError, heroImageLoaded]);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
+      {/* ページ（特にヒーロー画像）読み込み中のローディングオーバーレイ（透過で背後のコンテンツがかすかに見える） */}
+      {!isPageReady && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
+          <LoadingDots variant="overlay" />
+        </div>
+      )}
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -206,6 +224,7 @@ export default function Home() {
                     className="absolute inset-0 w-full h-full object-cover object-top md:object-center"
                     fetchPriority="high"
                     onError={handleHeroImageError}
+                    onLoad={() => setHeroImageLoaded(true)}
                   />
                 </picture>
               </div>
@@ -249,6 +268,11 @@ export default function Home() {
               >
                 普段見えない、企業の素と、自分の本音。<br />互いが飾らず語らう中で<br />あなたなりの正解の手がかりが、見つかる場所。
               </p>
+              <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+                <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+                  次回のイベントを見る
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -389,12 +413,6 @@ export default function Home() {
                   ))}
                 </div>
               )}
-            </div>
-            <div className="pt-6">
-              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-                参加申し込みをする
-                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
-              </a>
             </div>
         </div>
       </section>
@@ -803,7 +821,7 @@ export default function Home() {
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
+              <a href="#event-detail" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
                 次回のイベントに参加する
                 <img src="/line-logo.png" alt="LINE" className="w-9 h-9 object-contain shrink-0" loading="lazy" />
               </a>

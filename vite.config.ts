@@ -7,34 +7,6 @@ import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 // =============================================================================
-// Analytics env placeholders in index.html (%VITE_ANALYTICS_*%)
-// Replaced at build time; script tag removed when not set
-// =============================================================================
-function vitePluginAnalyticsEnv(): Plugin {
-  let env: Record<string, string> = {};
-  return {
-    name: "analytics-env",
-    configResolved(config) {
-      env = config.env;
-    },
-    transformIndexHtml(html) {
-      const endpoint = env.VITE_ANALYTICS_ENDPOINT ?? "";
-      const websiteId = env.VITE_ANALYTICS_WEBSITE_ID ?? "";
-      const hasAnalytics = endpoint && websiteId;
-      if (hasAnalytics) {
-        return html
-          .replace(/%VITE_ANALYTICS_ENDPOINT%/g, endpoint)
-          .replace(/%VITE_ANALYTICS_WEBSITE_ID%/g, websiteId);
-      }
-      return html.replace(
-        /<script[\s\S]*?%VITE_ANALYTICS_ENDPOINT%[\s\S]*?%VITE_ANALYTICS_WEBSITE_ID%[\s\S]*?<\/script>\s*/g,
-        ""
-      );
-    },
-  };
-}
-
-// =============================================================================
 // Manus Debug Collector - Vite Plugin
 // Writes browser logs directly to files, trimmed when exceeding size limit
 // =============================================================================
@@ -126,6 +98,14 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
+      // GET /__manus__/debug-collector.js: stub (injected by transformIndexHtml; 404 would return HTML and cause parse error)
+      server.middlewares.use("/__manus__/debug-collector.js", (req, res, next) => {
+        if (req.method !== "GET") return next();
+        res.setHeader("Content-Type", "application/javascript");
+        res.end("/* Manus debug collector stub */\n");
+        return;
+      });
+
       // POST /__manus__/logs: Browser sends logs (written directly to files)
       server.middlewares.use("/__manus__/logs", (req, res, next) => {
         if (req.method !== "POST") {
@@ -202,7 +182,6 @@ const plugins = [
   react(),
   tailwindcss(),
   jsxLocPlugin(),
-  vitePluginAnalyticsEnv(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
   vitePluginGhPages404(),
