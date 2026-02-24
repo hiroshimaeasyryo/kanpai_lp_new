@@ -13,6 +13,9 @@ import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_HERO_IMAGE_PATH,
+  DEFAULT_HERO_IMAGE_PATH_MOBILE,
+  DEFAULT_HERO_IMAGE_PATH_MOBILE_WEBP,
+  DEFAULT_HERO_IMAGE_PATH_WEBP,
   getDefaultFeatureWebpPath,
   getDefaultHeroWebpPath,
   getStoredEventImages,
@@ -113,62 +116,52 @@ export default function Home() {
     };
   }, []);
 
-  // ヒーロー画像: PCのみスクロールに合わせて object-position を右端→左端へ移動。モバイルはアニメーションなしで画像全体を固定表示
+  // ヒーロー画像: PC・モバイルともスクロール連動なし。PCは中央固定、モバイルは上部固定
   useEffect(() => {
     const media = typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)") : null;
-    let rafId = 0;
+    const imgEl = heroImageRef.current;
+    if (!imgEl) return;
 
     const update = () => {
-      rafId = 0;
-      const sectionEl = heroSectionRef.current;
-      const imgEl = heroImageRef.current;
-      if (!sectionEl || !imgEl) return;
-
-      // モバイル: アニメーション廃止。画像全体を上部固定表示（余白は下部のみ）
-      if (media?.matches) {
-        imgEl.style.objectPosition = "center top";
-        return;
-      }
-
-      const rect = sectionEl.getBoundingClientRect();
-      const sectionH = rect.height || 1;
-      const progress = Math.min(1, Math.max(0, -rect.top / sectionH));
-
-      // start 右端 (100%) -> end 左端 (0%)
-      const startX = 100;
-      const endX = 0;
-      const startY = 50;
-      const endY = 50;
-
-      const x = startX + (endX - startX) * progress;
-      const y = startY + (endY - startY) * progress;
-
-      imgEl.style.objectPosition = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
-    };
-
-    const onScrollOrResize = () => {
-      if (rafId) return;
-      rafId = window.requestAnimationFrame(update);
+      if (!heroImageRef.current) return;
+      heroImageRef.current.style.objectPosition = media?.matches ? "center top" : "center center";
     };
 
     update();
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-    media?.addEventListener("change", onScrollOrResize);
+    media?.addEventListener("change", update);
+    window.addEventListener("resize", update);
 
     return () => {
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-      media?.removeEventListener("change", onScrollOrResize);
-      if (rafId) window.cancelAnimationFrame(rafId);
+      media?.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
     };
   }, []);
 
   // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え
   const handleLogoError = () => setLogoUrl(null);
 
-  // ヒーロー画像の読み込み失敗時は背景画像を外し、グラデーションのみ表示
-  const handleHeroImageError = () => setHeroImageLoadError(true);
+  // ヒーロー画像の読み込み失敗時: デフォルトのPNGの場合はWebPにフォールバック、それ以外は背景を外す
+  const handleHeroImageError = () => {
+    if (heroImageUrl === DEFAULT_HERO_IMAGE_PATH) {
+      setHeroImageUrl(DEFAULT_HERO_IMAGE_PATH_WEBP);
+      setHeroImageLoadError(false);
+      return;
+    }
+    if (heroImageUrl === DEFAULT_HERO_IMAGE_PATH_WEBP) {
+      setHeroImageLoadError(true);
+      return;
+    }
+    if (heroImageMobileUrl === DEFAULT_HERO_IMAGE_PATH_MOBILE) {
+      setHeroImageMobileUrl(DEFAULT_HERO_IMAGE_PATH_MOBILE_WEBP);
+      setHeroImageLoadError(false);
+      return;
+    }
+    if (heroImageMobileUrl === DEFAULT_HERO_IMAGE_PATH_MOBILE_WEBP) {
+      setHeroImageLoadError(true);
+      return;
+    }
+    setHeroImageLoadError(true);
+  };
 
   // ヒーロー画像の preload: PC・モバイル共通1枚のため1リンクで LCP 短縮
   useEffect(() => {
@@ -219,13 +212,15 @@ export default function Home() {
           const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
           const mobileUrl = heroImageMobileUrl || pcUrl;
           const pcWebp = getDefaultHeroWebpPath(pcUrl);
+          // デフォルトヒーローはPNGを優先（pngが無いときだけWebPにフォールバック）。PNGのときはWebPのsourceを出さない
+          const preferPng = pcUrl === DEFAULT_HERO_IMAGE_PATH || pcUrl === DEFAULT_HERO_IMAGE_PATH_MOBILE;
           return (
           <div className="absolute inset-0 z-0">
             <picture className="absolute inset-0 block w-full h-full">
               {/* モバイル用画像（768px以下） */}
               <source media="(max-width: 768px)" srcSet={mobileUrl} />
-              {/* PC用画像（769px以上） */}
-              {pcWebp && <source media="(min-width: 769px)" type="image/webp" srcSet={pcWebp} />}
+              {/* PC用画像（769px以上）。デフォルトでPNG優先の場合はWebPのsourceは使わない */}
+              {pcWebp && !preferPng && <source media="(min-width: 769px)" type="image/webp" srcSet={pcWebp} />}
               <source media="(min-width: 769px)" srcSet={pcUrl} />
               {/* フォールバック */}
               <img
