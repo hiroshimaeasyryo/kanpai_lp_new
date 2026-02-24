@@ -103,6 +103,14 @@ export const DEFAULT_EVENT_FLOW_IMAGE_PATHS = ["/event-flow-1.png", "/event-flow
 /** EVENT FLOW の1〜3枚目でラベル未設定時に使う表示文言 */
 export const DEFAULT_EVENT_FLOW_LABELS = ["第1回", "第7回", "第13回"] as const;
 
+/**
+ * ロゴ未設定時に表示するデフォルトアイコンの画像パス。
+ * client/public/default-logo.png（または .svg / .webp）にファイルを置くと、
+ * その画像がヘッダー・フッターのデフォルトアイコンとして表示されます。
+ * 未配置または読み込み失敗時は、DefaultLogoIcon のインライン SVG が使われます。
+ */
+export const DEFAULT_LOGO_IMAGE_PATH = "/default-logo.png";
+
 /** localStorage からヒーロー画像 URL を取得 */
 export function getStoredHeroImage(): string | null {
   if (typeof window === "undefined") return null;

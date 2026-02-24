@@ -21,6 +21,7 @@ import {
   migrateOldImageFormat,
 } from "@/lib/content-settings";
 import { fetchContent, getContentFromLocalStorage } from "@/lib/content-loader";
+import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 
@@ -123,9 +124,9 @@ export default function Home() {
       const imgEl = heroImageRef.current;
       if (!sectionEl || !imgEl) return;
 
-      // モバイル: アニメーション廃止。画像全体を中央で固定表示
+      // モバイル: アニメーション廃止。画像全体を上部固定表示（余白は下部のみ）
       if (media?.matches) {
-        imgEl.style.objectPosition = "center center";
+        imgEl.style.objectPosition = "center top";
         return;
       }
 
@@ -190,11 +191,7 @@ export default function Home() {
             {logoUrl ? (
               <img src={logoUrl} alt="ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
             ) : (
-              <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-                <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 10l4-4m12 4l-4-4" stroke="var(--lp-primary)" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+              <DefaultLogoIcon size="md" />
             )}
           </a>
           <div className="flex items-center gap-3">
@@ -210,7 +207,7 @@ export default function Home() {
 
       {/* Hero Section: PC・モバイル共通で背景画像+オーバーレイ+テキスト */}
       <section ref={heroSectionRef} className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
-        {/* 背景レイヤー1: ベースのグラデーション（全画面） */}
+        {/* 背景レイヤー1: ベースのグラデーション（全画面・全デバイス） */}
         <div
           className="absolute inset-0 z-0"
           style={{
@@ -235,7 +232,7 @@ export default function Home() {
                 ref={heroImageRef}
                 src={pcUrl}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain object-top md:object-cover"
                 style={{ objectPosition: "center center" }}
                 fetchPriority="high"
                 onError={handleHeroImageError}
@@ -245,9 +242,15 @@ export default function Home() {
           </div>
           );
         })()}
-        {/* オーバーレイ: テキスト可読性と次セクションへのつながり（PC・モバイル共通） */}
+        {/* オーバーレイ: モバイル=上部はテキスト用の暗さ＋下端30%で白→透明のグラデ / PC=従来 */}
         <div
-          className="absolute inset-0 z-[1] pointer-events-none"
+          className="absolute inset-0 z-[1] pointer-events-none md:[background:none]"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, transparent 55%, transparent 70%, rgba(255,255,255,0.4) 85%, white 100%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none hidden md:block"
           style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, color-mix(in srgb, var(--lp-bg-warm) 88%, transparent) 88%, var(--lp-bg-warm) 100%)',
           }}
@@ -938,11 +941,7 @@ export default function Home() {
             {logoUrl ? (
               <img src={logoUrl} alt="ロゴ" className="h-5 w-auto object-contain" loading="lazy" onError={handleLogoError} />
             ) : (
-              <svg className="w-5 h-5" viewBox="0 0 40 40" fill="none">
-                <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 10l4-4m12 4l-4-4" stroke="var(--lp-primary)" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <DefaultLogoIcon size="sm" />
             )}
           </div>
           <div className="text-center">
