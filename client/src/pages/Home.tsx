@@ -200,11 +200,11 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section: PC=背景画像+オーバーレイ+テキスト / モバイル=テキストブロック(グラデ背景)+その下に画像 */}
-      <section ref={heroSectionRef} className="min-h-screen flex flex-col md:flex-row md:items-center md:justify-center relative pt-14 pb-20 overflow-hidden">
-        {/* 背景レイヤー1: ベースのグラデーション。モバイル=テキストエリア高さのみ（その直下から画像なので下地が出ない）／PC=全面 */}
+      {/* Hero Section: PC・モバイル共通で背景画像+オーバーレイ+テキスト */}
+      <section ref={heroSectionRef} className="min-h-screen flex items-center justify-center relative pt-14 pb-20 overflow-hidden">
+        {/* 背景レイヤー1: ベースのグラデーション（全画面） */}
         <div
-          className="absolute top-0 left-0 right-0 h-[44vh] z-0 md:inset-0 md:h-auto"
+          className="absolute inset-0 z-0"
           style={{
             background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, var(--lp-bg-warm)) 85%, var(--lp-bg-warm) 100%)',
           }}
@@ -215,7 +215,7 @@ export default function Home() {
           const mobileUrl = heroImageMobileUrl || pcUrl;
           const pcWebp = getDefaultHeroWebpPath(pcUrl);
           return (
-          <div className="order-2 relative flex-1 min-h-0 w-full md:flex-none md:absolute md:inset-0 md:order-none md:z-0">
+          <div className="absolute inset-0 z-0">
             <picture className="absolute inset-0 block w-full h-full">
               {/* モバイル用画像（768px以下） */}
               <source media="(max-width: 768px)" srcSet={mobileUrl} />
@@ -233,30 +233,23 @@ export default function Home() {
                 onError={handleHeroImageError}
               />
             </picture>
-            {/* モバイルのみ: 画像にグラデーションオーバーレイで洗練（上=テキストブロックと融合、下=次セクションへ自然に） */}
-            <div
-              className="absolute inset-0 pointer-events-none md:hidden"
-              style={{
-                background: 'linear-gradient(to bottom, color-mix(in srgb, var(--lp-accent-light) 22%, transparent) 0%, transparent 28%, transparent 55%, color-mix(in srgb, var(--lp-bg-warm) 35%, transparent) 85%, color-mix(in srgb, var(--lp-bg-warm) 92%, transparent) 100%)',
-                boxShadow: 'inset 0 0 80px 20px rgba(255,250,245,0.12)',
-              }}
-            />
+
           </div>
           );
         })()}
-        {/* オーバーレイ: PC用（テキスト可読性・次セクションへのつながり）。モバイルはテキストがグラデ上なので不要 */}
+        {/* オーバーレイ: テキスト可読性と次セクションへのつながり（PC・モバイル共通） */}
         <div
-          className="absolute inset-0 z-[1] pointer-events-none hidden md:block"
+          className="absolute inset-0 z-[1] pointer-events-none"
           style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, color-mix(in srgb, var(--lp-bg-warm) 88%, transparent) 88%, var(--lp-bg-warm) 100%)',
           }}
         />
-        {/* コンテンツ: モバイル=グラデ背景のテキストブロック（文字は濃い色で可読性確保）、PC=従来どおり画像上の明るい文字+シャドウ */}
-        <div className="relative z-10 order-1 flex flex-col justify-center min-h-[44vh] flex-shrink-0 md:min-h-0 md:flex-initial max-w-2xl px-8 md:px-6 hero-mobile-text-bg md:bg-transparent">
+        {/* コンテンツ: 画像上の明るい文字+シャドウ（PC・モバイル共通） */}
+        <div className="relative z-10 flex flex-col justify-center max-w-2xl px-8 md:px-6">
           <div className="flex flex-1 flex-col justify-center py-8 md:py-0">
             <div className="text-center mb-8">
               <h1
-                className="lp-hero-title font-bold leading-[1.2] opacity-0 animate-fadeUp md:whitespace-nowrap text-lp-text-heading md:text-[var(--lp-bg-warm)] [text-shadow:none] md:[text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)]"
+                className="lp-hero-title font-bold leading-[1.2] opacity-0 animate-fadeUp md:whitespace-nowrap text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)]"
                 style={{
                   animationDelay: '0.2s',
                   animationFillMode: 'forwards',
@@ -269,7 +262,7 @@ export default function Home() {
             </div>
             <div className="text-left md:text-center mx-6 md:mx-0">
               <p
-                className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp text-lp-text-body md:text-[var(--lp-bg-warm)] [text-shadow:none] md:[text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
+                className="text-base md:text-lg mb-11 leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
                 style={{
                   animationDelay: '0.4s',
                   animationFillMode: 'forwards',
