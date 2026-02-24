@@ -227,7 +227,7 @@ export default function Home() {
                 ref={heroImageRef}
                 src={pcUrl}
                 alt=""
-                className="absolute inset-0 w-full h-full object-contain object-top md:object-cover"
+                className="absolute inset-0 w-full h-full object-cover object-top"
                 style={{ objectPosition: "center center" }}
                 fetchPriority="high"
                 onError={handleHeroImageError}
