@@ -32,7 +32,7 @@ import {
   setStoredHeroImageMobile,
 } from "@/lib/content-settings";
 import { applyContentToLocalStorage, fetchContent } from "@/lib/content-loader";
-import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi } from "@/lib/github-content-api";
+import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
 import type { KanpaiEvent } from "@/types/events";
@@ -95,7 +95,7 @@ export default function ContentsManager() {
   const [newEventForm, setNewEventForm] = useState<KanpaiEvent>(() =>
     createEmptyEvent(events.length)
   );
-  const [repoConfig, setRepoConfig] = useState<{ owner: string; repo: string; branch?: string } | null>(null);
+  const [repoConfig, setRepoConfig] = useState<RepoConfig | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [githubToken, setGithubToken] = useState("");
