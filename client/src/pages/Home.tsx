@@ -112,8 +112,9 @@ export default function Home() {
     };
   }, []);
 
-  // ヒーロー画像: スクロールに合わせて「見える位置（object-position）」を右端→左端へ移動
+  // ヒーロー画像: PCのみスクロールに合わせて object-position を右端→左端へ移動。モバイルはアニメーションなしで画像全体を固定表示
   useEffect(() => {
+    const media = typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)") : null;
     let rafId = 0;
 
     const update = () => {
@@ -121,6 +122,12 @@ export default function Home() {
       const sectionEl = heroSectionRef.current;
       const imgEl = heroImageRef.current;
       if (!sectionEl || !imgEl) return;
+
+      // モバイル: アニメーション廃止。画像全体を中央で固定表示
+      if (media?.matches) {
+        imgEl.style.objectPosition = "center center";
+        return;
+      }
 
       const rect = sectionEl.getBoundingClientRect();
       const sectionH = rect.height || 1;
@@ -143,14 +150,15 @@ export default function Home() {
       rafId = window.requestAnimationFrame(update);
     };
 
-    // 初期位置反映
     update();
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", onScrollOrResize);
+    media?.addEventListener("change", onScrollOrResize);
 
     return () => {
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
+      media?.removeEventListener("change", onScrollOrResize);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, []);
