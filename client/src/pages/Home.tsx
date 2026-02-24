@@ -29,6 +29,7 @@ export default function Home() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [heroImageMobileUrl, setHeroImageMobileUrl] = useState<string | null>(null);
   const [heroImageLoadError, setHeroImageLoadError] = useState(false);
   const [nextEvents, setNextEvents] = useState<KanpaiEvent[]>([]);
   const [eventImages, setEventImages] = useState<string[]>([]);
@@ -74,6 +75,7 @@ export default function Home() {
         setEventFlowItems(flowItems);
         setLogoUrl(payload.logo || "/logo.png");
         setHeroImageUrl(payload.hero ?? DEFAULT_HERO_IMAGE_PATH);
+        setHeroImageMobileUrl(payload.heroMobile || null);
         setHeroImageLoadError(false);
         setFeatures(payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : getStoredFeatures());
         setFeatureImageErrors(new Set());
@@ -99,6 +101,7 @@ export default function Home() {
       const local = getContentFromLocalStorage();
       setLogoUrl(local.logo || "/logo.png");
       setHeroImageUrl(local.hero ?? DEFAULT_HERO_IMAGE_PATH);
+      setHeroImageMobileUrl(local.heroMobile || null);
       setHeroImageLoadError(false);
       setFeatures(local.features && local.features.length >= 3 ? local.features.slice(0, 3) : getStoredFeatures());
       setFeatureImageErrors(new Set());
@@ -206,20 +209,26 @@ export default function Home() {
             background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, var(--lp-bg-warm)) 85%, var(--lp-bg-warm) 100%)',
           }}
         />
-        {/* 背景レイヤー2: ヒーロー画像（PC・モバイル共通で1枚。PC=全面配置 / モバイル=テキスト下にブロック配置＋グラデオーバーレイで洗練） */}
+        {/* 背景レイヤー2: ヒーロー画像（モバイル専用画像がある場合は分岐。PC=全面配置 / モバイル=テキスト下にブロック配置＋グラデオーバーレイで洗練） */}
         {heroImageUrl && !heroImageLoadError && (() => {
           const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;
+          const mobileUrl = heroImageMobileUrl || pcUrl;
           const pcWebp = getDefaultHeroWebpPath(pcUrl);
           return (
           <div className="order-2 relative flex-1 min-h-0 w-full md:flex-none md:absolute md:inset-0 md:order-none md:z-0">
             <picture className="absolute inset-0 block w-full h-full">
-              {pcWebp && <source type="image/webp" srcSet={pcWebp} />}
+              {/* モバイル用画像（768px以下） */}
+              <source media="(max-width: 768px)" srcSet={mobileUrl} />
+              {/* PC用画像（769px以上） */}
+              {pcWebp && <source media="(min-width: 769px)" type="image/webp" srcSet={pcWebp} />}
+              <source media="(min-width: 769px)" srcSet={pcUrl} />
+              {/* フォールバック */}
               <img
                 ref={heroImageRef}
                 src={pcUrl}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectPosition: "100% 50%" }}
+                style={{ objectPosition: "center center" }}
                 fetchPriority="high"
                 onError={handleHeroImageError}
               />
