@@ -186,7 +186,7 @@ export default function Home() {
           </a>
           <div className="flex items-center gap-3">
             <a
-              href="#apply"
+              href="#event-detail"
               className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
               イベントに参加する
@@ -909,7 +909,7 @@ export default function Home() {
               </div>
             ))}
             <div className="pt-2">
-              <a href="https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027" target="_blank" rel="noopener noreferrer" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              <a href="/thanks_ks" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
                 参加申し込みをする
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
