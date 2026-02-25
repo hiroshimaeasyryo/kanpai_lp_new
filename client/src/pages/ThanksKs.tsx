@@ -1,16 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LoadingDots } from "@/components/LoadingDots";
 
 const REDIRECT_URL =
   "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027";
 const REDIRECT_DELAY_MS = 10; // 0.01秒
+const FALLBACK_BUTTON_DELAY_MS = 5000; // 5秒後にフォールバックボタン表示
 
 /**
  * /thanks_ks クッションページ
  * - Meta Facebook Pixel を head に注入
  * - 0.01秒後に指定URLへリダイレクト
+ * - 表示開始から5秒経過後に「数秒待っても遷移しない場合はこちら」ボタンを表示（リダイレクトされなかった場合用）
  */
 export default function ThanksKs() {
+  const [showFallbackButton, setShowFallbackButton] = useState(false);
+
   useEffect(() => {
     // 既に注入済みの場合はスキップ
     if (document.getElementById("fb-pixel-thanks-ks")) return;
@@ -62,5 +66,27 @@ fbq('track', 'PageView');
     return () => clearTimeout(t);
   }, []);
 
-  return <LoadingDots />;
+  // 表示開始から5秒経過後にフォールバックボタンを表示（通常はその前にリダイレクトされる）
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setShowFallbackButton(true);
+    }, FALLBACK_BUTTON_DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 bg-white">
+      <LoadingDots />
+      {showFallbackButton && (
+        <a
+          href={REDIRECT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-lp-primary underline hover:text-lp-primary-hover transition-colors"
+        >
+          数秒待っても遷移しない場合はこちら
+        </a>
+      )}
+    </div>
+  );
 }
