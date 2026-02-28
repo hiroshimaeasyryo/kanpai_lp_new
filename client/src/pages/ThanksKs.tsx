@@ -3,13 +3,13 @@ import { LoadingDots } from "@/components/LoadingDots";
 
 const REDIRECT_URL =
   "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027";
-const REDIRECT_DELAY_MS =30000; // 30秒
-const FALLBACK_BUTTON_DELAY_MS = 50000; // 5秒後にフォールバックボタン表示
+const REDIRECT_DELAY_MS =300; // 0.3秒
+const FALLBACK_BUTTON_DELAY_MS = 5000; // 5秒後にフォールバックボタン表示
 
 /**
  * /thanks_ks クッションページ
  * - Meta Facebook Pixel を head に注入
- * - 30秒後に指定URLへリダイレクト
+ * - 0.3秒後に指定URLへリダイレクト
  * - 表示開始から5秒経過後に「数秒待っても遷移しない場合はこちら」ボタンを表示（リダイレクトされなかった場合用）
  */
 export default function ThanksKs() {
