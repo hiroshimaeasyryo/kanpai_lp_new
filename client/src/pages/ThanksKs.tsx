@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { LoadingDots } from "@/components/LoadingDots";
 
 const REDIRECT_URL =
-  "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free2=sns_ks2027";
+  "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free1=sns_ks2027";
 const REDIRECT_DELAY_MS =300; // 0.3秒
 const FALLBACK_BUTTON_DELAY_MS = 5000; // 5秒後にフォールバックボタン表示
 
