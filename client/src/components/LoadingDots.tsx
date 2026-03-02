@@ -1,8 +1,19 @@
 /**
  * 洗練されたバウンスするローディングドット（5つの球が順番に跳ね、伸縮は控えめ＋フェードで統一）
  * @param variant - 'page': 画面全体の中央に表示（ThanksKs用） / 'overlay': ドットのみ（親でオーバーレイに配置）
+ * @param dotColor - ドットの色（例: '#e61874'）。未指定時はデフォルトのブラウン系
  */
-export function LoadingDots({ variant = "page" }: { variant?: "page" | "overlay" }) {
+export function LoadingDots({
+  variant = "page",
+  dotColor,
+}: { variant?: "page" | "overlay"; dotColor?: string }) {
+  const gradient = dotColor
+    ? `radial-gradient(circle at 50% 50%, ${dotColor}f2 0%, ${dotColor}80 60%, ${dotColor}33 100%)`
+    : `radial-gradient(circle at 50% 50%, rgb(212 132 75 / 0.95) 0%, rgb(212 132 75 / 0.5) 60%, rgb(212 132 75 / 0.2) 100%)`;
+  const shadow = dotColor
+    ? `0 0 12px ${dotColor}40`
+    : "0 0 12px rgb(212 132 75 / 0.25)";
+
   const dots = (
     <>
       <div className="flex items-end gap-2.5">
@@ -19,13 +30,8 @@ export function LoadingDots({ variant = "page" }: { variant?: "page" | "overlay"
       </div>
       <style>{`
         .loading-dot {
-          background: radial-gradient(
-            circle at 50% 50%,
-            rgb(212 132 75 / 0.95) 0%,
-            rgb(212 132 75 / 0.5) 60%,
-            rgb(212 132 75 / 0.2) 100%
-          );
-          box-shadow: 0 0 12px rgb(212 132 75 / 0.25);
+          background: ${gradient};
+          box-shadow: ${shadow};
         }
         @keyframes loading-dot-bounce {
           0%, 100% {

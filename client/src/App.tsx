@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
+import PoprockRedirect from "@/pages/PoprockRedirect";
 import ThanksKs from "@/pages/ThanksKs";
 import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
 import { Route, Switch } from "wouter";
@@ -24,6 +25,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/thanks_ks"} component={ThanksKs} />
+      <Route path={"/poprock_redirect"} component={PoprockRedirect} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />

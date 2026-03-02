@@ -1,0 +1,96 @@
+import { useEffect, useState } from "react";
+import { LoadingDots } from "@/components/LoadingDots";
+
+const REDIRECT_URL =
+  "https://xp48w7qk.autosns.app/addfriend/s/MG318NaAzS/@779ahmbk";
+const REDIRECT_DELAY_MS = 200; // 0.2秒
+const FALLBACK_BUTTON_DELAY_MS = 5000; // 5秒後にフォールバックボタン表示
+
+const PINK = "#e61874";
+
+/**
+ * /poprock_redirect クッションページ
+ * - Meta Facebook Pixel を head に注入
+ * - 白背景・ピンク系ドットのローディング表示
+ * - 0.2秒後に指定URLへリダイレクト
+ * - 表示開始から5秒経過後にフォールバックボタン表示（ピンクに調和）
+ */
+export default function PoprockRedirect() {
+  const [showFallbackButton, setShowFallbackButton] = useState(false);
+
+  useEffect(() => {
+    if (document.getElementById("fb-pixel-poprock-redirect")) return;
+
+    const script = document.createElement("script");
+    script.id = "fb-pixel-poprock-redirect";
+    script.textContent = `
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window,document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '552186969429990');
+fbq('track', 'PageView');
+`;
+    document.head.appendChild(script);
+
+    const noscript = document.createElement("noscript");
+    const img = document.createElement("img");
+    img.setAttribute("height", "1");
+    img.setAttribute("width", "1");
+    img.setAttribute(
+      "src",
+      "https://www.facebook.com/tr?id=552186969429990&ev=PageView&noscript=1"
+    );
+    img.setAttribute("alt", "");
+    noscript.appendChild(img);
+    document.head.appendChild(noscript);
+
+    const metaRefresh = document.createElement("meta");
+    metaRefresh.setAttribute("http-equiv", "refresh");
+    metaRefresh.setAttribute("content", `0.01;URL=${REDIRECT_URL}`);
+    document.head.appendChild(metaRefresh);
+
+    const t = setTimeout(() => {
+      window.location.replace(REDIRECT_URL);
+    }, REDIRECT_DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowFallbackButton(true), FALLBACK_BUTTON_DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 bg-white">
+      <LoadingDots variant="overlay" dotColor={PINK} />
+      {showFallbackButton && (
+        <a
+          href={REDIRECT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium py-2.5 px-5 rounded-full border-2 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{
+            color: PINK,
+            borderColor: PINK,
+            outlineColor: PINK,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = PINK;
+            e.currentTarget.style.color = "white";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = PINK;
+          }}
+        >
+          数秒待っても遷移しない場合はこちら
+        </a>
+      )}
+    </div>
+  );
+}
