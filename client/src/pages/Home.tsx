@@ -28,6 +28,14 @@ import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import { LoadingDots } from "@/components/LoadingDots";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
+import { LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+
+/** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
+function trackKsLineSignupClick() {
+  if (typeof window !== "undefined" && typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function") {
+    (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead");
+  }
+}
 
 export default function Home() {
   useSmoothScroll();
@@ -52,6 +60,17 @@ export default function Home() {
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   /** ページ全体の読み込みが完了し、ローディングを外してよいか */
   const [isPageReady, setIsPageReady] = useState(false);
+  /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
+  useEffect(() => {
+    const threshold = 200;
+    const onScroll = () => setShowStickyCta(window.scrollY > threshold);
+    onScroll(); // 初期状態
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -194,6 +213,27 @@ export default function Home() {
           </div>
         </div>
       </nav>
+
+      {/* モバイル用: スクロール時に表示する下部固定LINE登録CTA（CVR改善） */}
+      <div
+        className={`fixed left-0 right-0 z-40 md:hidden transition-all duration-300 ease-out ${
+          showStickyCta ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+        }`}
+        style={{ bottom: "max(12px, env(safe-area-inset-bottom))" }}
+      >
+        <div className="px-4 pt-3 pb-1">
+          <a
+            href={LINE_KS_SIGNUP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={trackKsLineSignupClick}
+            className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
+          >
+            参加申し込みをする
+            <img src="/line-logo.png" alt="" className="w-8 h-8 object-contain" loading="lazy" />
+          </a>
+        </div>
+      </div>
 
       {/* Hero Section: モバイル=画像をアスペクト比ブロックにしテキストを常に画像上に。PC=従来の全面配置 */}
       <section ref={heroSectionRef} className="md:min-h-screen md:flex md:items-center md:justify-center relative overflow-hidden">
@@ -909,7 +949,13 @@ export default function Home() {
               </div>
             ))}
             <div className="pt-2">
-              <a href="/thanks_ks" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              <a
+                href={LINE_KS_SIGNUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={trackKsLineSignupClick}
+                className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+              >
                 参加申し込みをする
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
