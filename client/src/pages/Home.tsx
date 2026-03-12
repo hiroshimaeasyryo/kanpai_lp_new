@@ -494,8 +494,13 @@ export default function Home() {
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
               <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>その先にある本質に、触れる時間です。
+                お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>                その先にある本質に、触れる時間です。
               </p>
+            </div>
+            <div className="mt-6 md:mt-8 w-full max-w-sm mx-auto hidden md:block">
+              <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+                次回のイベントを見る
+              </a>
             </div>
             {eventImages.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
@@ -646,6 +651,11 @@ export default function Home() {
               </div>
             </div>
           )}
+          <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
+            <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              次回のイベントを見る
+            </a>
+          </div>
         </div>
       </section>
 
@@ -721,6 +731,11 @@ export default function Home() {
                 </p>
               </div>
             ))}
+          </div>
+          <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
+            <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
+              次回のイベントを見る
+            </a>
           </div>
         </div>
       </section>
