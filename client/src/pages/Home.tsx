@@ -231,10 +231,13 @@ export default function Home({ lpSlug }: HomeProps) {
           </a>
           <div className="flex items-center gap-3">
             <a
-              href="#event-detail"
-              className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
+              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={trackKsLineSignupClick}
+              className="inline-flex items-center gap-1.5 px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
-              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "イベントに参加する"}
+              イベントに参加する
             </a>
           </div>
         </div>
@@ -335,8 +338,15 @@ export default function Home({ lpSlug }: HomeProps) {
                 普段見えない、企業の素と、自分の本音。<br />互いが飾らず語らう中で<br />あなたなりの正解の手がかりが、見つかる場所。
               </p>
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-                <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-                  {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
+                <a
+                  href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={trackKsLineSignupClick}
+                  className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  参加申し込みをする
+                  <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
                 </a>
               </div>
             </div>
@@ -538,8 +548,15 @@ export default function Home({ lpSlug }: HomeProps) {
               </p>
             </div>
             <div className="mt-6 md:mt-8 w-full max-w-sm mx-auto hidden md:block">
-              <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-                {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
+              <a
+                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={trackKsLineSignupClick}
+                className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+              >
+                参加申し込みをする
+                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
             </div>
             {eventImages.length > 0 && (
@@ -692,8 +709,15 @@ export default function Home({ lpSlug }: HomeProps) {
             </div>
           )}
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
-            <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
+            <a
+              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={trackKsLineSignupClick}
+              className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+            >
+              参加申し込みをする
+              <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
             </a>
           </div>
         </div>
@@ -773,8 +797,15 @@ export default function Home({ lpSlug }: HomeProps) {
             ))}
           </div>
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
-            <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
+            <a
+              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={trackKsLineSignupClick}
+              className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+            >
+              参加申し込みをする
+              <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
             </a>
           </div>
         </div>
@@ -920,8 +951,15 @@ export default function Home({ lpSlug }: HomeProps) {
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              <a href="#event-detail" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
-                {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントに参加する"}
+              <a
+                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={trackKsLineSignupClick}
+                className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
+              >
+                参加申し込みをする
+                <img src="/line-logo.png" alt="LINE" className="w-7 h-7 object-contain" loading="lazy" />
               </a>
               <p className="text-xs text-lp-primary font-medium tracking-wide">
                 <span>参加費無料</span>
