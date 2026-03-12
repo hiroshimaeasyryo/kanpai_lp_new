@@ -20,6 +20,8 @@ export interface ContentPayload {
   features?: FeatureItem[];
   /** テーマパレットID（管理画面用。LPでは未使用） */
   paletteId?: string | null;
+  /** campaign2603用: イベント詳細「場所」下に表示するキャンペーン文言（改行区切り） */
+  campaign2603Notice?: string | null;
 }
 
 /** content.json のパス（配信時は /content.json） */

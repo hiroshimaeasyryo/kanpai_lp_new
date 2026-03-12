@@ -143,6 +143,25 @@ export function setStoredHeroImageMobile(url: string | null): void {
   }
 }
 
+const CAMPAIGN2603_NOTICE_KEY = "kanpai_campaign2603_notice";
+
+/** campaign2603用: イベント詳細「場所」下のキャンペーン文言を取得 */
+export function getStoredCampaign2603Notice(): string | null {
+  if (typeof window === "undefined") return null;
+  const v = localStorage.getItem(CAMPAIGN2603_NOTICE_KEY);
+  return v === "" ? null : v;
+}
+
+/** campaign2603用: イベント詳細「場所」下のキャンペーン文言を保存 */
+export function setStoredCampaign2603Notice(value: string | null): void {
+  if (typeof window === "undefined") return;
+  if (value != null && value.trim() !== "") {
+    localStorage.setItem(CAMPAIGN2603_NOTICE_KEY, value);
+  } else {
+    localStorage.removeItem(CAMPAIGN2603_NOTICE_KEY);
+  }
+}
+
 /**
  * Unique Features セクションの1件分（見出し・本文・任意の画像）
  * 管理画面から3件まとめて編集可能。画像は client/public/feature-1.png など未設定時に使用。

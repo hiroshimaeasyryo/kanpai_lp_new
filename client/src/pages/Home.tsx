@@ -18,18 +18,34 @@ import {
   DEFAULT_HERO_IMAGE_PATH_WEBP,
   getDefaultFeatureWebpPath,
   getDefaultHeroWebpPath,
+  getStoredCampaign2603Notice,
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
-import { fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
+import { applyContentToLocalStorage, fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
 import { TOP_SLUG } from "@/lib/lp-slug";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import { LoadingDots } from "@/components/LoadingDots";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
-import { LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+
+/** campaign2603用: キャンペーン文言のデフォルト（未設定時表示） */
+const DEFAULT_CAMPAIGN2603_NOTICE =
+  "※地方学生限定キャンペーン実施中です※\n\nKANPAI就活は27卒向けラスト2回。\n「行きたいけど遠い」という方へ、今回限り交通費サポートを用意しました。\n先着5名・上限あり。\n詳細はご予約後に運営よりご案内します。";
+
+/** キャンペーン文言を1行目（タイトル）と本文に分けて表示用に返す */
+function getCampaign2603NoticeParts(): { title: string; body: string } {
+  const raw = getStoredCampaign2603Notice() ?? DEFAULT_CAMPAIGN2603_NOTICE;
+  const trimmed = raw.trim();
+  if (!trimmed) return { title: "", body: "" };
+  const firstNewline = trimmed.indexOf("\n");
+  const title = firstNewline >= 0 ? trimmed.slice(0, firstNewline).trim() : trimmed;
+  const body = firstNewline >= 0 ? trimmed.slice(firstNewline + 1).trim() : "";
+  return { title, body };
+}
 
 /** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
 function trackKsLineSignupClick() {
@@ -91,7 +107,8 @@ export default function Home({ lpSlug }: HomeProps) {
       if (cancelled) return;
 
       if (payload) {
-        // 端末間同期: content.json を正として表示
+        // 端末間同期: content.json を正として表示（campaign2603Notice 等も localStorage に反映）
+        applyContentToLocalStorage(payload);
         const events = (payload.events ?? [])
           .slice()
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -217,7 +234,7 @@ export default function Home({ lpSlug }: HomeProps) {
               href="#event-detail"
               className="inline-flex items-center px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
-              イベントに参加する
+              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "イベントに参加する"}
             </a>
           </div>
         </div>
@@ -232,7 +249,7 @@ export default function Home({ lpSlug }: HomeProps) {
       >
         <div className="px-4 pt-3 pb-1">
           <a
-            href={LINE_KS_SIGNUP_URL}
+            href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackKsLineSignupClick}
@@ -319,7 +336,7 @@ export default function Home({ lpSlug }: HomeProps) {
               </p>
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
                 <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-                  次回のイベントを見る
+                  {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
                 </a>
               </div>
             </div>
@@ -399,6 +416,20 @@ export default function Home({ lpSlug }: HomeProps) {
                             </p>
                           </div>
                         </div>
+                        {contentSlug === "campaign2603" && (() => {
+                          const { title, body } = getCampaign2603NoticeParts();
+                          if (!title && !body) return null;
+                          return (
+                            <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2">
+                              {title && <p className="font-medium text-lp-primary">{title}</p>}
+                              {body && (
+                                <p className="whitespace-pre-line" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                                  {body}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
                             <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
@@ -508,7 +539,7 @@ export default function Home({ lpSlug }: HomeProps) {
             </div>
             <div className="mt-6 md:mt-8 w-full max-w-sm mx-auto hidden md:block">
               <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-                次回のイベントを見る
+                {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
               </a>
             </div>
             {eventImages.length > 0 && (
@@ -662,7 +693,7 @@ export default function Home({ lpSlug }: HomeProps) {
           )}
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
             <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-              次回のイベントを見る
+              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
             </a>
           </div>
         </div>
@@ -743,7 +774,7 @@ export default function Home({ lpSlug }: HomeProps) {
           </div>
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
             <a href="#event-detail" className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5">
-              次回のイベントを見る
+              {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントを見る"}
             </a>
           </div>
         </div>
@@ -843,15 +874,19 @@ export default function Home({ lpSlug }: HomeProps) {
             </h2>
           </div>
           <div className="space-y-0 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-            {[
-              { q: "お酒が飲めなくても参加できますか？", a: "はい、もちろん参加いただけます。ソフトドリンクもご用意しています。お酒はあくまで「飾らない対話」のきっかけです。" },
-              { q: "志望業界が決まっていなくても大丈夫ですか？", a: "むしろ、まだ決まっていない方にこそおすすめです。さまざまな業界の社会人と対話する中で、新しい気づきが得られます。" },
-              { q: "どんな企業が参加していますか？", a: "大手からベンチャーまで、運営の厳格な基準を通過した企業のみが参加しています。業界は幅広く、毎回異なります。" },
-              { q: "当日エントリーや選考を強要されませんか？", a: "一切ありません。対話を楽しんでいただくことが目的です。気になる企業があれば、その後のつながり方はあなた次第です。" },
-              { q: "服装はスーツですか？", a: "私服でお越しください。飾らない、自然体の場です。" },
-              { q: "参加費はかかりますか？", a: "参加費は無料です。飲食も企業様のご提供でご用意しています。" },
-              { q: "一人で参加しても大丈夫ですか？", a: "多くの方がお一人で参加されています。アイスブレイクから始まるので、自然に打ち解けられます。" },
-            ].map((item, i) => (
+            {(() => {
+              const baseFaq = [
+                { q: "お酒が飲めなくても参加できますか？", a: "はい、もちろん参加いただけます。ソフトドリンクもご用意しています。お酒はあくまで「飾らない対話」のきっかけです。" },
+                { q: "志望業界が決まっていなくても大丈夫ですか？", a: "むしろ、まだ決まっていない方にこそおすすめです。さまざまな業界の社会人と対話する中で、新しい気づきが得られます。" },
+                { q: "どんな企業が参加していますか？", a: "大手からベンチャーまで、運営の厳格な基準を通過した企業のみが参加しています。業界は幅広く、毎回異なります。" },
+                { q: "当日エントリーや選考を強要されませんか？", a: "一切ありません。対話を楽しんでいただくことが目的です。気になる企業があれば、その後のつながり方はあなた次第です。" },
+                { q: "服装はスーツですか？", a: "私服でお越しください。飾らない、自然体の場です。" },
+                { q: "参加費はかかりますか？", a: "参加費は無料です。飲食も企業様のご提供でご用意しています。" },
+                ...(contentSlug === "campaign2603" ? [{ q: "交通費はどうやって支払われますか？", a: "後日振り込みを予定しています。詳細は予約いただいた方に、運営から2〜3分ほどお電話でお伝えいたします。" }] : []),
+                { q: "一人で参加しても大丈夫ですか？", a: "多くの方がお一人で参加されています。アイスブレイクから始まるので、自然に打ち解けられます。" },
+              ];
+              return baseFaq;
+            })().map((item, i) => (
               <details key={i} className="border-b border-lp-border group">
                 <summary className="py-5 cursor-pointer flex items-center justify-between text-lp-text-heading font-medium text-sm hover:text-lp-primary transition-colors">
                   {item.q}
@@ -886,7 +921,7 @@ export default function Home({ lpSlug }: HomeProps) {
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
               <a href="#event-detail" className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4">
-                次回のイベントに参加する
+                {contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "次回のイベントに参加する"}
               </a>
               <p className="text-xs text-lp-primary font-medium tracking-wide">
                 <span>参加費無料</span>
@@ -949,6 +984,20 @@ export default function Home({ lpSlug }: HomeProps) {
                       </p>
                     </div>
                   </div>
+                  {contentSlug === "campaign2603" && (() => {
+                    const { title, body } = getCampaign2603NoticeParts();
+                    if (!title && !body) return null;
+                    return (
+                      <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2">
+                        {title && <p className="font-medium text-lp-primary">{title}</p>}
+                        {body && (
+                          <p className="whitespace-pre-line" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                            {body}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-lp-border/60">
                       <span className="text-2xl font-bold text-lp-primary tabular-nums" style={{ fontFamily: "'Shippori Mincho', serif" }}>
@@ -974,7 +1023,7 @@ export default function Home({ lpSlug }: HomeProps) {
             ))}
             <div className="pt-2">
               <a
-                href={LINE_KS_SIGNUP_URL}
+                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackKsLineSignupClick}

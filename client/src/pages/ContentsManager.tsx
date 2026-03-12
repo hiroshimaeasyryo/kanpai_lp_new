@@ -111,6 +111,8 @@ export default function ContentsManager() {
   const [lpSlugs, setLpSlugs] = useState<string[]>([]);
   /** いま編集しているLPのスラグ */
   const [selectedSlug, setSelectedSlug] = useState<string>(TOP_SLUG);
+  /** campaign2603用: イベント詳細「場所」下のキャンペーン文言 */
+  const [campaign2603Notice, setCampaign2603Notice] = useState<string>("");
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -143,6 +145,7 @@ export default function ContentsManager() {
           (payload.events ?? []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
         );
         if (payload.paletteId) setPaletteId(payload.paletteId);
+        setCampaign2603Notice(payload.campaign2603Notice ?? "");
         applyContentToLocalStorage(payload);
       }
     })();
@@ -269,6 +272,9 @@ export default function ContentsManager() {
     events: events.length > 0 ? events : undefined,
     features: features.slice(0, 3),
     paletteId: paletteId ?? null,
+    ...(selectedSlug === "campaign2603"
+      ? { campaign2603Notice: campaign2603Notice.trim() || null }
+      : {}),
   });
 
   const handleDownloadJson = () => {
@@ -434,6 +440,33 @@ export default function ContentsManager() {
               <p className="text-xs text-[#875a3c] mt-2">
                 選択したLPのコンテンツを編集・保存します。プレビューは選択中のLPのURLで開きます。
               </p>
+            </div>
+          )}
+
+          {/* campaign2603: 地方学生限定キャンペーン文言 */}
+          {selectedSlug === "campaign2603" && (
+            <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
+              <h2
+                className="text-xl font-bold text-[#5C3D2E] mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                地方学生限定キャンペーン文言
+              </h2>
+              <p className="text-sm text-[#875a3c] mb-4">
+                /campaign2603 のイベント詳細「場所」の下に表示するテキストです。改行はLP上でも反映されます。
+              </p>
+              <Textarea
+                value={campaign2603Notice}
+                onChange={(e) => setCampaign2603Notice(e.target.value)}
+                placeholder={`※地方学生限定キャンペーン実施中です※
+
+KANPAI就活は27卒向けラスト2回。
+「行きたいけど遠い」という方へ、今回限り交通費サポートを用意しました。
+先着5名・上限あり。
+詳細はご予約後に運営よりご案内します。`}
+                className="min-h-[180px] border-[#ffd7c3] text-[#5C3D2E] placeholder:text-[#875a3c]/60"
+                rows={8}
+              />
             </div>
           )}
 

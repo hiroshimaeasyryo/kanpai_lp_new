@@ -4,11 +4,13 @@
  * - fetchContent() はトップ用（root スラグ）、従来の /content.json にフォールバック
  */
 import {
+  getStoredCampaign2603Notice,
   getStoredEventImages,
   getStoredFeatures,
   getStoredHeroImage,
   getStoredHeroImageMobile,
   migrateOldImageFormat,
+  setStoredCampaign2603Notice,
   setStoredEventImages,
   setStoredFeatures,
   setStoredHeroImage,
@@ -112,6 +114,7 @@ export function getContentFromLocalStorage(): ContentPayload {
     events: getStoredEvents(),
     features: getStoredFeatures(),
     paletteId: getStoredPaletteId(),
+    campaign2603Notice: getStoredCampaign2603Notice(),
   };
 }
 
@@ -145,5 +148,8 @@ export function applyContentToLocalStorage(payload: ContentPayload): void {
   }
   if (payload.paletteId !== undefined && payload.paletteId) {
     setStoredPaletteId(payload.paletteId);
+  }
+  if (payload.campaign2603Notice !== undefined) {
+    setStoredCampaign2603Notice(payload.campaign2603Notice);
   }
 }
