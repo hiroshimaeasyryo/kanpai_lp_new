@@ -40,6 +40,19 @@
   - 方式 B: 設定を `public/settings.json` に置き、LP は fetch で読み込む（初回表示のわずかな遅延とキャッシュの考慮が必要）。
 - **ベースパス**: Github Pages でリポジトリ名をパスに含める場合は、`vite.config.ts` の `base` を `'/リポジトリ名/'` に設定する。
 
+### 1.4 複数LP運用（スラグ別コンテンツ）
+
+同一ドメイン配下に複数のLPを置く構成を採用している。
+
+- **URL 構成**: トップ `/` および `/{スラグ}`（例: `/main`, `/campaign2603`）でそれぞれ別のLPコンテンツを表示する。`/contents-manager`・`/poprock_redirect` 等は固定ルートとして予約している。
+- **スラグ**: 各LPを識別する名前（英数字など）。トップはスラグ `root` に紐づく。予約語（`contents-manager`, `poprock_redirect`, `content`, `api`, `assets`, `root` 等）はLP名に使用しない。
+- **コンテンツの配置**: `client/public/content/{スラグ}.json` に1LPあたり1ファイル。配信時は `/content/{スラグ}.json` として fetch する。
+- **manifest**: ビルド時に `client/public/content/*.json` を列挙し、`content/manifest.json`（`{ "slugs": ["campaign2603", "main", "root"] }`）を生成する。Contents Manager の「編集するLP」一覧はこの manifest を参照する。
+- **ルーティング**: SPA の動的ルート `/:lpSlug` で予約外のスラグをLPとして表示。トップ `/` はスラグ `root` のコンテンツを表示する。
+- **Contents Manager**: 編集対象LPをドロップダウンで選択し、選択したLPのコンテンツの読み込み・保存・プレビューを行う。保存先は `client/public/content/{選択中スラグ}.json`。
+
+新規LPを追加する場合は、リポジトリに `client/public/content/新スラグ.json` を追加（既存LPのJSONをコピーしてフォーク可）し、ビルド／デプロイすると一覧に出現する。
+
 ---
 
 ## 2. データモデル・設定構造
@@ -87,14 +100,16 @@ interface LPContentSettings {
 ### 3.1 画面構成（一元化）
 
 - **1 画面で完結**: ロゴ、イベント画像、イベント一覧、テーマ選択をすべて同一画面（またはタブ/セクション）で編集する。
+- **複数LP運用時**: 画面上部に「編集するLP」のドロップダウンを設け、トップ（/）・/main・/campaign2603 等から選択する。選択したLPのコンテンツを読み込み・保存する。
 - **Image Manager** は廃止し、`/image-manager` は `/contents-manager` へリダイレクトする（既存の実装を維持）。
 - **セクション例**:
   1. アクセスコード入力（未解除時）
-  2. ブランドロゴ
-  3. イベント画像（枚数可変・並び替え可能）
-  4. イベント管理（一覧・追加・編集・削除・並び替え）
-  5. テーマ（カラーパレット）選択
-  6. 保存・プレビュー・エクスポート
+  2. 編集するLPの選択（複数LP運用時）
+  3. ブランドロゴ
+  4. イベント画像（枚数可変・並び替え可能）
+  5. イベント管理（一覧・追加・編集・削除・並び替え）
+  6. テーマ（カラーパレット）選択
+  7. 保存・プレビュー・エクスポート
 
 ### 3.2 画像の扱い（ファイル名の正規化・GUI 完結）
 
@@ -127,20 +142,24 @@ interface LPContentSettings {
 ```
 （リポジトリルート）
 ├── client/
-├── content/
-│   └── settings.json          # 設定（ロゴ・イベント画像の参照・イベント一覧・themeId）
-├── public/
-│   └── assets/
-│       └── images/
-│           ├── logo.png       # 正規化後のロゴ
-│           ├── event-0.png    # イベント画像 1
-│           ├── event-1.png
-│           └── event-2.png
+│   ├── public/
+│   │   ├── content.json       # 従来用（トップのフォールバック。任意）
+│   │   ├── content/          # 複数LP運用: スラグ別JSON
+│   │   │   ├── manifest.json # ビルド時生成（編集可能LP一覧）
+│   │   │   ├── root.json     # トップ (/) 用
+│   │   │   ├── main.json     # /main 用
+│   │   │   ├── campaign2603.json  # /campaign2603 用（例）
+│   │   │   └── ...
+│   │   └── assets/
+│   │       └── images/
+│   │           ├── logo.png  # 正規化後のロゴ
+│   │           ├── event-0.png
+│   │           └── ...
 ├── docs/
 └── ...
 ```
 
-- 設定ファイルには **ファイル名のみ**（例: `"logo": "logo.png"`）または **パス**（例: `"/assets/images/logo.png"`）を保存する。絶対 URL の場合は外部ストレージ用。
+- 各 `content/{スラグ}.json` が1つのLPの設定（ロゴ・イベント画像の参照・イベント一覧・テーマ等）を格納する。設定には **ファイル名のみ** または **パス** を保存する。絶対 URL の場合は外部ストレージ用。
 
 ### 4.2 正規化の具体例（プログラムで強制するファイル名）
 

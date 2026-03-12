@@ -23,7 +23,8 @@ import {
   getStoredHeroImage,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
-import { fetchContent, getContentFromLocalStorage } from "@/lib/content-loader";
+import { fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
+import { TOP_SLUG } from "@/lib/lp-slug";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import { LoadingDots } from "@/components/LoadingDots";
 import type { KanpaiEvent } from "@/types/events";
@@ -37,7 +38,13 @@ function trackKsLineSignupClick() {
   }
 }
 
-export default function Home() {
+export interface HomeProps {
+  /** 複数LP運用: このLPのスラグ。未指定時はトップ（root） */
+  lpSlug?: string;
+}
+
+export default function Home({ lpSlug }: HomeProps) {
+  const contentSlug = lpSlug ?? TOP_SLUG;
   useSmoothScroll();
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -78,7 +85,9 @@ export default function Home() {
     let cancelled = false;
 
     (async () => {
-      const payload = await fetchContent();
+      const payload = contentSlug === TOP_SLUG
+        ? await fetchContent()
+        : await fetchContentBySlug(contentSlug);
       if (cancelled) return;
 
       if (payload) {
@@ -137,7 +146,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [contentSlug]);
 
 
   // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え

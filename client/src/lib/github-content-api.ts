@@ -1,5 +1,5 @@
 /**
- * GitHub Contents API で content.json を更新する（保存してデプロイ）
+ * GitHub Contents API で content.json / content/{slug}.json を更新する（保存してデプロイ）
  */
 import type { ContentPayload } from "@/types/content-payload";
 import { CONTENT_JSON_REPO_PATH } from "@/types/content-payload";
@@ -14,16 +14,19 @@ export interface RepoConfig {
 }
 
 /**
- * リポジトリ内の content.json を更新する。
+ * リポジトリ内のコンテンツファイルを更新する。
+ * repoPath 未指定時は従来の client/public/content.json。
  * 成功時はコミットが作成され push されるため、push トリガーの Actions でデプロイされる。
  */
 export async function saveContentToGitHub(
   payload: ContentPayload,
   token: string,
   config: RepoConfig,
+  repoPath?: string,
 ): Promise<void> {
   const branch = config.branch ?? "main";
-  const apiPath = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${CONTENT_JSON_REPO_PATH}`;
+  const path = repoPath ?? CONTENT_JSON_REPO_PATH;
+  const apiPath = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}`;
 
   const res = await fetch(`${apiPath}?ref=${branch}`, {
     method: "GET",
@@ -51,7 +54,7 @@ export async function saveContentToGitHub(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: "contents-manager: update content.json",
+      message: `contents-manager: update ${path}`,
       content: contentBase64,
       branch,
       ...(sha ? { sha } : {}),
@@ -65,23 +68,25 @@ export async function saveContentToGitHub(
 }
 
 /**
- * 保存用 GCP API 経由で content.json を更新する（トークン入力不要）。
- * repo-config に saveApiUrl と saveApiSecret が設定されている場合に使用。
+ * 保存用 GCP API 経由でコンテンツファイルを更新する（トークン入力不要）。
+ * repoPath 未指定時は従来の client/public/content.json。
  */
 export async function saveContentViaApi(
   payload: ContentPayload,
   config: RepoConfig,
+  repoPath?: string,
 ): Promise<void> {
   const url = config.saveApiUrl?.trim();
   const secret = config.saveApiSecret?.trim();
   if (!url || !secret) {
     throw new Error("saveApiUrl と saveApiSecret が設定されていません");
   }
+  const path = repoPath ?? CONTENT_JSON_REPO_PATH;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      path: CONTENT_JSON_REPO_PATH,
+      path,
       content: payload,
       owner: config.owner,
       repo: config.repo,

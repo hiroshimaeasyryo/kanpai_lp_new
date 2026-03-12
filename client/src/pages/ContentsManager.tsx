@@ -31,8 +31,9 @@ import {
   setStoredHeroImage,
   setStoredHeroImageMobile,
 } from "@/lib/content-settings";
-import { applyContentToLocalStorage, fetchContent } from "@/lib/content-loader";
+import { applyContentToLocalStorage, fetchContentBySlug, fetchContentManifest } from "@/lib/content-loader";
 import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
+import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
 import type { KanpaiEvent } from "@/types/events";
@@ -42,6 +43,13 @@ import {
   setStoredEvents,
 } from "@/types/events";
 import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DEFAULT_SCENES = {
   scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
@@ -99,6 +107,10 @@ export default function ContentsManager() {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [githubToken, setGithubToken] = useState("");
+  /** 編集可能なLP一覧（manifest から取得） */
+  const [lpSlugs, setLpSlugs] = useState<string[]>([]);
+  /** いま編集しているLPのスラグ */
+  const [selectedSlug, setSelectedSlug] = useState<string>(TOP_SLUG);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -107,8 +119,20 @@ export default function ContentsManager() {
   useEffect(() => {
     if (!unlocked) return;
     (async () => {
-      const [config, payload] = await Promise.all([fetchRepoConfig(), fetchContent()]);
+      const [config, manifest] = await Promise.all([fetchRepoConfig(), fetchContentManifest()]);
       setRepoConfig(config);
+      const slugs = manifest?.slugs?.length ? manifest.slugs : [TOP_SLUG];
+      setLpSlugs(slugs);
+      if (!slugs.includes(selectedSlug)) {
+        setSelectedSlug(slugs[0] ?? TOP_SLUG);
+      }
+    })();
+  }, [unlocked]);
+
+  useEffect(() => {
+    if (!unlocked || !selectedSlug) return;
+    (async () => {
+      const payload = await fetchContentBySlug(selectedSlug);
       if (payload) {
         setLogoUrl(payload.logo ?? null);
         setHeroImageUrl(payload.hero ?? null);
@@ -122,7 +146,7 @@ export default function ContentsManager() {
         applyContentToLocalStorage(payload);
       }
     })();
-  }, [unlocked, setPaletteId]);
+  }, [unlocked, selectedSlug, setPaletteId]);
 
   const persistEvents = (next: KanpaiEvent[]) => {
     setEvents(next);
@@ -252,11 +276,12 @@ export default function ContentsManager() {
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "content.json";
+    a.download = `content-${selectedSlug}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
     setSaveError("");
-    setSaveMessage("content.json をダウンロードしました。リポジトリの client/public/content.json に置いてコミット・push するとサイトに反映されます。");
+    const repoPath = getContentRepoPathForSlug(selectedSlug);
+    setSaveMessage(`${a.download} をダウンロードしました。リポジトリの ${repoPath} に置いてコミット・push するとサイトに反映されます。`);
     setTimeout(() => setSaveMessage(""), 6000);
   };
 
@@ -271,9 +296,10 @@ export default function ContentsManager() {
     }
     setSaveError("");
     setSaveMessage("保存中…");
+    const repoPath = getContentRepoPathForSlug(selectedSlug);
     try {
       if (useSaveApi) {
-        await saveContentViaApi(buildPayload(), repoConfig);
+        await saveContentViaApi(buildPayload(), repoConfig, repoPath);
       } else {
         const token = githubToken.trim();
         if (!token) {
@@ -281,7 +307,7 @@ export default function ContentsManager() {
           setSaveMessage("");
           return;
         }
-        await saveContentToGitHub(buildPayload(), token, repoConfig);
+        await saveContentToGitHub(buildPayload(), token, repoConfig, repoPath);
       }
       setSaveMessage("保存しました。push により数分以内にサイトに反映されます。");
       setTimeout(() => setSaveMessage(""), 6000);
@@ -377,7 +403,7 @@ export default function ContentsManager() {
               </div>
             </div>
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(selectedSlug === TOP_SLUG ? "/" : `/${selectedSlug}`)}
               variant="outline"
               className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
             >
@@ -389,6 +415,28 @@ export default function ContentsManager() {
 
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* 編集するLPの選択 */}
+          {lpSlugs.length > 0 && (
+            <div className="mb-8 rounded-xl border border-[#ffd7c3] bg-white p-4">
+              <Label className="text-[#5C3D2E] text-sm font-medium block mb-2">編集するLP</Label>
+              <Select value={selectedSlug} onValueChange={setSelectedSlug}>
+                <SelectTrigger className="max-w-xs border-[#ffd7c3] text-[#5C3D2E]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {lpSlugs.map((slug) => (
+                    <SelectItem key={slug} value={slug}>
+                      {slug === TOP_SLUG ? "トップ (/)" : `/${slug}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-[#875a3c] mt-2">
+                選択したLPのコンテンツを編集・保存します。プレビューは選択中のLPのURLで開きます。
+              </p>
+            </div>
+          )}
+
           {/* 保存して反映（端末間同期） */}
           <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
             <h2
@@ -398,7 +446,7 @@ export default function ContentsManager() {
               保存して反映
             </h2>
             <p className="text-sm text-[#875a3c] mb-4">
-              編集内容は <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content.json</code> として保存すると、どの端末から開いても同じ LP に反映されます。どちらか一方を選んでください。
+              編集内容は <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content-{selectedSlug}.json</code> として保存すると、選択中の LP に反映されます。どちらか一方を選んでください。
             </p>
             <div className="flex flex-wrap gap-3 items-center mb-4">
               <Button
@@ -410,7 +458,7 @@ export default function ContentsManager() {
                 JSONをダウンロード
               </Button>
               <span className="text-sm text-[#875a3c]">
-                ダウンロードした content.json をリポジトリの <code className="bg-[#fffaf5] px-1 rounded text-xs">client/public/content.json</code> に置き、コミット・push するとサイトに反映されます（トークン不要）。
+                ダウンロードしたファイルをリポジトリの <code className="bg-[#fffaf5] px-1 rounded text-xs">{getContentRepoPathForSlug(selectedSlug)}</code> に置き、コミット・push するとサイトに反映されます（トークン不要）。
               </span>
             </div>
             {useSaveApi ? (

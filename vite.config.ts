@@ -159,6 +159,55 @@ function vitePluginManusDebugCollector(): Plugin {
 }
 
 // =============================================================================
+// 複数LP: content/manifest.json 生成 & content.json → content/root.json 移行
+// ビルド前に client/public/content/ を整え、manifest を出力する
+// =============================================================================
+function vitePluginContentManifest(): Plugin {
+  return {
+    name: "content-manifest",
+    buildStart() {
+      const publicDir = path.join(PROJECT_ROOT, "client", "public");
+      const contentDir = path.join(publicDir, "content");
+      const legacyContentPath = path.join(publicDir, "content.json");
+      const rootContentPath = path.join(contentDir, "root.json");
+      const manifestPath = path.join(contentDir, "manifest.json");
+
+      if (!fs.existsSync(contentDir)) {
+        fs.mkdirSync(contentDir, { recursive: true });
+      }
+
+      // 既存の content.json を content/root.json にコピー（初回移行）
+      if (fs.existsSync(legacyContentPath) && !fs.existsSync(rootContentPath)) {
+        fs.copyFileSync(legacyContentPath, rootContentPath);
+      }
+      // 戦略: トップと同内容を /main にも配置（content/main.json が無いとき root をコピー）
+      const mainContentPath = path.join(contentDir, "main.json");
+      if (fs.existsSync(rootContentPath) && !fs.existsSync(mainContentPath)) {
+        fs.copyFileSync(rootContentPath, mainContentPath);
+      }
+
+      const slugs: string[] = [];
+      if (fs.existsSync(contentDir)) {
+        const entries = fs.readdirSync(contentDir, { withFileTypes: true });
+        for (const e of entries) {
+          if (!e.isFile() || e.name === "manifest.json") continue;
+          if (e.name.endsWith(".json")) {
+            slugs.push(e.name.slice(0, -5));
+          }
+        }
+      }
+      slugs.sort();
+
+      fs.writeFileSync(
+        manifestPath,
+        JSON.stringify({ slugs }, null, 2),
+        "utf-8",
+      );
+    },
+  };
+}
+
+// =============================================================================
 // GitHub Pages: 404.html を index.html のコピーで出力（SPA の直接URLアクセス用）
 // 存在しないパス（例: /contents-manager）で 404 が出たときに 404.html が返り、
 // 同じ SPA が読み込まれてクライアントルーターが正しいページを表示する
@@ -184,6 +233,7 @@ const plugins = [
   jsxLocPlugin(),
   vitePluginManusRuntime(),
   vitePluginManusDebugCollector(),
+  vitePluginContentManifest(),
   vitePluginGhPages404(),
 ];
 

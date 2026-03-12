@@ -5,10 +5,11 @@ import NotFound from "@/pages/NotFound";
 import PoprockRedirect from "@/pages/PoprockRedirect";
 import ThanksKs from "@/pages/ThanksKs";
 import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useRoute } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { PaletteProvider } from "./contexts/PaletteContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { isReservedSlug } from "@/lib/lp-slug";
 import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
 
@@ -20,6 +21,15 @@ function ImageManagerRedirect() {
   return null;
 }
 
+/** /:lpSlug 用。予約パスでなければ Home をスラグ付きで表示 */
+function LpBySlugPage() {
+  const [match, params] = useRoute("/:lpSlug");
+  if (!match || !params?.lpSlug || isReservedSlug(params.lpSlug)) {
+    return <NotFound />;
+  }
+  return <Home lpSlug={params.lpSlug} />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -29,7 +39,7 @@ function Router() {
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path={"/:lpSlug"} component={LpBySlugPage} />
       <Route component={NotFound} />
     </Switch>
   );

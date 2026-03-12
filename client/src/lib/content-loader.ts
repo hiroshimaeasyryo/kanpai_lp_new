@@ -1,7 +1,7 @@
 /**
- * 端末間同期用: content.json の取得と localStorage フォールバック
- * - 先に /content.json を fetch し、あればそれを正とする
- * - 失敗時は従来どおり localStorage から構築
+ * 端末間同期用: スラグ別 content/{slug}.json の取得と localStorage フォールバック
+ * - 先に /content/{slug}.json を fetch し、あればそれを正とする
+ * - fetchContent() はトップ用（root スラグ）、従来の /content.json にフォールバック
  */
 import {
   getStoredEventImages,
@@ -14,6 +14,8 @@ import {
   setStoredHeroImage,
   setStoredHeroImageMobile,
 } from "@/lib/content-settings";
+import { getContentPathForSlug, CONTENT_MANIFEST_PATH, TOP_SLUG } from "@/lib/lp-slug";
+import type { ContentManifest } from "@/lib/lp-slug";
 import { getStoredPaletteId, setStoredPaletteId } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
 import { CONTENT_JSON_PATH } from "@/types/content-payload";
@@ -23,17 +25,64 @@ function isContentPayload(v: unknown): v is ContentPayload {
   return v !== null && typeof v === "object";
 }
 
+function getBaseUrl(): string {
+  return typeof import.meta.env?.BASE_URL === "string" && import.meta.env.BASE_URL !== "/"
+    ? import.meta.env.BASE_URL.replace(/\/$/, "")
+    : "";
+}
+
 /**
- * 配信されている /content.json を取得する。
- * 取得成功時は ContentPayload を返し、失敗・不正な形式の場合は null。
+ * 指定スラグのコンテンツを /content/{slug}.json から取得する。
  */
-export async function fetchContent(): Promise<ContentPayload | null> {
+export async function fetchContentBySlug(slug: string): Promise<ContentPayload | null> {
   if (typeof window === "undefined") return null;
   try {
-    const base =
-      typeof import.meta.env?.BASE_URL === "string" && import.meta.env.BASE_URL !== "/"
-        ? import.meta.env.BASE_URL.replace(/\/$/, "")
-        : "";
+    const base = getBaseUrl();
+    const path = getContentPathForSlug(slug);
+    const res = await fetch(`${base}${path}`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    return isContentPayload(data) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 編集可能なLP一覧（manifest）を取得する。
+ */
+export async function fetchContentManifest(): Promise<ContentManifest | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const base = getBaseUrl();
+    const res = await fetch(`${base}${CONTENT_MANIFEST_PATH}`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as unknown;
+    if (data !== null && typeof data === "object" && Array.isArray((data as ContentManifest).slugs)) {
+      return data as ContentManifest;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * トップ用コンテンツを取得する。
+ * 先に /content/root.json を試し、なければ従来の /content.json にフォールバックする。
+ */
+export async function fetchContent(): Promise<ContentPayload | null> {
+  const bySlug = await fetchContentBySlug(TOP_SLUG);
+  if (bySlug) return bySlug;
+  if (typeof window === "undefined") return null;
+  try {
+    const base = getBaseUrl();
     const res = await fetch(`${base}${CONTENT_JSON_PATH}`, {
       cache: "no-store",
       headers: { Accept: "application/json" },
