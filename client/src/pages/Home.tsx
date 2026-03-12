@@ -86,6 +86,9 @@ export default function Home({ lpSlug }: HomeProps) {
   /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
   const [showStickyCta, setShowStickyCta] = useState(false);
 
+  const lineCtaLabel = contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "参加申し込みをする";
+  const lineSignupLabel = contentSlug === "campaign2603" ? "キャンペーンで申し込み" : "参加申し込みをする";
+
   // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
   useEffect(() => {
     const threshold = 200;
@@ -258,7 +261,7 @@ export default function Home({ lpSlug }: HomeProps) {
             onClick={trackKsLineSignupClick}
             className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
           >
-            参加申し込みをする
+            {lineSignupLabel}
             <img src="/line-logo.png" alt="" className="w-8 h-8 object-contain" loading="lazy" />
           </a>
         </div>
@@ -345,7 +348,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   onClick={trackKsLineSignupClick}
                   className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
                 >
-                  参加申し込みをする
+                  {lineCtaLabel}
                   <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
                 </a>
               </div>
@@ -555,7 +558,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 onClick={trackKsLineSignupClick}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
-                参加申し込みをする
+                {lineCtaLabel}
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
             </div>
@@ -716,7 +719,7 @@ export default function Home({ lpSlug }: HomeProps) {
               onClick={trackKsLineSignupClick}
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
-              参加申し込みをする
+              {lineCtaLabel}
               <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
             </a>
           </div>
@@ -804,7 +807,7 @@ export default function Home({ lpSlug }: HomeProps) {
               onClick={trackKsLineSignupClick}
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
-              参加申し込みをする
+              {lineCtaLabel}
               <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
             </a>
           </div>
@@ -958,7 +961,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 onClick={trackKsLineSignupClick}
                 className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
               >
-                参加申し込みをする
+                {lineCtaLabel}
                 <img src="/line-logo.png" alt="LINE" className="w-7 h-7 object-contain" loading="lazy" />
               </a>
               <p className="text-xs text-lp-primary font-medium tracking-wide">
@@ -1067,7 +1070,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 onClick={trackKsLineSignupClick}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
-                参加申し込みをする
+                {lineSignupLabel}
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
               </a>
             </div>
