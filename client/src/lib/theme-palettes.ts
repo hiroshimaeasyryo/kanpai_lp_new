@@ -259,14 +259,30 @@ export function applyPalette(paletteId: string): void {
 
 const STORAGE_KEY = "kanpai_theme";
 
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* QuotaExceededError 等 */
+  }
+}
+
 /** localStorage からパレット ID を取得 */
 export function getStoredPaletteId(): string {
   if (typeof window === "undefined") return "amber";
-  return localStorage.getItem(STORAGE_KEY) ?? "amber";
+  return safeGetItem(STORAGE_KEY) ?? "amber";
 }
 
 /** localStorage にパレット ID を保存 */
 export function setStoredPaletteId(id: string): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, id);
+  safeSetItem(STORAGE_KEY, id);
 }

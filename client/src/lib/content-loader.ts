@@ -97,6 +97,15 @@ export async function fetchContent(): Promise<ContentPayload | null> {
   }
 }
 
+/** QuotaExceededError 等を避けるため localStorage 読み取りを try/catch で保護 */
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 現在の localStorage の内容から ContentPayload を組み立てる。
  * フォールバック表示や、管理画面の「保存」用に使用。
@@ -107,7 +116,7 @@ export function getContentFromLocalStorage(): ContentPayload {
   }
   const eventImages = getStoredEventImages() ?? migrateOldImageFormat();
   return {
-    logo: localStorage.getItem("kanpai_logo"),
+    logo: safeGetItem("kanpai_logo"),
     hero: getStoredHeroImage(),
     heroMobile: getStoredHeroImageMobile(),
     eventImages: eventImages && eventImages.length > 0 ? eventImages : undefined,
@@ -123,11 +132,27 @@ export function getContentFromLocalStorage(): ContentPayload {
  * 管理画面でリモートを読み込んだあとフォームと同期する場合や、
  * 保存前にローカルプレビューを合わせる場合に使用。
  */
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* QuotaExceededError 等 */
+  }
+}
+
+function safeRemoveItem(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* 同上 */
+  }
+}
+
 export function applyContentToLocalStorage(payload: ContentPayload): void {
   if (typeof window === "undefined") return;
   if (payload.logo !== undefined) {
-    if (payload.logo) localStorage.setItem("kanpai_logo", payload.logo);
-    else localStorage.removeItem("kanpai_logo");
+    if (payload.logo) safeSetItem("kanpai_logo", payload.logo);
+    else safeRemoveItem("kanpai_logo");
   }
   if (payload.hero !== undefined) {
     if (payload.hero) setStoredHeroImage(payload.hero);

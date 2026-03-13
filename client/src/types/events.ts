@@ -61,10 +61,26 @@ function parseStored(raw: string | null): KanpaiEvent[] {
   }
 }
 
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* QuotaExceededError 等: 保存を諦め、表示は継続 */
+  }
+}
+
 /** localStorage からイベント一覧を取得。先頭から最大3件が「次回のイベント詳細」に表示される */
 export function getStoredEvents(): KanpaiEvent[] {
   if (typeof window === "undefined") return defaultEvents;
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = safeGetItem(STORAGE_KEY);
   const list = parseStored(raw);
   return [...list].sort((a, b) => a.order - b.order);
 }
@@ -72,7 +88,7 @@ export function getStoredEvents(): KanpaiEvent[] {
 /** イベント一覧を localStorage に保存 */
 export function setStoredEvents(events: KanpaiEvent[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+  safeSetItem(STORAGE_KEY, JSON.stringify(events));
 }
 
 /** 次回表示用のイベントを最大 limit 件取得（先頭から）。回次は表示順で第1回・第2回… */

@@ -77,9 +77,14 @@ export default function ContentsManager() {
   const [unlocked, setUnlocked] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [error, setError] = useState("");
-  const [logoUrl, setLogoUrl] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("kanpai_logo") : null
-  );
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem("kanpai_logo");
+    } catch {
+      return null;
+    }
+  });
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(() =>
     typeof window !== "undefined" ? getStoredHeroImage() : null
   );
@@ -200,12 +205,20 @@ export default function ContentsManager() {
 
   const handleLogoUpdate = (url: string) => {
     setLogoUrl(url);
-    localStorage.setItem("kanpai_logo", url);
+    try {
+      localStorage.setItem("kanpai_logo", url);
+    } catch {
+      /* QuotaExceededError 等 */
+    }
   };
 
   const handleLogoReset = () => {
     setLogoUrl(null);
-    localStorage.removeItem("kanpai_logo");
+    try {
+      localStorage.removeItem("kanpai_logo");
+    } catch {
+      /* 同上 */
+    }
   };
 
   const handleHeroImageUpdate = (url: string) => {

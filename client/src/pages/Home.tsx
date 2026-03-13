@@ -27,7 +27,6 @@ import {
 import { applyContentToLocalStorage, fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
 import { TOP_SLUG } from "@/lib/lp-slug";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
-import { LoadingDots } from "@/components/LoadingDots";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
@@ -79,10 +78,8 @@ export default function Home({ lpSlug }: HomeProps) {
   const [nextEventCarouselIndex, setNextEventCarouselIndex] = useState(0);
   const nextEventCarouselTouchStartX = useRef<number | null>(null);
   const heroSectionRef = useRef<HTMLElement | null>(null);
-  /** ヒーロー画像の img onLoad が発火したか（重い画像の読み込み完了の目安） */
+  /** ヒーロー画像の img onLoad が発火したか（スケルトン非表示の目安） */
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
-  /** ページ全体の読み込みが完了し、ローディングを外してよいか */
-  const [isPageReady, setIsPageReady] = useState(false);
   /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
   const [showStickyCta, setShowStickyCta] = useState(false);
 
@@ -110,8 +107,12 @@ export default function Home({ lpSlug }: HomeProps) {
       if (cancelled) return;
 
       if (payload) {
-        // 端末間同期: content.json を正として表示（campaign2603Notice 等も localStorage に反映）
-        applyContentToLocalStorage(payload);
+        // 端末間同期: content.json を正として表示。QuotaExceededError 時は保存を諦め表示は継続
+        try {
+          applyContentToLocalStorage(payload);
+        } catch {
+          /* Safari 等でストレージ上限: 表示は継続 */
+        }
         const events = (payload.events ?? [])
           .slice()
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -207,21 +208,8 @@ export default function Home({ lpSlug }: HomeProps) {
     return () => link.remove();
   }, [heroImageUrl]);
 
-  // コンテンツ取得済み & (ヒーローなし or ヒーロー画像読み込み済み) → ローディングを外す
-  useEffect(() => {
-    if (!heroImageUrl) return;
-    const heroReady = heroImageLoadError || heroImageLoaded;
-    if (heroReady) setIsPageReady(true);
-  }, [heroImageUrl, heroImageLoadError, heroImageLoaded]);
-
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
-      {/* ページ（特にヒーロー画像）読み込み中のローディングオーバーレイ（透過で背後のコンテンツがかすかに見える） */}
-      {!isPageReady && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-[2px]">
-          <LoadingDots variant="overlay" />
-        </div>
-      )}
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -276,8 +264,15 @@ export default function Home({ lpSlug }: HomeProps) {
             background: 'linear-gradient(160deg, color-mix(in srgb, var(--lp-bg-warm) 70%, white) 0%, color-mix(in srgb, var(--lp-accent-light) 25%, transparent) 40%, color-mix(in srgb, var(--lp-primary) 12%, var(--lp-bg-warm)) 85%, var(--lp-bg-warm) 100%)',
           }}
         />
-        {/* ヒーロー画像ブロック: モバイル=アスペクト比で高さ固定しテキストを画像上に収める / PC=全面 */}
+        {/* ヒーロー画像ブロック: 固定アスペクトで CLS 防止。スケルトンで読み込み中を表示 */}
         <div className="relative w-full flex-shrink-0 aspect-[3/4] md:absolute md:inset-0 md:aspect-auto z-0">
+          {/* スケルトン: 画像読み込み中は同じ領域を確保しレイアウトを安定させる */}
+          {!heroImageLoaded && !heroImageLoadError && (
+            <div
+              className="absolute inset-0 z-0 bg-[color-mix(in_srgb,var(--lp-primary)_8%,var(--lp-bg-warm))] animate-pulse"
+              aria-hidden
+            />
+          )}
           {/* 背景レイヤー2: ヒーロー画像（モバイル=ブロック内で object-cover / PC=全面） */}
           {heroImageUrl && !heroImageLoadError && (() => {
             const pcUrl = heroImageUrl ?? DEFAULT_HERO_IMAGE_PATH;

@@ -25,16 +25,25 @@ export default function ImageManager() {
   const [unlocked, setUnlocked] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [error, setError] = useState("");
-  const [logoUrl, setLogoUrl] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("kanpai_logo") : null
-  );
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem("kanpai_logo");
+    } catch {
+      return null;
+    }
+  });
   const [images, setImages] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_SCENES;
-    return {
-      scene1: localStorage.getItem("kanpai_scene1") || DEFAULT_SCENES.scene1,
-      scene2: localStorage.getItem("kanpai_scene2") || DEFAULT_SCENES.scene2,
-      scene3: localStorage.getItem("kanpai_scene3") || DEFAULT_SCENES.scene3,
-    };
+    try {
+      return {
+        scene1: localStorage.getItem("kanpai_scene1") || DEFAULT_SCENES.scene1,
+        scene2: localStorage.getItem("kanpai_scene2") || DEFAULT_SCENES.scene2,
+        scene3: localStorage.getItem("kanpai_scene3") || DEFAULT_SCENES.scene3,
+      };
+    } catch {
+      return DEFAULT_SCENES;
+    }
   });
 
   useEffect(() => {
@@ -57,17 +66,29 @@ export default function ImageManager() {
       ...prev,
       [key]: url
     }));
-    localStorage.setItem(`kanpai_${key}`, url);
+    try {
+      localStorage.setItem(`kanpai_${key}`, url);
+    } catch {
+      /* QuotaExceededError 等 */
+    }
   };
 
   const handleLogoUpdate = (url: string) => {
     setLogoUrl(url);
-    localStorage.setItem("kanpai_logo", url);
+    try {
+      localStorage.setItem("kanpai_logo", url);
+    } catch {
+      /* QuotaExceededError 等 */
+    }
   };
 
   const handleLogoReset = () => {
     setLogoUrl(null);
-    localStorage.removeItem("kanpai_logo");
+    try {
+      localStorage.removeItem("kanpai_logo");
+    } catch {
+      /* 同上 */
+    }
   };
 
   if (!unlocked) {

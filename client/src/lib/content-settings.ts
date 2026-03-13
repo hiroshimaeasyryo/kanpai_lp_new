@@ -12,10 +12,35 @@ export interface EventImage {
 
 const EVENT_IMAGES_KEY = "kanpai_event_images";
 
+/** QuotaExceededError 等を握りつぶし、保存失敗時も表示は継続する（Safari 等でストレージ制限時） */
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* QuotaExceededError 等: 保存を諦め、表示は継続 */
+  }
+}
+
+function safeRemoveItem(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* 同上 */
+  }
+}
+
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 /** localStorage からイベント画像配列を取得 */
 export function getStoredEventImages(): EventImage[] | null {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem(EVENT_IMAGES_KEY);
+  const stored = safeGetItem(EVENT_IMAGES_KEY);
   if (!stored) return null;
   try {
     const parsed = JSON.parse(stored);
@@ -28,7 +53,7 @@ export function getStoredEventImages(): EventImage[] | null {
 /** イベント画像配列を localStorage に保存 */
 export function setStoredEventImages(images: EventImage[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(EVENT_IMAGES_KEY, JSON.stringify(images));
+  safeSetItem(EVENT_IMAGES_KEY, JSON.stringify(images));
 }
 
 /**
@@ -37,9 +62,9 @@ export function setStoredEventImages(images: EventImage[]): void {
  */
 export function migrateOldImageFormat(): EventImage[] | null {
   if (typeof window === "undefined") return null;
-  const s1 = localStorage.getItem("kanpai_scene1");
-  const s2 = localStorage.getItem("kanpai_scene2");
-  const s3 = localStorage.getItem("kanpai_scene3");
+  const s1 = safeGetItem("kanpai_scene1");
+  const s2 = safeGetItem("kanpai_scene2");
+  const s3 = safeGetItem("kanpai_scene3");
   if (!s1 && !s2 && !s3) return null;
 
   const images: EventImage[] = [];
@@ -114,32 +139,32 @@ export const DEFAULT_LOGO_IMAGE_PATH = "/default-logo.png";
 /** localStorage からヒーロー画像 URL を取得 */
 export function getStoredHeroImage(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(HERO_IMAGE_KEY);
+  return safeGetItem(HERO_IMAGE_KEY);
 }
 
 /** ヒーロー画像 URL を localStorage に保存 */
 export function setStoredHeroImage(url: string | null): void {
   if (typeof window === "undefined") return;
   if (url) {
-    localStorage.setItem(HERO_IMAGE_KEY, url);
+    safeSetItem(HERO_IMAGE_KEY, url);
   } else {
-    localStorage.removeItem(HERO_IMAGE_KEY);
+    safeRemoveItem(HERO_IMAGE_KEY);
   }
 }
 
 /** localStorage からモバイル用ヒーロー画像 URL を取得（未設定時は null） */
 export function getStoredHeroImageMobile(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(HERO_IMAGE_MOBILE_KEY);
+  return safeGetItem(HERO_IMAGE_MOBILE_KEY);
 }
 
 /** モバイル用ヒーロー画像 URL を localStorage に保存 */
 export function setStoredHeroImageMobile(url: string | null): void {
   if (typeof window === "undefined") return;
   if (url) {
-    localStorage.setItem(HERO_IMAGE_MOBILE_KEY, url);
+    safeSetItem(HERO_IMAGE_MOBILE_KEY, url);
   } else {
-    localStorage.removeItem(HERO_IMAGE_MOBILE_KEY);
+    safeRemoveItem(HERO_IMAGE_MOBILE_KEY);
   }
 }
 
@@ -148,7 +173,7 @@ const CAMPAIGN2603_NOTICE_KEY = "kanpai_campaign2603_notice";
 /** campaign2603用: イベント詳細「場所」下のキャンペーン文言を取得 */
 export function getStoredCampaign2603Notice(): string | null {
   if (typeof window === "undefined") return null;
-  const v = localStorage.getItem(CAMPAIGN2603_NOTICE_KEY);
+  const v = safeGetItem(CAMPAIGN2603_NOTICE_KEY);
   return v === "" ? null : v;
 }
 
@@ -156,9 +181,9 @@ export function getStoredCampaign2603Notice(): string | null {
 export function setStoredCampaign2603Notice(value: string | null): void {
   if (typeof window === "undefined") return;
   if (value != null && value.trim() !== "") {
-    localStorage.setItem(CAMPAIGN2603_NOTICE_KEY, value);
+    safeSetItem(CAMPAIGN2603_NOTICE_KEY, value);
   } else {
-    localStorage.removeItem(CAMPAIGN2603_NOTICE_KEY);
+    safeRemoveItem(CAMPAIGN2603_NOTICE_KEY);
   }
 }
 
@@ -210,7 +235,7 @@ export const DEFAULT_FEATURES: FeatureItem[] = [
 /** localStorage から特徴3件を取得。未保存時は旧キー(ito/messageCard)を移行してからデフォルトを返す */
 export function getStoredFeatures(): FeatureItem[] {
   if (typeof window === "undefined") return [...DEFAULT_FEATURES];
-  const stored = localStorage.getItem(FEATURES_KEY);
+  const stored = safeGetItem(FEATURES_KEY);
   if (stored) {
     try {
       const parsed = JSON.parse(stored);
@@ -229,8 +254,8 @@ export function getStoredFeatures(): FeatureItem[] {
     }
   }
   // 旧キーから画像だけ移行
-  const ito = localStorage.getItem("kanpai_ito_image");
-  const msg = localStorage.getItem("kanpai_message_card_image");
+  const ito = safeGetItem("kanpai_ito_image");
+  const msg = safeGetItem("kanpai_message_card_image");
   const base = [...DEFAULT_FEATURES];
   if (ito) base[1] = { ...base[1], imageUrl: ito };
   if (msg) base[2] = { ...base[2], imageUrl: msg };
@@ -245,5 +270,5 @@ export function setStoredFeatures(features: FeatureItem[]): void {
     body: f.body,
     imageUrl: f.imageUrl ?? null,
   }));
-  localStorage.setItem(FEATURES_KEY, JSON.stringify(payload));
+  safeSetItem(FEATURES_KEY, JSON.stringify(payload));
 }
