@@ -516,13 +516,13 @@ export default function Home({ lpSlug }: HomeProps) {
           <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 説明会やサイトで企業を見ても、<br/>そこで語られるのは、給料、年間休日、福利厚生のような「条件」や企業の良い面だけ。<br/><br/>企業で働く人の、等身大の声や葛藤は包み隠されたまま。<br/>それでは、自分に合うかどうか、確信が持てない。
               </p>
             </div>
             <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.36s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-body leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 自己分析もやった。就活軸も整理した。<br/>周りには「いいんじゃない？」と言われる。選考も通る。<br/>でも、なんかしっくりこない。<br/><br/><em className="font-bold" style={{ fontStyle: 'normal' }}>まだ自分が気づいていない、大事にしている何かがある気がする。</em>
               </p>
             </div>
