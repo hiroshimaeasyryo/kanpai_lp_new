@@ -99,12 +99,12 @@ export default function ImageManager() {
       >
         <div className="w-full max-w-sm p-8 bg-white rounded-2xl border border-[#ffd7c3] shadow-sm">
           <h1
-            className="text-xl font-bold text-[#4A3124] mb-2 text-center"
+            className="text-xl font-bold text-[#3D281E] mb-2 text-center"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             画像管理
           </h1>
-          <p className="text-sm text-[#6E4A32] mb-6 text-center">
+          <p className="text-sm text-[#5C3E2A] mb-6 text-center">
             アクセスコードを入力してください
           </p>
           <form onSubmit={handleAccessSubmit} className="space-y-4">
@@ -138,16 +138,16 @@ export default function ImageManager() {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <svg className="w-8 h-8 text-[#4A3124]" viewBox="0 0 40 40" fill="none">
+              <svg className="w-8 h-8 text-[#3D281E]" viewBox="0 0 40 40" fill="none">
                 <path d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M12 10l4-4m12 4l-4-4" stroke="#D4845A" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               <div>
-                <h1 className="text-xl font-bold text-[#4A3124]" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <h1 className="text-xl font-bold text-[#3D281E]" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   画像管理
                 </h1>
-                <p className="text-xs text-[#6E4A32]">KANPAI就活 ランディングページ</p>
+                <p className="text-xs text-[#5C3E2A]">KANPAI就活 ランディングページ</p>
               </div>
             </div>
             <Button
@@ -166,10 +166,10 @@ export default function ImageManager() {
         <div className="max-w-4xl mx-auto">
           {/* ブランドロゴ */}
           <div className="mb-10">
-            <h2 className="text-2xl font-bold text-[#4A3124] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <h2 className="text-2xl font-bold text-[#3D281E] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               ブランドロゴ
             </h2>
-            <p className="text-sm text-[#6E4A32] mb-4">
+            <p className="text-sm text-[#5C3E2A] mb-4">
               ヘッダー・ヒーロー・フッターに表示されるロゴです。SVG・PNG・JPGに対応しています。未設定の場合はデフォルトのアイコンが表示されます。
             </p>
             <div className="max-w-xs">
@@ -193,10 +193,10 @@ export default function ImageManager() {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#4A3124] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <h2 className="text-2xl font-bold text-[#3D281E] mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               イベント画像の管理
             </h2>
-            <p className="text-sm text-[#6E4A32]">
+            <p className="text-sm text-[#5C3E2A]">
               Aboutセクションに表示される3枚のイベント画像をアップロードして置換できます。
             </p>
           </div>
@@ -220,10 +220,10 @@ export default function ImageManager() {
           </div>
 
           <div className="mt-12 p-6 bg-white rounded-2xl border border-[#ffd7c3]">
-            <h3 className="text-lg font-bold text-[#4A3124] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <h3 className="text-lg font-bold text-[#3D281E] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               使い方
             </h3>
-            <ul className="space-y-2 text-sm text-[#6E4A32]">
+            <ul className="space-y-2 text-sm text-[#5C3E2A]">
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
                 <span>ブランドロゴはヘッダー・ヒーロー・フッターの全箇所に表示されます。アップロードするとLP全体のロゴが差し替わります。「デフォルトのロゴに戻す」で元のアイコンに戻せます。</span>
