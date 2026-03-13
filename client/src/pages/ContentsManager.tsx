@@ -344,12 +344,12 @@ export default function ContentsManager() {
       >
         <div className="w-full max-w-sm p-8 bg-white rounded-2xl border border-[#ffd7c3] shadow-sm">
           <h1
-            className="text-xl font-bold text-[#5C3D2E] mb-2 text-center"
+            className="text-xl font-bold text-[#4A3124] mb-2 text-center"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             コンテンツ管理
           </h1>
-          <p className="text-sm text-[#875a3c] mb-6 text-center">
+          <p className="text-sm text-[#6E4A32] mb-6 text-center">
             アクセスコードを入力してください
           </p>
           <form onSubmit={handleAccessSubmit} className="space-y-4">
@@ -384,7 +384,7 @@ export default function ContentsManager() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <svg
-                className="w-8 h-8 text-[#5C3D2E]"
+                className="w-8 h-8 text-[#4A3124]"
                 viewBox="0 0 40 40"
                 fill="none"
               >
@@ -411,12 +411,12 @@ export default function ContentsManager() {
               </svg>
               <div>
                 <h1
-                  className="text-xl font-bold text-[#5C3D2E]"
+                  className="text-xl font-bold text-[#4A3124]"
                   style={{ fontFamily: "'Shippori Mincho', serif" }}
                 >
                   コンテンツ管理
                 </h1>
-                <p className="text-xs text-[#875a3c]">
+                <p className="text-xs text-[#6E4A32]">
                   KANPAI就活 ランディングページ
                 </p>
               </div>
@@ -437,9 +437,9 @@ export default function ContentsManager() {
           {/* 編集するLPの選択 */}
           {lpSlugs.length > 0 && (
             <div className="mb-8 rounded-xl border border-[#ffd7c3] bg-white p-4">
-              <Label className="text-[#5C3D2E] text-sm font-medium block mb-2">編集するLP</Label>
+              <Label className="text-[#4A3124] text-sm font-medium block mb-2">編集するLP</Label>
               <Select value={selectedSlug} onValueChange={setSelectedSlug}>
-                <SelectTrigger className="max-w-xs border-[#ffd7c3] text-[#5C3D2E]">
+                <SelectTrigger className="max-w-xs border-[#ffd7c3] text-[#4A3124]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -450,7 +450,7 @@ export default function ContentsManager() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-[#875a3c] mt-2">
+              <p className="text-xs text-[#6E4A32] mt-2">
                 選択したLPのコンテンツを編集・保存します。プレビューは選択中のLPのURLで開きます。
               </p>
             </div>
@@ -460,12 +460,12 @@ export default function ContentsManager() {
           {selectedSlug === "campaign2603" && (
             <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
               <h2
-                className="text-xl font-bold text-[#5C3D2E] mb-2"
+                className="text-xl font-bold text-[#4A3124] mb-2"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 地方学生限定キャンペーン文言
               </h2>
-              <p className="text-sm text-[#875a3c] mb-4">
+              <p className="text-sm text-[#6E4A32] mb-4">
                 /campaign2603 のイベント詳細「場所」の下に表示するテキストです。改行はLP上でも反映されます。
               </p>
               <Textarea
@@ -477,7 +477,7 @@ KANPAI就活は27卒向けラスト2回。
 「行きたいけど遠い」という方へ、今回限り交通費サポートを用意しました。
 先着5名・上限あり。
 詳細はご予約後に運営よりご案内します。`}
-                className="min-h-[180px] border-[#ffd7c3] text-[#5C3D2E] placeholder:text-[#875a3c]/60"
+                className="min-h-[180px] border-[#ffd7c3] text-[#4A3124] placeholder:text-[#6E4A32]/60"
                 rows={8}
               />
             </div>
@@ -486,12 +486,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* 保存して反映（端末間同期） */}
           <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
             <h2
-              className="text-xl font-bold text-[#5C3D2E] mb-2"
+              className="text-xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               保存して反映
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               編集内容は <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content-{selectedSlug}.json</code> として保存すると、選択中の LP に反映されます。どちらか一方を選んでください。
             </p>
             <div className="flex flex-wrap gap-3 items-center mb-4">
@@ -503,17 +503,17 @@ KANPAI就活は27卒向けラスト2回。
               >
                 JSONをダウンロード
               </Button>
-              <span className="text-sm text-[#875a3c]">
+              <span className="text-sm text-[#6E4A32]">
                 ダウンロードしたファイルをリポジトリの <code className="bg-[#fffaf5] px-1 rounded text-xs">{getContentRepoPathForSlug(selectedSlug)}</code> に置き、コミット・push するとサイトに反映されます（トークン不要）。
               </span>
             </div>
             {useSaveApi ? (
-              <p className="text-sm text-[#875a3c] mb-3">
+              <p className="text-sm text-[#6E4A32] mb-3">
                 保存 API が設定されています。トークン入力は不要です。下のボタンでそのまま保存してデプロイできます。
               </p>
             ) : (
               <div className="space-y-2 mb-2">
-                <Label className="text-[#5C3D2E] text-sm">GitHub トークン（保存してデプロイする場合のみ）</Label>
+                <Label className="text-[#4A3124] text-sm">GitHub トークン（保存してデプロイする場合のみ）</Label>
                 <Input
                   type="password"
                   placeholder="ghp_xxxx..."
@@ -521,7 +521,7 @@ KANPAI就活は27卒向けラスト2回。
                   onChange={(e) => setGithubToken(e.target.value)}
                   className="max-w-md border-[#ffd7c3]"
                 />
-                <p className="text-xs text-[#875a3c]">
+                <p className="text-xs text-[#6E4A32]">
                   トークンはこの画面でのみ使用し、保存されません。非エンジニア向けには、GCP に保存 API を1回デプロイし、repo-config に saveApiUrl / saveApiSecret を設定するとトークン入力不要になります。
                 </p>
               </div>
@@ -541,12 +541,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* ブランドロゴ */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               ブランドロゴ
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               ヘッダー・フッターに表示されるロゴです。未設定の場合はデフォルトのアイコンが表示されます。
             </p>
             <div className="max-w-xs">
@@ -572,12 +572,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* ヒーロー画像 */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               ヒーロー画像
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               トップのヒーローセクションに表示する画像です。未設定の場合はプレースホルダーが表示されます。16:10程度の横長画像がおすすめです。PC用とモバイル用を分けると、スマホでは軽い画像だけ読み込まれて表示が速くなります。
             </p>
             <div className="max-w-md space-y-6">
@@ -605,7 +605,7 @@ KANPAI就活は27卒向けラスト2回。
                   currentImage={heroImageUrlMobile ?? undefined}
                   onImageUpload={handleHeroImageMobileUpdate}
                 />
-                <p className="text-xs text-[#875a3c] mt-1 mb-2">
+                <p className="text-xs text-[#6E4A32] mt-1 mb-2">
                   未設定の場合はPC用画像（または hero-mobile.png）が使われます。縦長・小さい解像度でOKです。
                 </p>
                 {heroImageUrlMobile && (
@@ -626,12 +626,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* Unique Features（3つの特徴） */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Unique Features（3つの特徴）
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               「他の就活イベントにはない、3つの特徴」の見出し・本文・画像を編集できます。画像は任意です。未設定時は client/public/feature-1.png 〜 feature-3.png が使われます。
             </p>
             <div className="space-y-8">
@@ -643,12 +643,12 @@ KANPAI就活は27卒向けラスト2回。
                     key={index}
                     className="p-6 bg-white border border-[#ffd7c3] rounded-2xl"
                   >
-                    <h3 className="text-lg font-bold text-[#5C3D2E] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    <h3 className="text-lg font-bold text-[#4A3124] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                       特徴 {index + 1}
                     </h3>
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-[#5C3D2E]">見出し</Label>
+                        <Label className="text-[#4A3124]">見出し</Label>
                         <Input
                           value={item.title}
                           onChange={(e) => handleFeatureUpdate(index, { title: e.target.value })}
@@ -657,7 +657,7 @@ KANPAI就活は27卒向けラスト2回。
                         />
                       </div>
                       <div>
-                        <Label className="text-[#5C3D2E]">本文</Label>
+                        <Label className="text-[#4A3124]">本文</Label>
                         <Textarea
                           value={item.body}
                           onChange={(e) => handleFeatureUpdate(index, { body: e.target.value })}
@@ -667,7 +667,7 @@ KANPAI就活は27卒向けラスト2回。
                         />
                       </div>
                       <div>
-                        <Label className="text-[#5C3D2E]">画像（任意）</Label>
+                        <Label className="text-[#4A3124]">画像（任意）</Label>
                         <div className="mt-2 max-w-xs">
                           <ImageUploader
                             label={`特徴 ${index + 1} の画像`}
@@ -689,7 +689,7 @@ KANPAI就活は27卒向けラスト2回。
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="mt-2 w-full text-[#875a3c] hover:text-[#5C3D2E]"
+                            className="mt-2 w-full text-[#6E4A32] hover:text-[#4A3124]"
                             onClick={() => handleFeatureUpdate(index, { imageUrl: null })}
                           >
                             画像を削除
@@ -705,7 +705,7 @@ KANPAI就活は27卒向けラスト2回。
               type="button"
               variant="ghost"
               size="sm"
-              className="mt-4 text-[#875a3c] hover:text-[#5C3D2E]"
+              className="mt-4 text-[#6E4A32] hover:text-[#4A3124]"
               onClick={() => persistFeatures([...DEFAULT_FEATURES])}
             >
               3つの特徴をデフォルトに戻す
@@ -715,12 +715,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* イベント画像 */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               イベント画像の管理
             </h2>
-<p className="text-sm text-[#875a3c] mb-4">
+<p className="text-sm text-[#6E4A32] mb-4">
                Aboutセクションに表示されるイベント画像をアップロードできます。1〜3枚目は「当日の過ごし方」のカルーセルにも使われます。表示ラベル（第1回・第7回・第13回など）は任意で変更できます。画像の追加・削除も可能です（最大6枚）。
             </p>
             <div className="grid md:grid-cols-3 gap-6">
@@ -733,7 +733,7 @@ KANPAI就活は27卒向けラスト2回。
                   />
                   {i < 3 && (
                     <div className="mt-3">
-                      <Label className="text-[#5C3D2E] text-xs">
+                      <Label className="text-[#4A3124] text-xs">
                         EVENT FLOW 表示ラベル（例: 第1回・第7回・第13回）
                       </Label>
                       <Input
@@ -777,12 +777,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* テーマ（カラーパレット） */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               テーマ（カラーパレット）
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               LP全体の配色を切り替えることができます。選択するとプレビューに即時反映されます。
             </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -815,10 +815,10 @@ KANPAI就活は27卒向けラスト2回。
                       style={{ background: palette.colors.border }}
                     />
                   </div>
-                  <p className="text-xs font-medium text-[#5C3D2E]">
+                  <p className="text-xs font-medium text-[#4A3124]">
                     {palette.nameJa}
                   </p>
-                  <p className="text-[10px] text-[#875a3c]">{palette.name}</p>
+                  <p className="text-[10px] text-[#6E4A32]">{palette.name}</p>
                 </button>
               ))}
             </div>
@@ -827,12 +827,12 @@ KANPAI就活は27卒向けラスト2回。
           {/* イベント管理 */}
           <div className="mb-10">
             <h2
-              className="text-2xl font-bold text-[#5C3D2E] mb-2"
+              className="text-2xl font-bold text-[#4A3124] mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               イベント管理
             </h2>
-            <p className="text-sm text-[#875a3c] mb-4">
+            <p className="text-sm text-[#6E4A32] mb-4">
               「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭から最大3件がLPに表示され、表示順に第1回・第2回・第3回として回次が付きます。
             </p>
 
@@ -852,7 +852,7 @@ KANPAI就活は27卒向けラスト2回。
                   ) : (
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <p className="font-medium text-[#5C3D2E]">
+                        <p className="font-medium text-[#4A3124]">
                           {[
                             ev.eventNumber != null && `第${ev.eventNumber}回`,
                             ev.eventNote?.trim(),
@@ -860,11 +860,11 @@ KANPAI就活は27卒向けラスト2回。
                           {(ev.eventNumber != null || ev.eventNote?.trim()) ? " — " : ""}
                           {ev.dateLabel || "（日時未設定）"}
                         </p>
-                        <p className="text-sm text-[#875a3c]">
+                        <p className="text-sm text-[#6E4A32]">
                           {ev.location}
                           {ev.locationNote ? ` ${ev.locationNote}` : ""}
                         </p>
-                        <p className="text-xs text-[#875a3c] mt-1">
+                        <p className="text-xs text-[#6E4A32] mt-1">
                           参加企業 {ev.companiesCount}社 / 参加学生 {ev.studentsCount}名
                         </p>
                       </div>
@@ -926,7 +926,7 @@ KANPAI就活は27卒向けラスト2回。
               type="button"
               variant="ghost"
               size="sm"
-              className="mt-4 text-[#875a3c] hover:text-[#5C3D2E]"
+              className="mt-4 text-[#6E4A32] hover:text-[#4A3124]"
               onClick={handleResetEventsToDefault}
             >
               イベントをデフォルトに戻す
@@ -935,12 +935,12 @@ KANPAI就活は27卒向けラスト2回。
 
           <div className="mt-12 p-6 bg-white rounded-2xl border border-[#ffd7c3]">
             <h3
-              className="text-lg font-bold text-[#5C3D2E] mb-4"
+              className="text-lg font-bold text-[#4A3124] mb-4"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               使い方
             </h3>
-            <ul className="space-y-2 text-sm text-[#875a3c]">
+            <ul className="space-y-2 text-sm text-[#6E4A32]">
               <li className="flex items-start gap-2">
                 <span className="text-[#d4844b] font-bold">1.</span>
                 <span>
@@ -1005,7 +1005,7 @@ function EventForm({
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-[#5C3D2E]">回次（表示用）</Label>
+        <Label className="text-[#4A3124]">回次（表示用）</Label>
         <Input
           type="number"
           min={1}
@@ -1019,7 +1019,7 @@ function EventForm({
         />
       </div>
       <div>
-        <Label className="text-[#5C3D2E]">回の備考（任意）</Label>
+        <Label className="text-[#4A3124]">回の備考（任意）</Label>
         <Input
           value={form.eventNote ?? ""}
           onChange={(e) => update({ eventNote: e.target.value || undefined })}
@@ -1028,7 +1028,7 @@ function EventForm({
         />
       </div>
       <div>
-        <Label className="text-[#5C3D2E]">日時（表示用）</Label>
+        <Label className="text-[#4A3124]">日時（表示用）</Label>
         <Input
           value={form.dateLabel}
           onChange={(e) => update({ dateLabel: e.target.value })}
@@ -1038,7 +1038,7 @@ function EventForm({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-[#5C3D2E]">時間帯（概要用）</Label>
+          <Label className="text-[#4A3124]">時間帯（概要用）</Label>
           <Input
             value={form.timeRange ?? ""}
             onChange={(e) => update({ timeRange: e.target.value })}
@@ -1047,7 +1047,7 @@ function EventForm({
           />
         </div>
         <div>
-          <Label className="text-[#5C3D2E]">時間の補足</Label>
+          <Label className="text-[#4A3124]">時間の補足</Label>
           <Input
             value={form.timeNote ?? ""}
             onChange={(e) => update({ timeNote: e.target.value })}
@@ -1057,7 +1057,7 @@ function EventForm({
         </div>
       </div>
       <div>
-        <Label className="text-[#5C3D2E]">場所</Label>
+        <Label className="text-[#4A3124]">場所</Label>
         <Input
           value={form.location}
           onChange={(e) => update({ location: e.target.value })}
@@ -1066,7 +1066,7 @@ function EventForm({
         />
       </div>
       <div>
-        <Label className="text-[#5C3D2E]">場所の補足</Label>
+        <Label className="text-[#4A3124]">場所の補足</Label>
         <Input
           value={form.locationNote ?? ""}
           onChange={(e) => update({ locationNote: e.target.value })}
@@ -1076,7 +1076,7 @@ function EventForm({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label className="text-[#5C3D2E]">参加企業数（社）</Label>
+          <Label className="text-[#4A3124]">参加企業数（社）</Label>
           <Input
             type="number"
             min={1}
@@ -1088,7 +1088,7 @@ function EventForm({
           />
         </div>
         <div>
-          <Label className="text-[#5C3D2E]">参加学生数（名）</Label>
+          <Label className="text-[#4A3124]">参加学生数（名）</Label>
           <Input
             type="number"
             min={1}

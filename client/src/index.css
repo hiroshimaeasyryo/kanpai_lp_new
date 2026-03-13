@@ -67,9 +67,9 @@
   /* LP Color Palette（applyPalette() で動的に上書き可能） */
   --lp-primary: #d4844b;
   --lp-primary-hover: #c47540;
-  --lp-text-heading: #5C3D2E;
-  --lp-text-body: #875a3c;
-  --lp-text-muted: #736964;
+  --lp-text-heading: #4A3124;
+  --lp-text-body: #6E4A32;
+  --lp-text-muted: #5C5450;
   --lp-bg-warm: #fffaf5;
   --lp-bg-card: #f5e6cd;
   --lp-border: #ffd7c3;
