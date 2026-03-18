@@ -5,13 +5,13 @@
   "events": [
     {
       "id": "default-2",
-      "eventNumber": 17,
-      "eventNote": "大規模特別回/27卒向けはラスト2回！！",
-      "dateLabel": "2026年3月18日（水）16:00〜20:00",
-      "timeRange": "16:00 – 20:00",
-      "location": "新宿（お申し込み後にご案内）",
-      "companiesCount": 8,
-      "studentsCount": 40,
+      "eventNumber": 18,
+      "eventNote": "27卒向け【最終回】",
+      "dateLabel": "2026年4月9日（木）13:00〜17:00",
+      "timeRange": "13:00〜17:00",
+      "location": "新宿駅から徒歩6分（お申し込み後にご案内）",
+      "companiesCount": 4,
+      "studentsCount": 20,
       "order": 0
     }
   ],
@@ -32,5 +32,6 @@
       "imageUrl": "/feature-3.png"
     }
   ],
-  "paletteId": "amber"
+  "paletteId": "amber",
+  "campaign2603Notice": null
 }
