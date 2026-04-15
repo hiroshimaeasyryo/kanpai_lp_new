@@ -52,7 +52,7 @@ const DEFAULT_CONTENT: SelfReflectionContent = {
     titleHtml: "面接のたびに、<br>自分を取り繕うことに<br>慣れていませんか。",
     sub: "言葉にならないのは、考えが足りないからじゃない。",
     ctaLabel: "日帰り自己分析合宿に申し込む",
-    bgImageUrl: "/self_reflection/hero.jpg",
+    bgImageUrl: "/self_reflection/hero.png",
   },
   eventInfo: {
     label: "次回開催",
@@ -150,7 +150,7 @@ const DEFAULT_CONTENT: SelfReflectionContent = {
     ],
   },
   advisor: {
-    photoUrl: "/self_reflection/advisor.jpg",
+    photoUrl: "/self_reflection/advisor.png",
     name: "堺 千菜美",
     title: "株式会社ワークアズライフ｜キャリアアドバイザー",
     bio: [
