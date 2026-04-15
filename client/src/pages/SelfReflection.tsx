@@ -51,6 +51,11 @@ const SELF_REFLECTION_IMAGE_ALIASES: Record<string, string> = {
   "/self_reflection/advisor.jpg": "/self_reflection/advisor.png",
 };
 
+/** .png/.jpg パスから対応する .webp パスを返す */
+function toWebP(src: string): string {
+  return src.replace(/\.(png|jpe?g)$/i, ".webp");
+}
+
 function normalizeSelfReflectionImages(c: SelfReflectionContent): SelfReflectionContent {
   const bg = SELF_REFLECTION_IMAGE_ALIASES[c.hero.bgImageUrl] ?? c.hero.bgImageUrl;
   const photo = SELF_REFLECTION_IMAGE_ALIASES[c.advisor.photoUrl] ?? c.advisor.photoUrl;
@@ -336,7 +341,8 @@ html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
 }
 .hero-bg {
   position:absolute; inset:0;
-  background:url("${content.hero.bgImageUrl}") center/cover no-repeat;
+  background:url("${toWebP(content.hero.bgImageUrl)}") center/cover no-repeat;
+  background:image-set(url("${toWebP(content.hero.bgImageUrl)}") type("image/webp"), url("${content.hero.bgImageUrl}") type("image/png")) center/cover no-repeat;
   opacity:0.18;
 }
 .hero-inner { position:relative; max-width:760px; margin:0 auto; }
@@ -628,7 +634,10 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </ul>
           <div className="step-img-row">
             {content.steps.images.slice(0, 2).map((img, i) => (
-              <img key={i} src={img.url} alt={img.alt} loading="lazy" />
+              <picture key={i}>
+                <source srcSet={toWebP(img.url)} type="image/webp" />
+                <img src={img.url} alt={img.alt} loading="lazy" />
+              </picture>
             ))}
           </div>
           <div className="s05-cta">
@@ -683,7 +692,10 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
         <div className="sec-inner">
           <div className="advisor-card">
             <div className="advisor-img-wrap">
-              <img className="advisor-photo" src={content.advisor.photoUrl} alt={content.advisor.name} loading="lazy" />
+              <picture>
+                <source srcSet={toWebP(content.advisor.photoUrl)} type="image/webp" />
+                <img className="advisor-photo" src={content.advisor.photoUrl} alt={content.advisor.name} loading="lazy" />
+              </picture>
               <div className="advisor-overlay">
                 <div className="advisor-name">{content.advisor.name}</div>
                 <div className="advisor-title">{content.advisor.title}</div>
