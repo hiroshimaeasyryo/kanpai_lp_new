@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { ImageUploader } from "@/components/ImageUploader";
+import { SelfReflectionEditor, type SelfReflectionContent } from "@/components/SelfReflectionEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,9 +119,8 @@ export default function ContentsManager() {
   const [selectedSlug, setSelectedSlug] = useState<string>(TOP_SLUG);
   /** campaign2603用: イベント詳細「場所」下のキャンペーン文言 */
   const [campaign2603Notice, setCampaign2603Notice] = useState<string>("");
-  /** self-reflection 用: JSON をそのまま編集 */
-  const [selfReflectionJson, setSelfReflectionJson] = useState<string>("");
-  const [selfReflectionJsonError, setSelfReflectionJsonError] = useState<string>("");
+  /** self-reflection 用: 構造化コンテンツ */
+  const [selfReflectionContent, setSelfReflectionContent] = useState<SelfReflectionContent | null>(null);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -155,8 +155,7 @@ export default function ContentsManager() {
         if (payload.paletteId) setPaletteId(payload.paletteId);
         setCampaign2603Notice(payload.campaign2603Notice ?? "");
         if (selectedSlug === "self-reflection") {
-          setSelfReflectionJson(JSON.stringify((payload as ContentPayload).selfReflection ?? {}, null, 2));
-          setSelfReflectionJsonError("");
+          setSelfReflectionContent(((payload as ContentPayload).selfReflection ?? null) as SelfReflectionContent | null);
         }
         applyContentToLocalStorage(payload);
       }
@@ -286,16 +285,7 @@ export default function ContentsManager() {
 
   const buildPayload = (): ContentPayload => {
     if (selectedSlug === "self-reflection") {
-      try {
-        const parsed = JSON.parse(selfReflectionJson || "{}") as unknown;
-        setSelfReflectionJsonError("");
-        return { selfReflection: parsed };
-      } catch {
-        setSelfReflectionJsonError(
-          "JSONの形式が正しくありません（カンマ、括弧、ダブルクォートをご確認ください）",
-        );
-        return { selfReflection: {} };
-      }
+      return { selfReflection: selfReflectionContent ?? {} };
     }
     return {
       logo: logoUrl ?? null,
@@ -504,28 +494,22 @@ KANPAI就活は27卒向けラスト2回。
             </div>
           )}
 
-          {/* self-reflection: JSONを編集 */}
-          {selectedSlug === "self-reflection" && (
-            <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
+          {/* self-reflection: ビジュアルエディタ */}
+          {selectedSlug === "self-reflection" && selfReflectionContent && (
+            <div className="mb-10">
               <h2
                 className="text-xl font-bold text-[#3D281E] mb-2"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                /self-reflection コンテンツ（JSON）
+                /self-reflection コンテンツ編集
               </h2>
               <p className="text-sm text-[#5C3E2A] mb-4">
-                このJSONが <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/content/self-reflection.json</code> として保存され、
-                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded ml-1">/self-reflection</code> に反映されます。
+                各セクションを編集して「保存してデプロイ」すると <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/self-reflection</code> に反映されます。
               </p>
-              <Textarea
-                value={selfReflectionJson}
-                onChange={(e) => setSelfReflectionJson(e.target.value)}
-                className="min-h-[420px] border-[#ffd7c3] font-mono text-xs text-[#3D281E]"
-                rows={18}
+              <SelfReflectionEditor
+                content={selfReflectionContent}
+                onChange={setSelfReflectionContent}
               />
-              {selfReflectionJsonError && (
-                <p className="text-sm text-red-600 mt-2">{selfReflectionJsonError}</p>
-              )}
             </div>
           )}
 
