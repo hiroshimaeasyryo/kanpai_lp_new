@@ -45,6 +45,23 @@ type SelfReflectionContent = {
 
 const STORAGE_KEY = "self_reflection_content_v1";
 
+/** public に置いた実ファイルは .png のみ。JSON が .jpg のままだと表示されないため正規化する */
+const SELF_REFLECTION_IMAGE_ALIASES: Record<string, string> = {
+  "/self_reflection/hero.jpg": "/self_reflection/hero.png",
+  "/self_reflection/advisor.jpg": "/self_reflection/advisor.png",
+};
+
+function normalizeSelfReflectionImages(c: SelfReflectionContent): SelfReflectionContent {
+  const bg = SELF_REFLECTION_IMAGE_ALIASES[c.hero.bgImageUrl] ?? c.hero.bgImageUrl;
+  const photo = SELF_REFLECTION_IMAGE_ALIASES[c.advisor.photoUrl] ?? c.advisor.photoUrl;
+  if (bg === c.hero.bgImageUrl && photo === c.advisor.photoUrl) return c;
+  return {
+    ...c,
+    hero: { ...c.hero, bgImageUrl: bg },
+    advisor: { ...c.advisor, photoUrl: photo },
+  };
+}
+
 const DEFAULT_CONTENT: SelfReflectionContent = {
   ctaUrl: "#apply",
   floatingCtaLabel: "自分の言葉を、見つけにいく",
@@ -194,7 +211,7 @@ function safeParseStored(): SelfReflectionContent | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object") return parsed as SelfReflectionContent;
+    if (parsed && typeof parsed === "object") return normalizeSelfReflectionImages(parsed as SelfReflectionContent);
     return null;
   } catch {
     return null;
@@ -223,8 +240,9 @@ export default function SelfReflection() {
       const remote = (payload as { selfReflection?: SelfReflectionContent } | null)?.selfReflection;
       if (cancelled) return;
       if (remote) {
-        setContent(remote);
-        safeStore(remote);
+        const fixed = normalizeSelfReflectionImages(remote);
+        setContent(fixed);
+        safeStore(fixed);
       }
     })();
     return () => {
