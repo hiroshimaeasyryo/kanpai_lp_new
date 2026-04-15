@@ -465,12 +465,15 @@ html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
 
 /* S08 */
 .s08 { background:var(--offwhite); }
-.advisor-grid { display:grid; grid-template-columns:320px 1fr; gap:56px; align-items:start; }
-.advisor-photo { width:100%; aspect-ratio:2/3; object-fit:cover; background:var(--brown-pale); }
-.advisor-name { font-family:'Shippori Mincho', serif; font-size:clamp(24px, 3vw, 32px); font-weight:700; color:var(--text); margin-bottom:6px; }
-.advisor-title { font-size:13px; color:var(--text-sub); margin-bottom:28px; letter-spacing:0.05em; }
+.advisor-card { position:relative; overflow:hidden; border-radius:12px; }
+.advisor-img-wrap { position:relative; width:100%; }
+.advisor-photo { width:100%; display:block; object-fit:contain; background:var(--brown-pale); }
+.advisor-overlay { position:absolute; bottom:0; left:0; right:0; padding:40px 48px 36px; background:linear-gradient(to top, rgba(62,39,35,0.92) 0%, rgba(62,39,35,0.78) 60%, rgba(62,39,35,0) 100%); color:#fff; }
+.advisor-overlay .advisor-name { font-family:'Shippori Mincho', serif; font-size:clamp(22px, 3vw, 30px); font-weight:700; color:#fff; margin-bottom:4px; }
+.advisor-overlay .advisor-title { font-size:13px; color:rgba(255,255,255,0.75); margin-bottom:0; letter-spacing:0.05em; }
+.advisor-text { padding:40px 0 0; }
 .advisor-bio { font-size:15px; line-height:2; color:var(--text); margin-bottom:20px; }
-.advisor-highlight { background:var(--brown-pale); padding:24px 28px; margin:24px 0; font-size:15px; line-height:2; color:var(--text); font-weight:500; }
+.advisor-highlight { background:var(--brown-pale); padding:24px 28px; margin:24px 0; font-size:15px; line-height:2; color:var(--text); font-weight:500; border-left:3px solid var(--brown-light); }
 
 /* S09 */
 .s09 { background:var(--white); }
@@ -510,8 +513,8 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
   .safety-grid { grid-template-columns:1fr; }
   .safety-item:nth-child(2n) { border-right:1px solid var(--border); }
   .safety-item:nth-child(3) { border-bottom:1px solid var(--border); }
-  .advisor-grid { grid-template-columns:1fr; gap:32px; }
-  .advisor-photo { aspect-ratio:3/2; max-height:320px; }
+  .advisor-overlay { padding:24px 24px 20px; }
+  .advisor-text { padding:28px 0 0; }
   .step-item { grid-template-columns:80px 1fr; gap:16px; }
   .step-img-row { grid-template-columns:1fr; }
   .step-img-row img { height:220px; }
@@ -678,25 +681,27 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s08">
         <div className="sec-inner">
-          <div className="advisor-grid">
-            <div>
+          <div className="advisor-card">
+            <div className="advisor-img-wrap">
               <img className="advisor-photo" src={content.advisor.photoUrl} alt={content.advisor.name} loading="lazy" />
+              <div className="advisor-overlay">
+                <div className="advisor-name">{content.advisor.name}</div>
+                <div className="advisor-title">{content.advisor.title}</div>
+              </div>
             </div>
-            <div>
-              <div className="advisor-name">{content.advisor.name}</div>
-              <div className="advisor-title">{content.advisor.title}</div>
-              {content.advisor.bio.slice(0, 3).map((p, i) => (
-                <p key={i} className="advisor-bio">
-                  {p}
-                </p>
-              ))}
-              <div className="advisor-highlight">{content.advisor.highlight}</div>
-              {content.advisor.bio.slice(3).map((p, i) => (
-                <p key={`tail-${i}`} className="advisor-bio">
-                  {p}
-                </p>
-              ))}
-            </div>
+          </div>
+          <div className="advisor-text">
+            {content.advisor.bio.slice(0, 3).map((p, i) => (
+              <p key={i} className="advisor-bio">
+                {p}
+              </p>
+            ))}
+            <div className="advisor-highlight">{content.advisor.highlight}</div>
+            {content.advisor.bio.slice(3).map((p, i) => (
+              <p key={`tail-${i}`} className="advisor-bio">
+                {p}
+              </p>
+            ))}
           </div>
         </div>
       </section>
