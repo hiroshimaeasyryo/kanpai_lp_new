@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## リポジトリ
+
+GitHub: https://github.com/hiroshimaeasyryo/kanpai_lp_new
+
 ## プロジェクト概要
 
 KANPAI就活のランディングページ（LP）サイト。複数LPをスラグベースで管理でき、コンテンツマネージャー画面からLP内容を編集・デプロイできる。
