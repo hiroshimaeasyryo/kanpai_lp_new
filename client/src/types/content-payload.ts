@@ -22,6 +22,12 @@ export interface ContentPayload {
   paletteId?: string | null;
   /** campaign2603用: イベント詳細「場所」下に表示するキャンペーン文言（改行区切り） */
   campaign2603Notice?: string | null;
+
+  /**
+   * /self-reflection 用コンテンツ。
+   * LP と異なる構造のため、ページ側で解釈する。
+   */
+  selfReflection?: unknown;
 }
 
 /** content.json のパス（配信時は /content.json） */

@@ -12,6 +12,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { isReservedSlug } from "@/lib/lp-slug";
 import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
+import SelfReflection from "./pages/SelfReflection";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -33,9 +34,10 @@ function LpBySlugPage() {
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"}>{() => <Home />}</Route>
       <Route path={"/thanks_ks"} component={ThanksKs} />
       <Route path={"/poprock_redirect"} component={PoprockRedirect} />
+      <Route path={"/self-reflection"} component={SelfReflection} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />

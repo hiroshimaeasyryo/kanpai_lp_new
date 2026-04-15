@@ -118,6 +118,9 @@ export default function ContentsManager() {
   const [selectedSlug, setSelectedSlug] = useState<string>(TOP_SLUG);
   /** campaign2603用: イベント詳細「場所」下のキャンペーン文言 */
   const [campaign2603Notice, setCampaign2603Notice] = useState<string>("");
+  /** self-reflection 用: JSON をそのまま編集 */
+  const [selfReflectionJson, setSelfReflectionJson] = useState<string>("");
+  const [selfReflectionJsonError, setSelfReflectionJsonError] = useState<string>("");
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -151,6 +154,10 @@ export default function ContentsManager() {
         );
         if (payload.paletteId) setPaletteId(payload.paletteId);
         setCampaign2603Notice(payload.campaign2603Notice ?? "");
+        if (selectedSlug === "self-reflection") {
+          setSelfReflectionJson(JSON.stringify((payload as ContentPayload).selfReflection ?? {}, null, 2));
+          setSelfReflectionJsonError("");
+        }
         applyContentToLocalStorage(payload);
       }
     })();
@@ -277,18 +284,32 @@ export default function ContentsManager() {
     setAddingNew(false);
   };
 
-  const buildPayload = (): ContentPayload => ({
-    logo: logoUrl ?? null,
-    hero: heroImageUrl ?? null,
-    heroMobile: heroImageUrlMobile ?? null,
-    eventImages: eventImages.length > 0 ? eventImages : undefined,
-    events: events.length > 0 ? events : undefined,
-    features: features.slice(0, 3),
-    paletteId: paletteId ?? null,
-    ...(selectedSlug === "campaign2603"
-      ? { campaign2603Notice: campaign2603Notice.trim() || null }
-      : {}),
-  });
+  const buildPayload = (): ContentPayload => {
+    if (selectedSlug === "self-reflection") {
+      try {
+        const parsed = JSON.parse(selfReflectionJson || "{}") as unknown;
+        setSelfReflectionJsonError("");
+        return { selfReflection: parsed };
+      } catch {
+        setSelfReflectionJsonError(
+          "JSONの形式が正しくありません（カンマ、括弧、ダブルクォートをご確認ください）",
+        );
+        return { selfReflection: {} };
+      }
+    }
+    return {
+      logo: logoUrl ?? null,
+      hero: heroImageUrl ?? null,
+      heroMobile: heroImageUrlMobile ?? null,
+      eventImages: eventImages.length > 0 ? eventImages : undefined,
+      events: events.length > 0 ? events : undefined,
+      features: features.slice(0, 3),
+      paletteId: paletteId ?? null,
+      ...(selectedSlug === "campaign2603"
+        ? { campaign2603Notice: campaign2603Notice.trim() || null }
+        : {}),
+    };
+  };
 
   const handleDownloadJson = () => {
     const payload = buildPayload();
@@ -483,6 +504,31 @@ KANPAI就活は27卒向けラスト2回。
             </div>
           )}
 
+          {/* self-reflection: JSONを編集 */}
+          {selectedSlug === "self-reflection" && (
+            <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
+              <h2
+                className="text-xl font-bold text-[#3D281E] mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                /self-reflection コンテンツ（JSON）
+              </h2>
+              <p className="text-sm text-[#5C3E2A] mb-4">
+                このJSONが <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/content/self-reflection.json</code> として保存され、
+                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded ml-1">/self-reflection</code> に反映されます。
+              </p>
+              <Textarea
+                value={selfReflectionJson}
+                onChange={(e) => setSelfReflectionJson(e.target.value)}
+                className="min-h-[420px] border-[#ffd7c3] font-mono text-xs text-[#3D281E]"
+                rows={18}
+              />
+              {selfReflectionJsonError && (
+                <p className="text-sm text-red-600 mt-2">{selfReflectionJsonError}</p>
+              )}
+            </div>
+          )}
+
           {/* 保存して反映（端末間同期） */}
           <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
             <h2
@@ -538,6 +584,8 @@ KANPAI就活は27卒向けラスト2回。
               {saveError && <span className="text-sm text-red-600">{saveError}</span>}
             </div>
           </div>
+          {selectedSlug === "self-reflection" ? null : (
+            <>
           {/* ブランドロゴ */}
           <div className="mb-10">
             <h2
@@ -973,6 +1021,8 @@ KANPAI就活は27卒向けラスト2回。
               </li>
             </ul>
           </div>
+            </>
+          )}
         </div>
       </main>
     </div>

@@ -15,6 +15,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "poprock_redirect",
   "thanks_ks",
   "image-manager",
+  "self-reflection",
   "404",
   "content",
   "api",
