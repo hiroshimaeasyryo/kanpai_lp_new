@@ -298,8 +298,8 @@ html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
 }
 .logo-sub { font-size:10px; letter-spacing:0.3em; color:var(--brown-light) !important; text-transform:uppercase; }
 
-/* SECTION BASE */
-section { padding:100px 40px; }
+/* SECTION BASE — .sr-body のみ（Sonner の section などへ漏れないようスコープ） */
+.sr-body section { padding:100px 40px; }
 .sec-inner { max-width:820px; margin:0 auto; }
 .center { text-align:center; }
 .left { text-align:left; }
@@ -483,7 +483,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 .footer-copy { font-size:12px; letter-spacing:0.05em; }
 
 @media(max-width:768px) {
-  section { padding:72px 24px; }
+  .sr-body section { padding:72px 24px; }
   .hero { padding:80px 24px; padding-top:calc(80px + 76px); }
   .s01b { padding:40px 24px; }
   .s01b-inner { padding:32px 24px; }
