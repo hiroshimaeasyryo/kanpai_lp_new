@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
 
+/** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
+function trackSelfReflectionCtaClick() {
+  if (typeof window !== "undefined" && typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function") {
+    (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead");
+  }
+}
+
 type SelfReflectionContent = {
   ctaUrl: string;
   floatingCtaLabel: string;
@@ -237,6 +244,36 @@ export default function SelfReflection() {
     return safeParseStored() ?? DEFAULT_CONTENT;
   });
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  // /self-reflection 専用: タイトル・favicon を表示中だけ差し替え
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = `${content.footer.brand} - 日帰り自己分析合宿`;
+
+    const nextFaviconHref = "/self_reflection/self-reflection.png";
+    const iconEl =
+      (document.querySelector("link[rel~='icon']") as HTMLLinkElement | null) ??
+      (document.querySelector("link[rel='shortcut icon']") as HTMLLinkElement | null);
+
+    if (!iconEl) {
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.href = nextFaviconHref;
+      document.head.appendChild(link);
+      return () => {
+        document.title = prevTitle;
+        link.remove();
+      };
+    }
+
+    const prevHref = iconEl.href;
+    iconEl.href = nextFaviconHref;
+
+    return () => {
+      document.title = prevTitle;
+      iconEl.href = prevHref;
+    };
+  }, [content.footer.brand]);
 
   useEffect(() => {
     let cancelled = false;
@@ -535,7 +572,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
     <div className="sr-body">
       <style>{css}</style>
 
-      <a href={content.ctaUrl} className="float-cta">
+      <a href={content.ctaUrl} className="float-cta" onClick={trackSelfReflectionCtaClick}>
         {content.floatingCtaLabel}
       </a>
 
@@ -551,7 +588,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
         <div className="hero-inner">
           <h1 className="hero-main-copy" dangerouslySetInnerHTML={{ __html: content.hero.titleHtml }} />
           <p className="hero-sub-copy">{content.hero.sub}</p>
-          <a href={content.ctaUrl} className="cta-btn large">
+          <a href={content.ctaUrl} className="cta-btn large" onClick={trackSelfReflectionCtaClick}>
             {content.hero.ctaLabel}
           </a>
         </div>
@@ -595,7 +632,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           <p className="body-text">{content.cause.body}</p>
           <div className="sub-copy-center">{content.cause.subCenter}</div>
           <div style={{ textAlign: "center" }}>
-            <a href={content.ctaUrl} className="cta-btn">
+            <a href={content.ctaUrl} className="cta-btn" onClick={trackSelfReflectionCtaClick}>
               {content.cause.ctaLabel}
             </a>
           </div>
@@ -641,7 +678,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
             ))}
           </div>
           <div className="s05-cta">
-            <a href={content.ctaUrl} className="cta-btn large">
+            <a href={content.ctaUrl} className="cta-btn large" onClick={trackSelfReflectionCtaClick}>
               {content.steps.ctaLabel}
             </a>
           </div>
@@ -758,7 +795,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
             <div className="s10-date">{content.closingCta.infoDate}</div>
             <div className="s10-venue" dangerouslySetInnerHTML={{ __html: content.closingCta.infoVenueHtml }} />
           </div>
-          <a href={content.ctaUrl} className="cta-btn dark-bg large">
+          <a href={content.ctaUrl} className="cta-btn dark-bg large" onClick={trackSelfReflectionCtaClick}>
             {content.closingCta.ctaLabel}
           </a>
         </div>
