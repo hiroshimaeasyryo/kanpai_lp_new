@@ -410,7 +410,11 @@ html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
 .s01b-date { margin-bottom:8px; }
 .s01b-time { margin-bottom:28px; }
 .s01b-venue { font-size:14px; color:var(--text-sub); margin-bottom:4px; font-weight:500; }
-.s01b-address { font-size:13px; color:var(--text-sub); margin-bottom:28px; }
+.s01b-address { font-size:13px; color:var(--text-sub); margin-bottom:14px; }
+.s01b-map { margin:0 auto 20px; max-width:560px; border-radius:18px; overflow:hidden; border:1px solid var(--border); background:var(--white); }
+.s01b-map iframe { display:block; width:100%; height:260px; border:0; }
+.s01b-access { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.s01b-access-pill { border:1px solid var(--border); background:var(--white); color:var(--text); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:500; letter-spacing:0.02em; }
 .s01b-tags { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
 .s01b-tag { background:var(--brown); color:#fff; padding:8px 20px; font-size:13px; font-weight:500; letter-spacing:0.05em; }
 
@@ -601,6 +605,20 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           <div className="s01b-time">{content.eventInfo.time}</div>
           <div className="s01b-venue">{content.eventInfo.venue}</div>
           <div className="s01b-address">{content.eventInfo.address}</div>
+          <div className="s01b-map" aria-label="Work as Life の地図">
+            <iframe
+              title="Work as Life 地図"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps?q=Work%20as%20Life%20Inc.&output=embed"
+            />
+          </div>
+          <div className="s01b-access">
+            <span className="s01b-access-pill">新宿駅から徒歩8分</span>
+            <span className="s01b-access-pill">大久保駅から徒歩7分</span>
+            <span className="s01b-access-pill">西武新宿駅から徒歩7分</span>
+          </div>
           <div className="s01b-tags">
             {content.eventInfo.tags.map((t, i) => (
               <span key={`${t}-${i}`} className="s01b-tag">
