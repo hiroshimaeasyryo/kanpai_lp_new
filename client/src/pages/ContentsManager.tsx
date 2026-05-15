@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { ImageUploader } from "@/components/ImageUploader";
 import { SelfReflectionEditor, type SelfReflectionContent } from "@/components/SelfReflectionEditor";
+import { BtobSeminarEditor } from "@/components/BtobSeminarEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfi
 import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
+import { mergeBtobSeminarContent, type BtobSeminarContent } from "@/types/btob-seminar";
 import type { KanpaiEvent } from "@/types/events";
 import {
   defaultEvents,
@@ -121,6 +123,8 @@ export default function ContentsManager() {
   const [campaign2603Notice, setCampaign2603Notice] = useState<string>("");
   /** self-reflection 用: 構造化コンテンツ */
   const [selfReflectionContent, setSelfReflectionContent] = useState<SelfReflectionContent | null>(null);
+  /** btob_seminar 用: 構造化コンテンツ */
+  const [btobSeminarContent, setBtobSeminarContent] = useState<BtobSeminarContent | null>(null);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -158,6 +162,9 @@ export default function ContentsManager() {
           setSelfReflectionContent(((payload as ContentPayload).selfReflection ?? null) as SelfReflectionContent | null);
         }
         applyContentToLocalStorage(payload);
+      }
+      if (selectedSlug === "btob_seminar") {
+        setBtobSeminarContent(mergeBtobSeminarContent(payload?.btobSeminar));
       }
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
@@ -286,6 +293,9 @@ export default function ContentsManager() {
   const buildPayload = (): ContentPayload => {
     if (selectedSlug === "self-reflection") {
       return { selfReflection: selfReflectionContent ?? {} };
+    }
+    if (selectedSlug === "btob_seminar") {
+      return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
     }
     return {
       logo: logoUrl ?? null,
@@ -494,6 +504,22 @@ KANPAI就活は27卒向けラスト2回。
             </div>
           )}
 
+          {selectedSlug === "btob_seminar" && btobSeminarContent && (
+            <div className="mb-10">
+              <h2
+                className="text-xl font-bold text-[#3D281E] mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                /btob_seminar コンテンツ編集
+              </h2>
+              <p className="text-sm text-[#5C3E2A] mb-4">
+                各セクションを編集して「保存してデプロイ」すると{" "}
+                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/btob_seminar</code> に反映されます。
+              </p>
+              <BtobSeminarEditor content={btobSeminarContent} onChange={setBtobSeminarContent} />
+            </div>
+          )}
+
           {/* self-reflection: ビジュアルエディタ */}
           {selectedSlug === "self-reflection" && selfReflectionContent && (
             <div className="mb-10">
@@ -568,7 +594,7 @@ KANPAI就活は27卒向けラスト2回。
               {saveError && <span className="text-sm text-red-600">{saveError}</span>}
             </div>
           </div>
-          {selectedSlug === "self-reflection" ? null : (
+          {selectedSlug === "self-reflection" || selectedSlug === "btob_seminar" ? null : (
             <>
           {/* ブランドロゴ */}
           <div className="mb-10">

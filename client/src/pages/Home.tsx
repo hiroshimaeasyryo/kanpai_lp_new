@@ -60,7 +60,7 @@ export interface HomeProps {
 
 export default function Home({ lpSlug }: HomeProps) {
   const contentSlug = lpSlug ?? TOP_SLUG;
-  useSmoothScroll();
+  useSmoothScroll({ offset: 56 });
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);

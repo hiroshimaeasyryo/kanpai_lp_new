@@ -1,0 +1,821 @@
+#btob-seminar-page {
+  --bg: #faf6ef;
+  --bg-warm: #f5efe4;
+  --ink: #1f1d1b;
+  --ink-soft: #443f3a;
+  --ink-mute: #807a72;
+  --rule: #e0d8c8;
+  --kanpai-red: #d63838;
+  --kanpai-red-deep: #b22a2a;
+  --sans-jp: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+  --script: 'Caveat', cursive;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans-jp);
+  font-weight: 400;
+  line-height: 1.85;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+#btob-seminar-page * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+  #btob-seminar-page .container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+
+  /* Header */
+  #btob-seminar-page .site-header { padding: 24px 0; background: var(--bg); position: relative; z-index: 10; border-bottom: 1px solid var(--rule); }
+  #btob-seminar-page .site-header-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  #btob-seminar-page .site-logo { font-weight: 700; font-size: 16px; letter-spacing: 0.02em; color: var(--ink); }
+  #btob-seminar-page .site-logo .x { color: var(--kanpai-red); margin: 0 6px; font-weight: 400; }
+  #btob-seminar-page .header-right { display: flex; align-items: center; gap: 16px; }
+  #btob-seminar-page .header-seminar-badge {
+    background: var(--kanpai-red);
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  #btob-seminar-page .header-cta {
+    display: inline-block; padding: 10px 22px;
+    background: var(--ink); color: #fff;
+    text-decoration: none; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; border-radius: 2px;
+    transition: background 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #btob-seminar-page .header-cta:hover { background: var(--kanpai-red); }
+
+  /* Hero */
+  #btob-seminar-page .hero { padding: 64px 0 120px; position: relative; overflow: hidden; }
+
+  /* Category Label - 大きめのセミナーカテゴリ表示 */
+  #btob-seminar-page .hero-category {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  #btob-seminar-page .hero-category-pill {
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    border-radius: 2px;
+    line-height: 1.4;
+  }
+  #btob-seminar-page .hero-category-pill .red-dot {
+    color: #ff9595;
+    margin-right: 6px;
+  }
+  #btob-seminar-page .hero-category-line {
+    display: none;
+  }
+  #btob-seminar-page .hero-category-meta {
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  /* Seminar Name - 体験ワークショップ名 */
+  #btob-seminar-page .hero-seminar-name {
+    font-size: 15px;
+    color: var(--kanpai-red);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--kanpai-red);
+    display: inline-block;
+  }
+
+  #btob-seminar-page .hero h1 {
+    font-weight: 900;
+    font-size: clamp(34px, 5.5vw, 64px);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    margin-bottom: 48px;
+    color: var(--ink);
+  }
+  #btob-seminar-page .hero h1 .red { color: var(--kanpai-red); }
+  #btob-seminar-page .hero h1 .small { font-weight: 500; font-size: 0.7em; }
+  #btob-seminar-page .hero h1 .underline {
+    background-image: linear-gradient(transparent 70%, rgba(214, 56, 56, 0.25) 70%);
+    padding: 0 4px;
+  }
+  #btob-seminar-page .hero-lead {
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 2.05;
+    color: var(--ink-soft);
+    margin-bottom: 56px;
+    font-weight: 500;
+  }
+
+  #btob-seminar-page .hero-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: #fff;
+    padding: 32px 0;
+    margin-bottom: 56px;
+    border-radius: 4px;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .hero-info-item { padding: 0 28px; border-right: 1px solid var(--rule); text-align: center; }
+  #btob-seminar-page .hero-info-item:last-child { border-right: none; }
+  #btob-seminar-page .hero-info-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--kanpai-red);
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: block;
+  }
+  #btob-seminar-page .hero-info-value { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.4; }
+
+  #btob-seminar-page .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--kanpai-red);
+    color: #fff;
+    padding: 22px 56px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    box-shadow: 0 6px 24px rgba(214, 56, 56, 0.22);
+  }
+  #btob-seminar-page .cta-primary:hover {
+    background: var(--kanpai-red-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(214, 56, 56, 0.3);
+  }
+  #btob-seminar-page .cta-primary::after { content: "→"; font-size: 18px; transition: transform 0.3s ease; }
+  #btob-seminar-page .cta-primary:hover::after { transform: translateX(4px); }
+
+  #btob-seminar-page .cta-fineprint-light {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+  }
+
+  #btob-seminar-page .hero-cta-wrap {
+    text-align: center;
+  }
+
+  /* Section Base */
+  #btob-seminar-page section { padding: 110px 0; position: relative; }
+  #btob-seminar-page section.alt-bg { background: var(--bg-warm); }
+  #btob-seminar-page .section-head { text-align: center; margin-bottom: 72px; }
+  #btob-seminar-page .section-script {
+    font-family: var(--script);
+    color: var(--kanpai-red);
+    font-size: 32px;
+    font-weight: 500;
+    display: inline-block;
+    transform: rotate(-2deg);
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  #btob-seminar-page .section-title {
+    font-weight: 900;
+    font-size: clamp(26px, 3.5vw, 40px);
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  #btob-seminar-page .section-title .red { color: var(--kanpai-red); }
+  #btob-seminar-page .section-sub {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-soft);
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 500;
+  }
+
+  /* Empathy */
+  #btob-seminar-page .empathy-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 72px; align-items: start; }
+  #btob-seminar-page .empathy-lead { font-size: 17px; line-height: 2.05; color: var(--ink-soft); font-weight: 500; margin-bottom: 32px; }
+  #btob-seminar-page .empathy-lead strong { color: var(--kanpai-red); font-weight: 700; }
+  #btob-seminar-page .empathy-checklist {
+    list-style: none;
+    background: #fff;
+    padding: 16px 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.04);
+  }
+  #btob-seminar-page .empathy-checklist li {
+    padding: 22px 32px;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 16px;
+    line-height: 1.7;
+    display: flex;
+    gap: 16px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #btob-seminar-page .empathy-checklist li:last-child { border-bottom: none; }
+  #btob-seminar-page .empathy-checklist li::before {
+    content: "✓"; color: var(--kanpai-red); font-size: 18px;
+    flex-shrink: 0; line-height: 1.4; font-weight: 700;
+  }
+  #btob-seminar-page .empathy-callout {
+    margin-top: 36px;
+    padding: 24px 28px;
+    background: var(--kanpai-red);
+    color: #fff;
+    border-radius: 4px;
+  }
+  #btob-seminar-page .empathy-callout-text { font-size: 16px; font-weight: 700; line-height: 1.75; }
+
+  /* Negative Loop */
+  #btob-seminar-page .loop-diagram { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+  #btob-seminar-page .loop-step {
+    padding: 36px 24px;
+    background: #fff;
+    border-radius: 4px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 16px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .loop-step:not(:last-child)::after {
+    content: "→"; position: absolute; right: -18px; top: 50%;
+    transform: translateY(-50%); color: var(--kanpai-red);
+    font-size: 22px; font-weight: 900; z-index: 2;
+  }
+  #btob-seminar-page .loop-step:last-child { background: var(--ink); color: #fff; }
+  #btob-seminar-page .loop-step:last-child .loop-step-label { color: #fff; }
+  #btob-seminar-page .loop-step:last-child .loop-step-desc { color: rgba(255, 255, 255, 0.7); }
+  #btob-seminar-page .loop-step-num {
+    font-family: var(--script);
+    font-size: 38px;
+    color: var(--kanpai-red);
+    margin-bottom: 8px;
+    display: block;
+    line-height: 1;
+    font-weight: 700;
+  }
+  #btob-seminar-page .loop-step:last-child .loop-step-num { color: #ff9595; }
+  #btob-seminar-page .loop-step-label { font-weight: 900; font-size: 17px; line-height: 1.5; margin-bottom: 10px; color: var(--ink); }
+  #btob-seminar-page .loop-step-desc { font-size: 13px; line-height: 1.7; color: var(--ink-mute); font-weight: 500; }
+  #btob-seminar-page .loop-note {
+    margin-top: 56px;
+    font-size: 17px;
+    line-height: 2;
+    color: var(--ink-soft);
+    text-align: center;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 500;
+  }
+  #btob-seminar-page .loop-note strong {
+    color: var(--kanpai-red);
+    font-weight: 700;
+    background-image: linear-gradient(transparent 70%, rgba(214, 56, 56, 0.18) 70%);
+    padding: 0 2px;
+  }
+
+  /* Speaker */
+  #btob-seminar-page .speaker-card {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 32px rgba(31, 29, 27, 0.06);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  #btob-seminar-page .speaker-photo {
+    background: linear-gradient(135deg, var(--kanpai-red) 0%, var(--kanpai-red-deep) 100%);
+    color: #fff;
+    padding: 56px 32px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #btob-seminar-page .speaker-photo::before {
+    content: "Speaker";
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-family: var(--script);
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.85);
+    transform: rotate(-3deg);
+    font-weight: 600;
+    line-height: 1;
+  }
+  #btob-seminar-page .speaker-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 56px;
+    color: var(--kanpai-red);
+    margin-bottom: 24px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+  }
+  #btob-seminar-page .speaker-photo-name { font-size: 20px; font-weight: 900; margin-bottom: 6px; letter-spacing: 0.05em; }
+  #btob-seminar-page .speaker-photo-role { font-size: 11px; letter-spacing: 0.2em; opacity: 0.9; font-weight: 700; }
+  #btob-seminar-page .speaker-content { padding: 48px 48px; }
+  #btob-seminar-page .speaker-meta {
+    font-size: 11px;
+    color: var(--kanpai-red);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  #btob-seminar-page .speaker-name-large { font-size: 28px; font-weight: 900; margin-bottom: 8px; letter-spacing: 0.02em; }
+  #btob-seminar-page .speaker-company {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 500;
+  }
+  #btob-seminar-page .speaker-message {
+    padding: 20px 24px;
+    background: var(--bg);
+    border-left: 3px solid var(--kanpai-red);
+    border-radius: 2px;
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--ink);
+    font-weight: 500;
+    font-style: italic;
+  }
+  #btob-seminar-page .speaker-message::before {
+    content: "“";
+    font-family: var(--script);
+    color: var(--kanpai-red);
+    font-size: 32px;
+    line-height: 0;
+    margin-right: 6px;
+    vertical-align: -10px;
+    font-weight: 700;
+  }
+
+  /* Experience */
+  #btob-seminar-page .experience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+  #btob-seminar-page .experience-card {
+    background: #fff;
+    padding: 40px 36px;
+    border-radius: 4px;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .experience-num {
+    font-family: var(--script);
+    font-size: 42px;
+    color: var(--kanpai-red);
+    line-height: 1;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 16px;
+  }
+  #btob-seminar-page .experience-name { font-weight: 900; font-size: 20px; line-height: 1.5; margin-bottom: 16px; color: var(--ink); }
+  #btob-seminar-page .experience-desc { font-size: 14px; line-height: 1.95; color: var(--ink-soft); font-weight: 500; }
+  #btob-seminar-page .experience-desc strong {
+    background-image: linear-gradient(transparent 65%, rgba(214, 56, 56, 0.2) 65%);
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* Takeaway */
+  #btob-seminar-page .takeaway-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 16px; }
+  #btob-seminar-page .takeaway-card {
+    background: #fff;
+    padding: 40px 32px;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .takeaway-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--bg-warm);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 24px;
+    color: var(--kanpai-red);
+  }
+  #btob-seminar-page .takeaway-title { font-weight: 900; font-size: 17px; line-height: 1.5; margin-bottom: 14px; color: var(--ink); }
+  #btob-seminar-page .takeaway-desc { font-size: 13px; line-height: 1.85; color: var(--ink-soft); font-weight: 500; }
+
+  /* Mid CTA Banner */
+  #btob-seminar-page .mid-cta {
+    padding: 64px 0;
+    background: linear-gradient(135deg, var(--kanpai-red) 0%, var(--kanpai-red-deep) 100%);
+    text-align: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  #btob-seminar-page .mid-cta-content { position: relative; z-index: 1; }
+  #btob-seminar-page .mid-cta-eyebrow {
+    font-family: var(--script);
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.95);
+    transform: rotate(-2deg);
+    display: inline-block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  #btob-seminar-page .mid-cta-title {
+    font-weight: 900;
+    font-size: clamp(22px, 3vw, 32px);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: #fff;
+  }
+  #btob-seminar-page .mid-cta-meta {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 28px;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+  #btob-seminar-page .mid-cta .cta-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    color: var(--kanpai-red);
+    padding: 18px 48px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  }
+  #btob-seminar-page .mid-cta .cta-light::after { content: "→"; font-size: 18px; }
+  #btob-seminar-page .mid-cta .cta-light:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25); }
+
+  /* Audience */
+  #btob-seminar-page .audience-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; align-items: start; }
+  #btob-seminar-page .audience-list {
+    list-style: none;
+    background: #fff;
+    border-radius: 4px;
+    padding: 16px 32px;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+    counter-reset: audience;
+  }
+  #btob-seminar-page .audience-list li {
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 15px;
+    line-height: 1.75;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #btob-seminar-page .audience-list li:last-child { border-bottom: none; }
+  #btob-seminar-page .audience-list li::before {
+    content: counter(audience, decimal-leading-zero);
+    counter-increment: audience;
+    font-family: var(--script);
+    color: var(--kanpai-red);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  #btob-seminar-page .audience-note {
+    padding: 36px 32px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 4px;
+  }
+  #btob-seminar-page .audience-note-script {
+    font-family: var(--script);
+    color: #ff9595;
+    font-size: 24px;
+    margin-bottom: 6px;
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+  #btob-seminar-page .audience-note-title { font-weight: 900; font-size: 18px; margin-bottom: 18px; line-height: 1.5; }
+  #btob-seminar-page .audience-note-body { font-size: 14px; line-height: 1.95; color: rgba(255, 255, 255, 0.85); font-weight: 500; }
+
+  /* Hosts */
+  #btob-seminar-page .hosts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+  #btob-seminar-page .host-card {
+    background: #fff;
+    padding: 48px 40px;
+    border-radius: 4px;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .host-card.primary { border-top: 4px solid var(--kanpai-red); }
+  #btob-seminar-page .host-card.secondary { border-top: 4px solid var(--ink); }
+  #btob-seminar-page .host-role {
+    font-family: var(--script);
+    font-size: 28px;
+    color: var(--kanpai-red);
+    margin-bottom: 4px;
+    display: inline-block;
+    transform: rotate(-2deg);
+    line-height: 1;
+    font-weight: 600;
+  }
+  #btob-seminar-page .host-card.secondary .host-role { color: var(--ink-mute); }
+  #btob-seminar-page .host-role-jp {
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.2em;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 700;
+  }
+  #btob-seminar-page .host-name { font-weight: 900; font-size: 24px; margin-bottom: 24px; letter-spacing: 0.02em; }
+  #btob-seminar-page .host-desc { font-size: 14px; line-height: 2; color: var(--ink-soft); font-weight: 500; }
+
+  /* Details */
+  #btob-seminar-page .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 24px rgba(31, 29, 27, 0.05);
+  }
+  #btob-seminar-page .details-table tr { border-bottom: 1px solid var(--rule); }
+  #btob-seminar-page .details-table tr:last-child { border-bottom: none; }
+  #btob-seminar-page .details-table th, #btob-seminar-page .details-table td { padding: 24px 32px; text-align: left; vertical-align: top; }
+  #btob-seminar-page .details-table th {
+    width: 240px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--kanpai-red);
+    background: var(--bg-warm);
+  }
+  #btob-seminar-page .details-table td { font-size: 16px; line-height: 1.7; color: var(--ink); font-weight: 500; }
+  #btob-seminar-page .details-table td .sub { display: block; font-size: 13px; color: var(--ink-mute); margin-top: 6px; }
+
+  /* FAQ */
+  #btob-seminar-page .faq-list { max-width: 920px; margin: 0 auto; }
+  #btob-seminar-page .faq-item {
+    background: #fff;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    padding: 32px 36px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    box-shadow: 0 2px 16px rgba(31, 29, 27, 0.04);
+  }
+  #btob-seminar-page .faq-marker { font-family: var(--script); font-size: 38px; color: var(--kanpai-red); line-height: 1; font-weight: 700; }
+  #btob-seminar-page .faq-q { font-weight: 900; font-size: 17px; line-height: 1.6; margin-bottom: 14px; }
+  #btob-seminar-page .faq-a { font-size: 14px; line-height: 1.95; color: var(--ink-soft); font-weight: 500; }
+
+  /* Final CTA */
+  #btob-seminar-page .final-cta {
+    background: linear-gradient(135deg, var(--kanpai-red) 0%, var(--kanpai-red-deep) 100%);
+    color: #fff;
+    padding: 130px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #btob-seminar-page .final-cta h2 {
+    font-weight: 900;
+    font-size: clamp(28px, 4.2vw, 48px);
+    line-height: 1.45;
+    margin-bottom: 28px;
+    color: #fff;
+    position: relative;
+  }
+  #btob-seminar-page .final-cta-lead {
+    max-width: 600px;
+    margin: 0 auto 48px;
+    font-size: 15px;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.92);
+    position: relative;
+    font-weight: 500;
+  }
+  #btob-seminar-page .cta-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: #fff;
+    color: var(--kanpai-red);
+    padding: 24px 64px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  }
+  #btob-seminar-page .cta-light:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25); }
+  #btob-seminar-page .cta-light::after { content: "→"; font-size: 18px; }
+  #btob-seminar-page .cta-fineprint {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+
+  /* Form Embed Section */
+  #btob-seminar-page .form-section {
+    background: var(--bg);
+    padding: 100px 0 110px;
+    scroll-margin-top: 20px;
+  }
+  #btob-seminar-page .form-embed-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(31, 29, 27, 0.08);
+    overflow: hidden;
+    padding: 12px;
+    border-top: 4px solid var(--kanpai-red);
+  }
+  #btob-seminar-page .form-embed-wrap iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: #fff;
+  }
+  #btob-seminar-page .form-fallback {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--ink-mute);
+    font-weight: 500;
+  }
+  #btob-seminar-page .form-fallback a {
+    color: var(--kanpai-red);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  /* Final CTA */
+  #btob-seminar-page .final-cta {
+    background: linear-gradient(135deg, var(--kanpai-red) 0%, var(--kanpai-red-deep) 100%);
+    padding: 100px 0 80px;
+  }
+
+  /* Footer */
+  #btob-seminar-page footer { background: var(--ink); color: #fff; padding: 48px 0 32px; }
+  #btob-seminar-page .footer-inner {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.05em;
+  }
+
+  /* Reveal */
+  #btob-seminar-page .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  #btob-seminar-page .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    #btob-seminar-page .container { padding: 0 24px; }
+    #btob-seminar-page .site-header { padding: 16px 0; }
+    #btob-seminar-page .site-header-inner {
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 12px;
+    }
+    #btob-seminar-page .site-logo {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    /* ヒーロー直下にも同文言があるため、狭い画面ではバッジを非表示 */
+    #btob-seminar-page .header-seminar-badge { display: none; }
+    #btob-seminar-page .header-right {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+    #btob-seminar-page .header-cta {
+      padding: 10px 16px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+
+    /* 極小画面: CTA を全幅にして確実に横書き */
+    @media (max-width: 480px) {
+      #btob-seminar-page .site-header-inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #btob-seminar-page .header-right {
+        margin-left: 0;
+        width: 100%;
+      }
+      #btob-seminar-page .header-cta {
+        display: block;
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+      }
+    }
+
+    #btob-seminar-page .hero { padding: 40px 0 80px; }
+    #btob-seminar-page .hero-category { flex-wrap: wrap; gap: 12px; }
+    #btob-seminar-page .hero-category-line { display: none; }
+    #btob-seminar-page .hero-category-pill { font-size: 12px; padding: 8px 16px; }
+    #btob-seminar-page .hero-category-meta { font-size: 11px; }
+    #btob-seminar-page .hero-seminar-name { font-size: 14px; margin-bottom: 20px; padding-bottom: 18px; }
+    #btob-seminar-page .hero h1 { margin-bottom: 32px; }
+    #btob-seminar-page .hero-lead { margin-bottom: 36px; }
+    #btob-seminar-page .hero-info { grid-template-columns: 1fr 1fr; padding: 20px 0; }
+    #btob-seminar-page .hero-info-item {
+      padding: 14px 16px;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    #btob-seminar-page .hero-info-item:nth-child(2) { border-right: none; }
+    #btob-seminar-page .hero-info-item:nth-child(3) { border-bottom: none; }
+    #btob-seminar-page .hero-info-item:nth-child(4) { border-right: none; border-bottom: none; }
+    #btob-seminar-page .cta-primary { padding: 18px 40px; font-size: 15px; }
+
+    #btob-seminar-page section { padding: 70px 0; }
+    #btob-seminar-page .section-head { margin-bottom: 48px; }
+
+    #btob-seminar-page .empathy-grid, #btob-seminar-page .audience-grid, #btob-seminar-page .hosts-grid, #btob-seminar-page .takeaway-list {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    #btob-seminar-page .empathy-grid, #btob-seminar-page .audience-grid, #btob-seminar-page .hosts-grid { gap: 40px; }
+
+    #btob-seminar-page .loop-diagram { grid-template-columns: 1fr; gap: 32px; }
+    #btob-seminar-page .loop-step:not(:last-child)::after {
+      content: "↓"; right: 50%; top: auto; bottom: -28px; transform: translateX(50%);
+    }
+
+    #btob-seminar-page .speaker-card { grid-template-columns: 1fr; }
+    #btob-seminar-page .speaker-photo { padding: 48px 24px 36px; }
+    #btob-seminar-page .speaker-content { padding: 36px 28px; }
+    #btob-seminar-page .speaker-name-large { font-size: 24px; }
+
+    #btob-seminar-page .experience-grid { grid-template-columns: 1fr; }
+    #btob-seminar-page .experience-card { padding: 32px 28px; }
+
+    #btob-seminar-page .mid-cta { padding: 48px 0; }
+    #btob-seminar-page .mid-cta .cta-light { padding: 16px 36px; font-size: 13px; }
+
+    #btob-seminar-page .details-table th { width: 110px; padding: 18px 16px; font-size: 10px; }
+    #btob-seminar-page .details-table td { font-size: 14px; padding: 18px 16px; }
+
+    #btob-seminar-page .faq-item { grid-template-columns: 44px 1fr; gap: 16px; padding: 24px 24px; }
+    #btob-seminar-page .faq-marker { font-size: 30px; }
+
+    #btob-seminar-page .final-cta { padding: 80px 0; }
+    #btob-seminar-page .cta-light { padding: 20px 44px; font-size: 14px; }
+  }
+
+/* 管理画面から差し替え可能な講師アバター画像 */
+#btob-seminar-page .speaker-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}

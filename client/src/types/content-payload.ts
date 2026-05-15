@@ -28,6 +28,12 @@ export interface ContentPayload {
    * LP と異なる構造のため、ページ側で解釈する。
    */
   selfReflection?: unknown;
+
+  /**
+   * /btob_seminar 用コンテンツ。
+   * ページ側で解釈する。
+   */
+  btobSeminar?: unknown;
 }
 
 /** content.json のパス（配信時は /content.json） */

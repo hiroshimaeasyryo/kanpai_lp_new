@@ -13,6 +13,7 @@ import { isReservedSlug } from "@/lib/lp-slug";
 import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
 import SelfReflection from "./pages/SelfReflection";
+import BtobSeminar from "./pages/BtobSeminar";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -38,6 +39,7 @@ function Router() {
       <Route path={"/thanks_ks"} component={ThanksKs} />
       <Route path={"/poprock_redirect"} component={PoprockRedirect} />
       <Route path={"/self-reflection"} component={SelfReflection} />
+      <Route path={"/btob_seminar"} component={BtobSeminar} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
