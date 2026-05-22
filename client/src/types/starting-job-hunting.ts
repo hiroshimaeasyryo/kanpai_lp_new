@@ -3,6 +3,7 @@
 import seed from "../../public/content/starting_job_hunting.json";
 
 export const STARTING_JOB_HUNTING_ASSETS = {
+  favicon: "/starting_job_hunting/favicon.png",
   lineIcon: "/starting_job_hunting/line-icon.png",
 } as const;
 
@@ -22,6 +23,8 @@ export type StartingJobHuntingContent = {
     logoUrl: string;
     logoAlt: string;
     ctaLabel: string;
+    /** モバイルヘッダーCTA用の短いラベル（未設定時は ctaLabel を折り返し表示） */
+    ctaLabelMobile?: string;
     ctaHref: string;
   };
   stickyCta: { label: string; ctaHref: string };

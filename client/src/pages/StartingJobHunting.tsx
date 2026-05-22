@@ -7,6 +7,8 @@ import {
   mergeStartingJobHuntingContent,
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
+
+const FAVICON_HREF = STARTING_JOB_HUNTING_ASSETS.favicon;
 import "./starting-job-hunting.css";
 
 const STORAGE_KEY = "starting_job_hunting_content_v1";
@@ -54,14 +56,12 @@ function Html({ html, as, className }: { html: string; as?: ElementType; classNa
   return <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function LineIcon() {
+function LineIcon({ className }: { className?: string }) {
   return (
     <img
       src={STARTING_JOB_HUNTING_ASSETS.lineIcon}
       alt=""
-      className="line-icon"
-      width={18}
-      height={18}
+      className={className ? `line-icon ${className}` : "line-icon"}
       aria-hidden
     />
   );
@@ -122,9 +122,33 @@ export default function StartingJobHunting() {
     }
     meta.setAttribute("content", content.seo.description);
 
+    const iconEl =
+      (document.querySelector("link[rel~='icon']") as HTMLLinkElement | null) ??
+      (document.querySelector("link[rel='shortcut icon']") as HTMLLinkElement | null);
+
+    if (!iconEl) {
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.type = "image/png";
+      link.href = FAVICON_HREF;
+      document.head.appendChild(link);
+      return () => {
+        document.title = prevTitle;
+        if (prevDescContent !== null && meta) meta.setAttribute("content", prevDescContent);
+        link.remove();
+      };
+    }
+
+    const prevHref = iconEl.href;
+    const prevType = iconEl.type;
+    iconEl.href = FAVICON_HREF;
+    iconEl.type = "image/png";
+
     return () => {
       document.title = prevTitle;
       if (prevDescContent !== null && meta) meta.setAttribute("content", prevDescContent);
+      iconEl.href = prevHref;
+      iconEl.type = prevType;
     };
   }, [content.seo.description, content.seo.title]);
 
@@ -158,8 +182,11 @@ export default function StartingJobHunting() {
           rel="noopener noreferrer"
           onClick={trackCtaClick}
         >
-          <LineIcon />
-          {c.header.ctaLabel}
+          <LineIcon className="line-icon--header" />
+          <span className="header-cta-label header-cta-label--desktop">{c.header.ctaLabel}</span>
+          <span className="header-cta-label header-cta-label--mobile">
+            {c.header.ctaLabelMobile?.trim() || c.header.ctaLabel}
+          </span>
         </a>
       </header>
 
@@ -248,22 +275,24 @@ export default function StartingJobHunting() {
         <h2>
           <Html html={c.program.titleHtml} as="span" />
         </h2>
-        <table className="flow-table">
-          <thead>
-            <tr>
-              <th>{c.program.tableHeaders.step}</th>
-              <th>{c.program.tableHeaders.content}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {c.program.rows.map((row, i) => (
-              <tr key={i}>
-                <td>{row.step}</td>
-                <td>{row.content}</td>
+        <div className="program-table-wrap">
+          <table className="flow-table">
+            <thead>
+              <tr>
+                <th>{c.program.tableHeaders.step}</th>
+                <th>{c.program.tableHeaders.content}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {c.program.rows.map((row, i) => (
+                <tr key={i}>
+                  <td>{row.step}</td>
+                  <td>{row.content}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <div className="flow-points">
           {c.program.points.map((p, i) => (
             <div key={i} className="flow-point">
