@@ -51,7 +51,7 @@ LPコンテンツは `client/public/content/` 配下の JSON ファイルで管�
 - `/` — メインLP（Home）
 - `/:lpSlug` — スラグ指定のLP（予約スラグでなければ Home にスラグを渡す）
 - `/contents-manager` — コンテンツ管理画面
-- `/thanks_ks`, `/poprock_redirect`, `/self-reflection` — 固定ページ
+- `/thanks_ks`, `/poprock_redirect`, `/self-reflection`, `/self-stance` — 固定ページ
 
 ### テーマ・カラーパレット
 

@@ -8,6 +8,7 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { SelfReflectionEditor, type SelfReflectionContent } from "@/components/SelfReflectionEditor";
 import { BtobSeminarEditor } from "@/components/BtobSeminarEditor";
 import { StartingJobHuntingEditor } from "@/components/StartingJobHuntingEditor";
+import { SelfStanceEditor } from "@/components/SelfStanceEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ import {
   mergeStartingJobHuntingContent,
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
+import { mergeSelfStanceContent, type SelfStanceContent } from "@/types/self-stance";
 import type { KanpaiEvent } from "@/types/events";
 import {
   defaultEvents,
@@ -133,6 +135,8 @@ export default function ContentsManager() {
   /** starting_job_hunting 用: 構造化コンテンツ */
   const [startingJobHuntingContent, setStartingJobHuntingContent] =
     useState<StartingJobHuntingContent | null>(null);
+  /** self-stance 用: 構造化コンテンツ */
+  const [selfStanceContent, setSelfStanceContent] = useState<SelfStanceContent | null>(null);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -176,6 +180,9 @@ export default function ContentsManager() {
       }
       if (selectedSlug === "starting_job_hunting") {
         setStartingJobHuntingContent(mergeStartingJobHuntingContent(payload?.startingJobHunting));
+      }
+      if (selectedSlug === "self-stance") {
+        setSelfStanceContent(mergeSelfStanceContent(payload?.selfStance));
       }
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
@@ -312,6 +319,11 @@ export default function ContentsManager() {
       return {
         startingJobHunting:
           startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined),
+      };
+    }
+    if (selectedSlug === "self-stance") {
+      return {
+        selfStance: selfStanceContent ?? mergeSelfStanceContent(undefined),
       };
     }
     return {
@@ -557,6 +569,22 @@ KANPAI就活は27卒向けラスト2回。
             </div>
           )}
 
+          {selectedSlug === "self-stance" && selfStanceContent && (
+            <div className="mb-10">
+              <h2
+                className="text-xl font-bold text-[#3D281E] mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                /self-stance コンテンツ編集
+              </h2>
+              <p className="text-sm text-[#5C3E2A] mb-4">
+                各セクションを編集して「保存してデプロイ」すると{" "}
+                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/self-stance</code> に反映されます。
+              </p>
+              <SelfStanceEditor content={selfStanceContent} onChange={setSelfStanceContent} />
+            </div>
+          )}
+
           {/* self-reflection: ビジュアルエディタ */}
           {selectedSlug === "self-reflection" && selfReflectionContent && (
             <div className="mb-10">
@@ -633,7 +661,8 @@ KANPAI就活は27卒向けラスト2回。
           </div>
           {selectedSlug === "self-reflection" ||
           selectedSlug === "btob_seminar" ||
-          selectedSlug === "starting_job_hunting" ? null : (
+          selectedSlug === "starting_job_hunting" ||
+          selectedSlug === "self-stance" ? null : (
             <>
           {/* ブランドロゴ */}
           <div className="mb-10">

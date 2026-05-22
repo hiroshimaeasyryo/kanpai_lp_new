@@ -1,0 +1,746 @@
+#self-stance-page {
+  --brown: #5d4037;
+  --brown-mid: #795548;
+  --brown-light: #a1887f;
+  --brown-dark: #3e2723;
+  --cream: #f7f5f0;
+  --cream-dark: #ede9e1;
+  --amber: #c77b2a;
+  --amber-light: #f5ddb5;
+  --amber-bg: #fdf3e3;
+  --white: #ffffff;
+  --text: #2c1810;
+  --muted: #6b5b52;
+  --border: #d7cfc9;
+  --serif: "Noto Serif JP", serif;
+  --sans: "Noto Sans JP", sans-serif;
+}
+
+#self-stance-page * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#self-stance-page {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 15px;
+  padding-bottom: 72px;
+}
+
+#self-stance-page .line-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+#self-stance-page .sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--brown-dark);
+  padding: 13px 20px;
+  z-index: 200;
+  text-align: center;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
+}
+
+#self-stance-page .sticky a {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#self-stance-page .site-header {
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 本文は640pxだが、ヘッダーは画面幅いっぱいで左右端に配置 */
+#self-stance-page .header-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  #self-stance-page .site-header {
+    padding: 12px 32px;
+  }
+}
+
+#self-stance-page .logo-img {
+  height: 36px;
+  width: auto;
+}
+
+#self-stance-page .header-btn {
+  background: var(--brown);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 14px;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+#self-stance-page .header-btn .line-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+#self-stance-page .inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+#self-stance-page section {
+  padding: 60px 20px;
+}
+
+#self-stance-page .deco-line {
+  height: 3px;
+  background: linear-gradient(90deg, var(--amber) 0%, var(--brown) 100%);
+}
+
+#self-stance-page .sec-label {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid var(--amber);
+}
+
+#self-stance-page h2.h2 {
+  font-family: var(--serif);
+  font-size: clamp(19px, 4vw, 24px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--brown-dark);
+  margin-bottom: 28px;
+}
+
+#self-stance-page h2.h2-light {
+  font-family: var(--serif);
+  font-size: clamp(19px, 4vw, 24px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--cream);
+  margin-bottom: 28px;
+}
+
+#self-stance-page .btn-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--brown-dark);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  padding: 16px 28px;
+  width: 100%;
+}
+
+#self-stance-page .fv {
+  background: var(--brown-dark);
+}
+
+#self-stance-page .fv-eyebrow {
+  background: var(--amber);
+  color: #fff;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+#self-stance-page .fv-img-wrap img {
+  width: 100%;
+  display: block;
+}
+
+#self-stance-page .fv-img-cta {
+  padding: 0 20px 28px;
+  background: var(--cream-dark);
+}
+
+#self-stance-page .fv-img-cta .inner {
+  padding-top: 20px;
+}
+
+#self-stance-page .fv-body-wrap {
+  background: var(--amber-bg);
+  border-top: 3px solid var(--amber);
+  padding: 28px 20px;
+}
+
+#self-stance-page .fv-body {
+  font-size: 14px;
+  line-height: 2.1;
+  color: var(--text);
+}
+
+#self-stance-page .fv-body em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+#self-stance-page .info-bar {
+  background: var(--cream);
+  padding: 32px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+#self-stance-page .info-bar-label {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--amber);
+  font-weight: 700;
+  text-align: center;
+}
+
+#self-stance-page .info-grid {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#self-stance-page .info-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 14px;
+}
+
+#self-stance-page .info-row:last-child {
+  border-bottom: none;
+}
+
+#self-stance-page .info-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--amber-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+#self-stance-page .info-text .ilabel {
+  font-size: 11px;
+  color: var(--amber);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+#self-stance-page .info-text .ivalue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  line-height: 1.4;
+}
+
+#self-stance-page .empathy {
+  background: var(--white);
+}
+
+#self-stance-page .emp-title {
+  font-family: var(--serif);
+  font-size: clamp(19px, 4vw, 24px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--brown-dark);
+  margin-bottom: 28px;
+}
+
+#self-stance-page .emp-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#self-stance-page .emp-list li {
+  padding: 14px 16px;
+  background: var(--cream);
+  font-size: 14px;
+  line-height: 1.8;
+  border-left: 4px solid var(--amber);
+}
+
+#self-stance-page .solution {
+  background: var(--brown-dark);
+}
+
+#self-stance-page .sol-subtitle {
+  font-family: var(--serif);
+  font-size: clamp(19px, 4vw, 24px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--cream);
+  margin-bottom: 28px;
+}
+
+#self-stance-page .sol-body {
+  font-size: 14px;
+  line-height: 2;
+  color: rgba(247, 245, 240, 0.82);
+  margin-bottom: 30px;
+}
+
+#self-stance-page .benefit-head {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.14em;
+  margin-bottom: 12px;
+}
+
+#self-stance-page .benefit-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 32px;
+}
+
+#self-stance-page .benefit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 15px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 14px;
+  color: var(--cream);
+}
+
+#self-stance-page .benefit-list li::before {
+  content: "✓";
+  color: var(--amber);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+#self-stance-page .cta-sol {
+  padding: 0 20px 28px;
+  background: var(--brown-dark);
+}
+
+#self-stance-page .flow {
+  background: var(--white);
+}
+
+#self-stance-page .flow-steps {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+#self-stance-page .flow-step {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+#self-stance-page .flow-step:last-child {
+  border-bottom: none;
+}
+
+#self-stance-page .flow-step-left {
+  width: 110px;
+  flex-shrink: 0;
+  padding: 16px 10px;
+  background: var(--brown-dark);
+  text-align: center;
+}
+
+#self-stance-page .flow-step-num {
+  font-family: var(--serif);
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+#self-stance-page .flow-step-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+}
+
+#self-stance-page .flow-step-right {
+  flex: 1;
+  padding: 16px;
+  background: var(--cream);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+#self-stance-page .flow-points {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-light);
+  padding: 18px;
+}
+
+#self-stance-page .flow-points > p {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+
+#self-stance-page .flow-points ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#self-stance-page .flow-points li {
+  font-size: 13px;
+  color: var(--muted);
+  padding-left: 14px;
+  position: relative;
+}
+
+#self-stance-page .flow-points li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+}
+
+#self-stance-page .faci {
+  background: var(--cream);
+}
+
+#self-stance-page .faci-card {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+#self-stance-page .faci-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 3px solid var(--amber-light);
+}
+
+#self-stance-page .faci-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#self-stance-page .faci-name {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 3px;
+}
+
+#self-stance-page .faci-role {
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+#self-stance-page .faci-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+#self-stance-page .faci-list li {
+  font-size: 13px;
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.7;
+}
+
+#self-stance-page .faci-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+}
+
+#self-stance-page .faci-quote {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 2;
+  color: var(--muted);
+  border-left: 3px solid var(--amber);
+  padding: 12px 16px;
+  background: var(--white);
+  font-style: italic;
+}
+
+#self-stance-page .voices {
+  background: var(--brown-dark);
+}
+
+#self-stance-page .voice-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#self-stance-page .voice-card {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  padding: 20px;
+}
+
+#self-stance-page .voice-who {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber-light);
+  margin-bottom: 8px;
+}
+
+#self-stance-page .voice-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(247, 245, 240, 0.88);
+}
+
+#self-stance-page .voice-note {
+  font-size: 11px;
+  color: rgba(247, 245, 240, 0.32);
+  text-align: center;
+  margin-top: 14px;
+}
+
+#self-stance-page .detail {
+  background: var(--white);
+}
+
+#self-stance-page .detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+#self-stance-page .detail-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+#self-stance-page .detail-table tr:first-child {
+  border-top: 1px solid var(--border);
+}
+
+#self-stance-page .detail-table td {
+  padding: 14px 4px;
+  vertical-align: top;
+  line-height: 1.7;
+}
+
+#self-stance-page .detail-table td:first-child {
+  width: 72px;
+  font-size: 10px;
+  color: var(--amber);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding-right: 8px;
+}
+
+#self-stance-page .map-wrap iframe {
+  width: 100%;
+  height: 240px;
+  border: 0;
+  display: block;
+}
+
+#self-stance-page .target {
+  background: var(--cream);
+}
+
+#self-stance-page .target-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+#self-stance-page .target-list li {
+  font-size: 14px;
+  padding: 13px 16px 13px 42px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--amber);
+  line-height: 1.7;
+  position: relative;
+}
+
+#self-stance-page .target-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 13px;
+  color: var(--amber);
+  font-weight: 700;
+}
+
+#self-stance-page .faq {
+  background: var(--white);
+}
+
+#self-stance-page .faq-list {
+  border-top: 1px solid var(--border);
+}
+
+#self-stance-page .faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+
+#self-stance-page .faq-q {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  padding-left: 26px;
+  position: relative;
+  margin-bottom: 9px;
+  line-height: 1.6;
+}
+
+#self-stance-page .faq-q::before {
+  content: "Q";
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+#self-stance-page .faq-a {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.8;
+  padding-left: 26px;
+  position: relative;
+}
+
+#self-stance-page .faq-a::before {
+  content: "A";
+  position: absolute;
+  left: 0;
+  color: var(--brown-light);
+  font-family: var(--serif);
+  font-size: 15px;
+}
+
+#self-stance-page .final-cta {
+  background: var(--amber-bg);
+  padding: 64px 20px 100px;
+  text-align: center;
+  border-top: 3px solid var(--amber);
+}
+
+#self-stance-page .final-cta h2 {
+  font-family: var(--serif);
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 700;
+  color: var(--brown-dark);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+#self-stance-page .final-cta .final-body p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 0.5em;
+}
+
+#self-stance-page .final-cta .btn-line {
+  max-width: 480px;
+  margin: 32px auto 0;
+  font-size: 14px;
+}
+
+#self-stance-page .cta-note {
+  font-size: 11px;
+  color: var(--brown-light);
+  margin-top: 12px;
+}
+
+#self-stance-page .page-footer {
+  background: var(--brown-dark);
+  color: rgba(247, 245, 240, 0.7);
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+@media (max-width: 480px) {
+  #self-stance-page .flow-step-left {
+    width: 88px;
+  }
+  #self-stance-page .faci-card {
+    flex-direction: column;
+  }
+  #self-stance-page .header-btn {
+    font-size: 10px;
+    padding: 7px 10px;
+  }
+}

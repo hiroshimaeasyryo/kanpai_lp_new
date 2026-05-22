@@ -18,6 +18,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "self-reflection",
   "btob_seminar",
   "starting_job_hunting",
+  "self-stance",
   "404",
   "content",
   "api",

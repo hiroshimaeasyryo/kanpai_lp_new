@@ -220,7 +220,7 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
             <Input
               className={inputCls}
               value={content.header.ctaLabelMobile ?? ""}
-              placeholder="例: 公式LINEを追加"
+              placeholder="公式LINEを追加"
               onChange={(e) =>
                 update("header", {
                   ...content.header,

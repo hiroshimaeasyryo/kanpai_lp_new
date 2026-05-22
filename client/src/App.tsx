@@ -15,6 +15,7 @@ import Home from "./pages/Home";
 import SelfReflection from "./pages/SelfReflection";
 import BtobSeminar from "./pages/BtobSeminar";
 import StartingJobHunting from "./pages/StartingJobHunting";
+import SelfStance from "./pages/SelfStance";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -42,6 +43,7 @@ function Router() {
       <Route path={"/self-reflection"} component={SelfReflection} />
       <Route path={"/btob_seminar"} component={BtobSeminar} />
       <Route path={"/starting_job_hunting"} component={StartingJobHunting} />
+      <Route path={"/self-stance"} component={SelfStance} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
