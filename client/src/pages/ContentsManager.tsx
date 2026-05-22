@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { ImageUploader } from "@/components/ImageUploader";
 import { SelfReflectionEditor, type SelfReflectionContent } from "@/components/SelfReflectionEditor";
 import { BtobSeminarEditor } from "@/components/BtobSeminarEditor";
+import { StartingJobHuntingEditor } from "@/components/StartingJobHuntingEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,10 @@ import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
 import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
 import { mergeBtobSeminarContent, type BtobSeminarContent } from "@/types/btob-seminar";
+import {
+  mergeStartingJobHuntingContent,
+  type StartingJobHuntingContent,
+} from "@/types/starting-job-hunting";
 import type { KanpaiEvent } from "@/types/events";
 import {
   defaultEvents,
@@ -125,6 +130,9 @@ export default function ContentsManager() {
   const [selfReflectionContent, setSelfReflectionContent] = useState<SelfReflectionContent | null>(null);
   /** btob_seminar 用: 構造化コンテンツ */
   const [btobSeminarContent, setBtobSeminarContent] = useState<BtobSeminarContent | null>(null);
+  /** starting_job_hunting 用: 構造化コンテンツ */
+  const [startingJobHuntingContent, setStartingJobHuntingContent] =
+    useState<StartingJobHuntingContent | null>(null);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -165,6 +173,9 @@ export default function ContentsManager() {
       }
       if (selectedSlug === "btob_seminar") {
         setBtobSeminarContent(mergeBtobSeminarContent(payload?.btobSeminar));
+      }
+      if (selectedSlug === "starting_job_hunting") {
+        setStartingJobHuntingContent(mergeStartingJobHuntingContent(payload?.startingJobHunting));
       }
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
@@ -296,6 +307,12 @@ export default function ContentsManager() {
     }
     if (selectedSlug === "btob_seminar") {
       return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
+    }
+    if (selectedSlug === "starting_job_hunting") {
+      return {
+        startingJobHunting:
+          startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined),
+      };
     }
     return {
       logo: logoUrl ?? null,
@@ -520,6 +537,26 @@ KANPAI就活は27卒向けラスト2回。
             </div>
           )}
 
+          {selectedSlug === "starting_job_hunting" && startingJobHuntingContent && (
+            <div className="mb-10">
+              <h2
+                className="text-xl font-bold text-[#3D281E] mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                /starting_job_hunting コンテンツ編集
+              </h2>
+              <p className="text-sm text-[#5C3E2A] mb-4">
+                各セクションを編集して「保存してデプロイ」すると{" "}
+                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/starting_job_hunting</code>{" "}
+                に反映されます。
+              </p>
+              <StartingJobHuntingEditor
+                content={startingJobHuntingContent}
+                onChange={setStartingJobHuntingContent}
+              />
+            </div>
+          )}
+
           {/* self-reflection: ビジュアルエディタ */}
           {selectedSlug === "self-reflection" && selfReflectionContent && (
             <div className="mb-10">
@@ -594,7 +631,9 @@ KANPAI就活は27卒向けラスト2回。
               {saveError && <span className="text-sm text-red-600">{saveError}</span>}
             </div>
           </div>
-          {selectedSlug === "self-reflection" || selectedSlug === "btob_seminar" ? null : (
+          {selectedSlug === "self-reflection" ||
+          selectedSlug === "btob_seminar" ||
+          selectedSlug === "starting_job_hunting" ? null : (
             <>
           {/* ブランドロゴ */}
           <div className="mb-10">

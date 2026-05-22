@@ -17,6 +17,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "image-manager",
   "self-reflection",
   "btob_seminar",
+  "starting_job_hunting",
   "404",
   "content",
   "api",

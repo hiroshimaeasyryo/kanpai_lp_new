@@ -14,6 +14,7 @@ import ContentsManager from "./pages/ContentsManager";
 import Home from "./pages/Home";
 import SelfReflection from "./pages/SelfReflection";
 import BtobSeminar from "./pages/BtobSeminar";
+import StartingJobHunting from "./pages/StartingJobHunting";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -40,6 +41,7 @@ function Router() {
       <Route path={"/poprock_redirect"} component={PoprockRedirect} />
       <Route path={"/self-reflection"} component={SelfReflection} />
       <Route path={"/btob_seminar"} component={BtobSeminar} />
+      <Route path={"/starting_job_hunting"} component={StartingJobHunting} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />
