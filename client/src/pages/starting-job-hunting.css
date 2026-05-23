@@ -175,23 +175,34 @@
   }
   #starting-job-hunting-page .event-info-row {
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
   }
   #starting-job-hunting-page .event-info-row:last-child { border-bottom: none; }
   #starting-job-hunting-page .event-info-icon {
-    width: 64px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
-    color: #fff;
-    font-size: 20px;
+    background: #f5ebe8;
+    border-radius: 50%;
     flex-shrink: 0;
+    margin-top: 2px;
+  }
+  #starting-job-hunting-page .event-info-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 1.8;
   }
   #starting-job-hunting-page .event-info-content {
-    padding: 18px 22px;
+    padding: 0;
     flex: 1;
+    min-width: 0;
   }
   #starting-job-hunting-page .event-info-content .ei-label {
     font-size: 11px;
@@ -398,7 +409,9 @@
     font-weight: 700;
     color: var(--accent);
     white-space: normal;
-    word-break: keep-all;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.45;
   }
   #starting-job-hunting-page .flow-points {
     display: flex;
@@ -693,19 +706,26 @@
     #starting-job-hunting-page header .header-cta-label--mobile {
       display: inline;
     }
+    #starting-job-hunting-page .flow-table {
+      table-layout: auto;
+    }
     #starting-job-hunting-page .flow-table th:first-child,
     #starting-job-hunting-page .flow-table td:first-child {
-      width: 28%;
+      width: auto;
+      min-width: 4.8em;
+      max-width: 36%;
       padding: 12px 10px;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1.45;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
     #starting-job-hunting-page .flow-table th:last-child,
     #starting-job-hunting-page .flow-table td:last-child {
-      width: 72%;
+      width: auto;
       padding: 12px 12px;
       font-size: 13px;
     }
-    #starting-job-hunting-page .event-info-icon { width: 48px; font-size: 16px; }
     #starting-job-hunting-page .event-info-content .ei-value { font-size: 17px; }
     #starting-job-hunting-page .deliverables { grid-template-columns: 1fr; }
     #starting-job-hunting-page .facilitator-card { grid-template-columns: 1fr; }

@@ -7,21 +7,13 @@ import {
   mergeSelfStanceContent,
   type SelfStanceContent,
 } from "@/types/self-stance";
+import { EventInfoIcon } from "@/components/EventInfoIcon";
 import "./self-stance.css";
 
 const STORAGE_KEY = "self_stance_content_v1";
 const FAVICON_HREF = SELF_STANCE_ASSETS.favicon;
 const FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap";
-
-const EVENT_INFO_ICONS: Record<string, string> = {
-  日時: "📅",
-  会場: "📍",
-  定員: "👥",
-  参加費: "🎁",
-  持ち物: "✏️",
-  運営会社: "🏢",
-};
 
 function trackCtaClick() {
   if (
@@ -225,7 +217,9 @@ export default function SelfStance() {
         <div className="info-grid">
           {c.eventInfo.rows.map((row, i) => (
             <div key={i} className="info-row">
-              <div className="info-icon">{EVENT_INFO_ICONS[row.label] ?? "•"}</div>
+              <div className="info-icon">
+                <EventInfoIcon label={row.label} />
+              </div>
               <div className="info-text">
                 <span className="ilabel">{row.label}</span>
                 <span className="ivalue">{row.value}</span>

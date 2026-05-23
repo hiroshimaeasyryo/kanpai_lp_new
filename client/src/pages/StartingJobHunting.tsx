@@ -7,20 +7,13 @@ import {
   mergeStartingJobHuntingContent,
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
-
-const FAVICON_HREF = STARTING_JOB_HUNTING_ASSETS.favicon;
+import { EventInfoIcon } from "@/components/EventInfoIcon";
 import "./starting-job-hunting.css";
 
 const STORAGE_KEY = "starting_job_hunting_content_v1";
+const FAVICON_HREF = STARTING_JOB_HUNTING_ASSETS.favicon;
 const FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@400;700&display=swap";
-
-const EVENT_INFO_ICONS: Record<string, string> = {
-  日時: "📅",
-  会場: "🏢",
-  定員: "👥",
-  参加費: "💰",
-};
 
 function trackCtaClick() {
   if (
@@ -207,7 +200,9 @@ export default function StartingJobHunting() {
           <div className="event-info-rows">
             {c.eventInfo.rows.map((row, i) => (
               <div key={i} className="event-info-row">
-                <div className="event-info-icon">{EVENT_INFO_ICONS[row.label] ?? "•"}</div>
+                <div className="event-info-icon">
+                  <EventInfoIcon label={row.label} />
+                </div>
                 <div className="event-info-content">
                   <div className="ei-label">{row.label}</div>
                   <div className="ei-value">{row.value}</div>
