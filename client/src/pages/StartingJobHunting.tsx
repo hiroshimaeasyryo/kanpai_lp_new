@@ -1,5 +1,6 @@
 import { useEffect, useState, type ElementType } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
+import { trackMetaPixelLead } from "@/lib/meta-pixel";
 import type { ContentPayload } from "@/types/content-payload";
 import {
   DEFAULT_STARTING_JOB_HUNTING_CONTENT,
@@ -14,15 +15,6 @@ const STORAGE_KEY = "starting_job_hunting_content_v1";
 const FAVICON_HREF = STARTING_JOB_HUNTING_ASSETS.favicon;
 const FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@400;700&display=swap";
-
-function trackCtaClick() {
-  if (
-    typeof window !== "undefined" &&
-    typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function"
-  ) {
-    (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead");
-  }
-}
 
 function safeParseStored(): StartingJobHuntingContent | null {
   try {
@@ -77,7 +69,7 @@ function CtaButton({
       className={className ?? "cta-btn"}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={trackCtaClick}
+      onClick={trackMetaPixelLead}
     >
       {!dark && <LineIcon />}
       {label}
@@ -173,7 +165,7 @@ export default function StartingJobHunting() {
           className="header-cta"
           target="_blank"
           rel="noopener noreferrer"
-          onClick={trackCtaClick}
+          onClick={trackMetaPixelLead}
         >
           <LineIcon className="line-icon--header" />
           <span className="header-cta-label header-cta-label--desktop">{c.header.ctaLabel}</span>

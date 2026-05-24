@@ -30,6 +30,7 @@ import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+import { trackMetaPixelLead } from "@/lib/meta-pixel";
 
 /** campaign2603用: キャンペーン文言のデフォルト（未設定時表示） */
 const DEFAULT_CAMPAIGN2603_NOTICE =
@@ -44,13 +45,6 @@ function getCampaign2603NoticeParts(): { title: string; body: string } {
   const title = firstNewline >= 0 ? trimmed.slice(0, firstNewline).trim() : trimmed;
   const body = firstNewline >= 0 ? trimmed.slice(firstNewline + 1).trim() : "";
   return { title, body };
-}
-
-/** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
-function trackKsLineSignupClick() {
-  if (typeof window !== "undefined" && typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function") {
-    (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead");
-  }
 }
 
 export interface HomeProps {
@@ -225,7 +219,7 @@ export default function Home({ lpSlug }: HomeProps) {
               href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={trackKsLineSignupClick}
+              onClick={trackMetaPixelLead}
               className="inline-flex items-center gap-1.5 px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
               イベントに参加する
@@ -246,7 +240,7 @@ export default function Home({ lpSlug }: HomeProps) {
             href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={trackKsLineSignupClick}
+            onClick={trackMetaPixelLead}
             className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
           >
             {lineSignupLabel}
@@ -340,7 +334,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={trackKsLineSignupClick}
+                  onClick={trackMetaPixelLead}
                   className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
                 >
                   {lineCtaLabel}
@@ -550,7 +544,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={trackKsLineSignupClick}
+                onClick={trackMetaPixelLead}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
                 {lineCtaLabel}
@@ -711,7 +705,7 @@ export default function Home({ lpSlug }: HomeProps) {
               href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={trackKsLineSignupClick}
+              onClick={trackMetaPixelLead}
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
@@ -799,7 +793,7 @@ export default function Home({ lpSlug }: HomeProps) {
               href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={trackKsLineSignupClick}
+              onClick={trackMetaPixelLead}
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
@@ -953,7 +947,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={trackKsLineSignupClick}
+                onClick={trackMetaPixelLead}
                 className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
               >
                 {lineCtaLabel}
@@ -1062,7 +1056,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={trackKsLineSignupClick}
+                onClick={trackMetaPixelLead}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
                 {lineSignupLabel}

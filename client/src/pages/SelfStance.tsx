@@ -1,5 +1,6 @@
 import { useEffect, useState, type ElementType } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
+import { trackMetaPixelLead } from "@/lib/meta-pixel";
 import type { ContentPayload } from "@/types/content-payload";
 import {
   DEFAULT_SELF_STANCE_CONTENT,
@@ -14,15 +15,6 @@ const STORAGE_KEY = "self_stance_content_v1";
 const FAVICON_HREF = SELF_STANCE_ASSETS.favicon;
 const FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap";
-
-function trackCtaClick() {
-  if (
-    typeof window !== "undefined" &&
-    typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function"
-  ) {
-    (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead");
-  }
-}
 
 function safeParseStored(): SelfStanceContent | null {
   try {
@@ -77,7 +69,7 @@ function CtaButton({
       className={className}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={trackCtaClick}
+      onClick={trackMetaPixelLead}
     >
       {showLineIcon && <LineIcon />}
       {label}
@@ -171,7 +163,7 @@ export default function SelfStance() {
           href={c.stickyCta.ctaHref}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={trackCtaClick}
+          onClick={trackMetaPixelLead}
         >
           <LineIcon />
           {c.stickyCta.label}
@@ -186,7 +178,7 @@ export default function SelfStance() {
             className="header-btn"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={trackCtaClick}
+            onClick={trackMetaPixelLead}
           >
             <span>{c.header.ctaLabel}</span>
             <LineIcon />
