@@ -19,7 +19,7 @@
       "info": [
         {
           "label": "DATE",
-          "value": "2026.◯.◯"
+          "value": "2026.6.17"
         },
         {
           "label": "VENUE",
@@ -40,7 +40,7 @@
     },
     "empathy": {
       "script": "Your Discomfort?",
-      "titleHtml": "こんな違和感、<span class=\"red\">感じていませんか</span>",
+      "titleHtml": "こんなお悩み、<span class=\"red\">感じていませんか</span>",
       "leadHtml": "採用がうまくいかない理由は、多くの場合<strong>「施策」ではなく「構造」</strong>にあります。<br><br>\n      まずは、いま御社で起きていることを、5つのチェックで照らし合わせてみてください。",
       "checklist": [
         "採用サイトや説明会で「うちの良さ」がうまく伝わっていない気がする",
@@ -182,7 +182,7 @@
       "rows": [
         {
           "th": "日時 / DATE",
-          "tdHtml": "2026年◯月◯日(◯) ◯◯:◯◯ — ◯◯:◯◯<span class=\"sub\">所要時間 120分(休憩なし)</span>"
+          "tdHtml": "2026年6月17日(水) 15:00 - 17:00<span class=\"sub\">所要時間 120分(休憩なし)</span>"
         },
         {
           "th": "会場 / VENUE",
@@ -194,7 +194,7 @@
         },
         {
           "th": "定員 / CAPACITY",
-          "tdHtml": "◯社限定"
+          "tdHtml": "上限4社"
         },
         {
           "th": "参加費 / FEE",
