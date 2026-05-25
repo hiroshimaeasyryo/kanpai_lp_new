@@ -5,13 +5,13 @@
   "events": [
     {
       "id": "default-2",
-      "eventNumber": 18,
-      "eventNote": "27卒向けは【最終回】",
-      "dateLabel": "2026年4月9日（木）13:00〜17:00",
-      "timeRange": "13:00〜17:00",
+      "eventNumber": 1,
+      "eventNote": "【28卒向け】は全4回",
+      "dateLabel": "2026年8月26日（水）16:00〜20:20",
+      "timeRange": "16:00〜20:20",
       "location": "新宿新宿駅から徒歩6分（お申し込み後にご案内）",
-      "companiesCount": 4,
-      "studentsCount": 20,
+      "companiesCount": 6,
+      "studentsCount": 40,
       "order": 0
     }
   ],
