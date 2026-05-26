@@ -73,29 +73,29 @@
       "titleHtml": "150分で\"あなたらしさ\"を見つける、<br>3つのワーク。",
       "steps": [
         {
-          "num": "",
-          "nameHtml": "START",
-          "description": "オリエン<br>テーション"
+          "num": "START",
+          "nameHtml": "オリエン<br>テーション",
+          "description": "今日の流れとゴールを共有。"
         },
         {
           "num": "WORK 01",
-          "nameHtml": "WORK 01",
-          "description": "エピソード<br>の棚卸し"
+          "nameHtml": "エピソード<br>の棚卸し",
+          "description": "今ある自己PR、エピソードの整理。"
         },
         {
-          "num": "",
-          "nameHtml": "WORK 02",
-          "description": "人事との<br>対話"
+          "num": "WORK 02",
+          "nameHtml": "人事との<br>対話",
+          "description": "”あなたらしい強み”を見つける。"
         },
         {
-          "num": "",
-          "nameHtml": "WORK 03",
-          "description": "客観<br>フィードバック"
+          "num": "WORK 03",
+          "nameHtml": "客観<br>フィードバック",
+          "description": "自然体で評価される言葉にする。"
         },
         {
-          "num": "",
-          "nameHtml": "END",
-          "description": "エンディング"
+          "num": "END",
+          "nameHtml": "エンディング",
+          "description": "この150分を”体験”で終わらせない。明日からの就活への活かし方を決める。"
         }
       ],
       "pointsHeading": "POINT",
