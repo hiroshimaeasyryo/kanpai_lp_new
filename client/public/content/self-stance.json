@@ -73,29 +73,29 @@
       "titleHtml": "150分で\"あなたらしさ\"を見つける、<br>3つのワーク。",
       "steps": [
         {
-          "num": "START",
-          "nameHtml": "オリエン<br>テーション",
-          "description": "今日の流れとゴールを共有します。\"盛らない\"自己PRで評価されるために必要な基本を解説します。"
+          "num": "",
+          "nameHtml": "START",
+          "description": "オリエン<br>テーション"
         },
         {
           "num": "WORK 01",
-          "nameHtml": "エピソード<br>の棚卸し",
-          "description": "言語化モデルを使ってエピソードを3本書き出します。完璧に書けなくてOKです。むしろ「ここ盛らないと書けない」と感じた部分が次のワークの素材になります。"
+          "nameHtml": "WORK 01",
+          "description": "エピソード<br>の棚卸し"
         },
         {
-          "num": "WORK 02",
-          "nameHtml": "人事との<br>対話",
-          "description": "書きにくかったエピソードを、人事と自然体で語り合いましょう。整えた言葉ではなく素の言葉で話すから、3本に通底するあなたの\"動き方の癖\"が見えてきます。"
+          "num": "",
+          "nameHtml": "WORK 02",
+          "description": "人事との<br>対話"
         },
         {
-          "num": "WORK 03",
-          "nameHtml": "客観<br>フィードバック",
-          "description": "他参加者と人事から、あなたの\"らしさ\"を客観的にフィードバック。自分では当たり前すぎて見えていなかったパターンが、他者の言葉でフィードバックします。"
+          "num": "",
+          "nameHtml": "WORK 03",
+          "description": "客観<br>フィードバック"
         },
         {
-          "num": "END",
-          "nameHtml": "エンディング",
-          "description": "今日の気づきを整理し、明日のESや面接にどう活かすかを決めましょう。ワークショップを\"体験\"で終わらせないための時間です。"
+          "num": "",
+          "nameHtml": "END",
+          "description": "エンディング"
         }
       ],
       "pointsHeading": "POINT",
