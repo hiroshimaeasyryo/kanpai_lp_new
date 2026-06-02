@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video,input,textarea,select {
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+	text-decoration: none;
+	font-style:normal;
+	-webkit-text-size-adjust: 100%;
+	list-style: none;
+	font-weight: normal;
+	letter-spacing: 0em;
+	outline: none;
+	-webkit-font-smoothing: antialiased;
+	box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;-o-box-sizing: border-box;-ms-box-sizing: border-box;
+	word-break: break-all;
+	font-size: 100%;
+	//font-feature-settings: "palt" on;
+	line-height: 1;
+
+}
+img{ border:none; text-decoration:none; vertical-align:top; font-size:0;box-shadow: #000 0 0 0;}
+b{
+	font-weight:bold;}
+a{text-decoration: none;}
+a:hover{cursor: pointer;}
+a{
+	box-sizing: border-box;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;-o-box-sizing: border-box;-ms-box-sizing: border-box;
+}
+a:focus{
+	outline: none;
+}

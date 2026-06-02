@@ -16,6 +16,7 @@ import SelfReflection from "./pages/SelfReflection";
 import BtobSeminar from "./pages/BtobSeminar";
 import StartingJobHunting from "./pages/StartingJobHunting";
 import SelfStance from "./pages/SelfStance";
+import KdkMockup from "@/pages/mockup/clients-website/kdk/KdkMockup";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -38,6 +39,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"}>{() => <Home />}</Route>
+      <Route path={"/kdk"} component={KdkMockup} />
       <Route path={"/thanks_ks"} component={ThanksKs} />
       <Route path={"/poprock_redirect"} component={PoprockRedirect} />
       <Route path={"/self-reflection"} component={SelfReflection} />

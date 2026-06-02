@@ -110,3 +110,5 @@ temp/
 
 docs/*
 client/public/repo-config.json
+
+mockup/*

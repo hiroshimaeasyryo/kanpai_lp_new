@@ -6,8 +6,16 @@ export const IMAGE_MANAGER_ACCESS_CODE = "image-manager";
 /** コンテンツ管理画面（/contents-manager）に入るためのアクセスコード */
 export const CONTENTS_MANAGER_ACCESS_CODE = "contents-manager";
 
+/**
+ * KDK モック（/mockup/clients-website/kdk）に入るためのアクセスキー
+ * NOTE: 静的サイトのため「秘匿」ではなく「鍵付き閲覧」用途（URLが漏れた際の抑止）として扱う。
+ */
+export const KDK_MOCKUP_ACCESS_KEY =
+  (import.meta.env.VITE_KDK_MOCKUP_ACCESS_KEY as string | undefined) ?? "kdk";
+
 const IMAGE_MANAGER_SESSION_KEY = "image_manager_unlocked";
 const CONTENTS_MANAGER_SESSION_KEY = "contents_manager_unlocked";
+const KDK_MOCKUP_SESSION_KEY = "kdk_mockup_unlocked";
 
 export function isImageManagerUnlocked(): boolean {
   return sessionStorage.getItem(IMAGE_MANAGER_SESSION_KEY) === "1";
@@ -23,6 +31,14 @@ export function isContentsManagerUnlocked(): boolean {
 
 export function setContentsManagerUnlocked(): void {
   sessionStorage.setItem(CONTENTS_MANAGER_SESSION_KEY, "1");
+}
+
+export function isKdkMockupUnlocked(): boolean {
+  return sessionStorage.getItem(KDK_MOCKUP_SESSION_KEY) === "1";
+}
+
+export function setKdkMockupUnlocked(): void {
+  sessionStorage.setItem(KDK_MOCKUP_SESSION_KEY, "1");
 }
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
