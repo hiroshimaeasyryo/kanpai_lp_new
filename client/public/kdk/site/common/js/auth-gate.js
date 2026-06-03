@@ -1,22 +1,34 @@
 /* KDK mockup access gate (client-side). */
 (function () {
+  var SESSION_KEY = "kdk_mockup_unlocked";
+
+  function isGatePath(path) {
+    return path === "/kdk" || path === "/kdk/" || path === "/kdk/index.html";
+  }
+
+  /** リダイレクト先は pathname のみ（query/hash を含めない） */
+  function buildNextPath() {
+    var path = window.location.pathname || "";
+    if (!path.startsWith("/kdk/site/")) return null;
+    if (isGatePath(path)) return null;
+    return path;
+  }
+
   try {
     var path = window.location.pathname || "";
     if (!path.startsWith("/kdk")) return;
+    if (isGatePath(path)) return;
 
-    // Gate page (static) is /kdk/ (or /kdk). Don't loop.
-    if (path === "/kdk" || path === "/kdk/") return;
+    if (window.sessionStorage.getItem(SESSION_KEY) === "1") return;
 
-    var unlocked = window.sessionStorage.getItem("kdk_mockup_unlocked") === "1";
-    if (unlocked) return;
+    var nextPath = buildNextPath();
+    if (!nextPath) {
+      window.location.replace("/kdk/");
+      return;
+    }
 
-    var next = encodeURIComponent(
-      window.location.pathname + window.location.search + window.location.hash,
-    );
-    window.location.replace("/kdk/?next=" + next);
+    window.location.replace("/kdk/?next=" + encodeURIComponent(nextPath));
   } catch (e) {
-    // If anything fails, fall back to gate.
     window.location.replace("/kdk/");
   }
 })();
-

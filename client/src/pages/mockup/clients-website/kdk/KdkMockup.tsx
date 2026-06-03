@@ -1,42 +1,28 @@
-import AccessKeyGate from "@/components/AccessKeyGate";
+import { useEffect } from "react";
 import {
-  isKdkMockupUnlocked,
-  KDK_MOCKUP_ACCESS_KEY,
-  setKdkMockupUnlocked,
-} from "@/const";
-import { useNoIndex } from "@/hooks/useNoIndex";
+  KDK_GATE_PATH,
+  KDK_MOCKUP_DEFAULT_PATH,
+  parseKdkMockupNext,
+} from "@/lib/kdk-mockup-auth";
 
-function getNextFromQuery(): string | null {
-  const url = new URL(window.location.href);
-  const next = url.searchParams.get("next");
-  if (!next) return null;
-  try {
-    const decoded = decodeURIComponent(next);
-    if (!decoded.startsWith("/kdk")) return null;
-    return decoded;
-  } catch {
-    return null;
-  }
-}
-
+/**
+ * SPA 側の /kdk は静的ゲート（/kdk/）へ委譲する。
+ * GitHub Pages では /kdk と /kdk/ の扱いが異なるため、ゲートは常に /kdk/ に統一する。
+ */
 export default function KdkMockup() {
-  useNoIndex(true);
+  useEffect(() => {
+    const next = parseKdkMockupNext();
+    const target = new URL(KDK_GATE_PATH, window.location.origin);
+    if (next) target.searchParams.set("next", next);
+    window.location.replace(target.toString());
+  }, []);
 
   return (
-    <AccessKeyGate
-      title="KDK モック（閲覧キー）"
-      description="これは一般公開用ではありません。アクセスキーを入力してください。"
-      expectedKey={KDK_MOCKUP_ACCESS_KEY}
-      isUnlocked={isKdkMockupUnlocked}
-      onUnlock={() => {
-        setKdkMockupUnlocked();
-        const next = getNextFromQuery();
-        window.location.assign(next ?? "/kdk/index.html");
-      }}
-    >
-      {/* ここに来た時点で onUnlock でリダイレクト済みの想定 */}
-      <div className="min-h-dvh bg-background text-foreground" />
-    </AccessKeyGate>
+    <div className="min-h-dvh bg-background text-foreground">
+      <p className="p-4 text-sm text-muted-foreground">
+        リダイレクト中…（
+        <a href={KDK_MOCKUP_DEFAULT_PATH}>KDK モック</a>）
+      </p>
+    </div>
   );
 }
-
