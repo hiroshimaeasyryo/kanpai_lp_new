@@ -6,7 +6,6 @@
     return path === "/kdk" || path === "/kdk/" || path === "/kdk/index.html";
   }
 
-  /** リダイレクト先は pathname のみ（query/hash を含めない） */
   function buildNextPath() {
     var path = window.location.pathname || "";
     if (!path.startsWith("/kdk/site/")) return null;
