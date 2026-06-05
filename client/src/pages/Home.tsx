@@ -80,6 +80,12 @@ export default function Home({ lpSlug }: HomeProps) {
   const lineCtaLabel = contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "参加申し込みをする";
   const lineSignupLabel = contentSlug === "campaign2603" ? "キャンペーンで申し込み" : "参加申し込みをする";
 
+  // campaign2603 はCTAボタンのみ青系(Oceanパレット)に。他LP・他要素はテーマ変数のまま
+  const isCampaign2603 = contentSlug === "campaign2603";
+  const ctaBgClass = isCampaign2603 ? "bg-[#4A7FA0]" : "bg-lp-primary";
+  const ctaHoverClass = isCampaign2603 ? "hover:bg-[#3D6F8E]" : "hover:bg-lp-primary-hover";
+  const ctaActiveClass = isCampaign2603 ? "active:bg-[#3D6F8E]" : "active:bg-lp-primary-hover";
+
   // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
   useEffect(() => {
     const threshold = 200;
@@ -220,7 +226,7 @@ export default function Home({ lpSlug }: HomeProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
-              className="inline-flex items-center gap-1.5 px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
+              className={`inline-flex items-center gap-1.5 px-5 h-10 ${ctaBgClass} text-white text-xs sm:text-sm font-medium rounded-full transition-colors ${ctaHoverClass} whitespace-nowrap`}
             >
               イベントに参加する
             </a>
@@ -241,7 +247,7 @@ export default function Home({ lpSlug }: HomeProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackMetaPixelLead}
-            className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
+            className={`flex items-center justify-center gap-2 w-full py-3.5 ${ctaBgClass} text-white rounded-full font-medium text-sm transition-all ${ctaActiveClass} shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]`}
           >
             {lineSignupLabel}
             <img src="/line-logo.png" alt="" className="w-8 h-8 object-contain" loading="lazy" />
@@ -335,7 +341,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={trackMetaPixelLead}
-                  className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+                  className={`block w-full text-center py-4 ${ctaBgClass} text-white rounded-full font-medium transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5`}
                 >
                   {lineCtaLabel}
                   <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
@@ -545,7 +551,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
-                className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+                className={`block w-full text-center py-4 ${ctaBgClass} text-white rounded-full font-medium transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5`}
               >
                 {lineCtaLabel}
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
@@ -706,7 +712,7 @@ export default function Home({ lpSlug }: HomeProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
-              className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+              className={`block w-full text-center py-4 ${ctaBgClass} text-white rounded-full font-medium transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5`}
             >
               {lineCtaLabel}
               <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
@@ -794,7 +800,7 @@ export default function Home({ lpSlug }: HomeProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
-              className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+              className={`block w-full text-center py-4 ${ctaBgClass} text-white rounded-full font-medium transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5`}
             >
               {lineCtaLabel}
               <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
@@ -948,7 +954,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
-                className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
+                className={`inline-flex items-center justify-center gap-2 px-12 py-4 ${ctaBgClass} text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5 mb-4`}
               >
                 {lineCtaLabel}
                 <img src="/line-logo.png" alt="LINE" className="w-7 h-7 object-contain" loading="lazy" />
@@ -1057,7 +1063,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
-                className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+                className={`block w-full text-center py-4 ${ctaBgClass} text-white rounded-full font-medium transition-all ${ctaHoverClass} hover:shadow-lg hover:-translate-y-0.5`}
               >
                 {lineSignupLabel}
                 <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
