@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "@/components/ImageUploader";
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 /** SelfReflection コンテンツの型（SelfReflection.tsx と同一） */
 export type SelfReflectionContent = {
+  fieldStyles?: HomeCopyFieldStyles;
   ctaUrl: string;
   floatingCtaLabel: string;
   hero: { titleHtml: string; sub: string; ctaLabel: string; bgImageUrl: string };
@@ -48,9 +50,12 @@ export type SelfReflectionContent = {
   footer: { brand: string; brandSub: string; company: string; copyright: string };
 };
 
+import { shouldShowEditorSection } from "@/lib/content-manager/editor-section";
+
 interface Props {
   content: SelfReflectionContent;
   onChange: (content: SelfReflectionContent) => void;
+  sectionId?: string | null;
 }
 
 /* ---- style helpers ---- */
@@ -67,7 +72,7 @@ const textareaCls = "border-[#ffd7c3] text-[#3D281E] min-h-[80px]";
 const addBtnCls = "border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]";
 const removeBtnCls = "text-red-500 hover:text-red-700 text-xs px-2 py-1";
 
-export function SelfReflectionEditor({ content, onChange }: Props) {
+export function SelfReflectionEditor({ content, onChange, sectionId }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const toggle = (key: string) =>
@@ -80,11 +85,12 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
     onChange({ ...content, [key]: value });
   };
 
-  const isOpen = (key: string) => !collapsed[key];
+  const show = (key: string) => shouldShowEditorSection(sectionId, key);
+  const isOpen = (key: string) => (sectionId ? show(key) : !collapsed[key]);
 
   return (
     <div className="space-y-2">
-      {/* ---- CTA URL / フローティングボタン ---- */}
+      {show("global") && (
       <div className={sectionCls}>
         <SectionHeading>基本設定</SectionHeading>
         <div className="space-y-4">
@@ -107,8 +113,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
-      {/* ---- ヒーロー ---- */}
+      {show("hero") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("hero")}>
           <SectionHeading>ヒーローセクション</SectionHeading>
@@ -153,8 +160,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- イベント情報 ---- */}
+      {show("eventInfo") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("eventInfo")}>
           <SectionHeading>イベント情報</SectionHeading>
@@ -199,8 +207,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- 課題提起 ---- */}
+      {show("issue") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("issue")}>
           <SectionHeading>課題提起セクション</SectionHeading>
@@ -224,8 +233,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- 原因・引用 ---- */}
+      {show("cause") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("cause")}>
           <SectionHeading>原因・メッセージ</SectionHeading>
@@ -256,8 +266,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- コンセプト ---- */}
+      {show("concept") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("concept")}>
           <SectionHeading>コンセプト</SectionHeading>
@@ -281,8 +292,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- ステップ ---- */}
+      {show("steps") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("steps")}>
           <SectionHeading>ステップ</SectionHeading>
@@ -353,8 +365,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- 体験者の声 ---- */}
+      {show("voices") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("voices")}>
           <SectionHeading>体験者の声</SectionHeading>
@@ -396,8 +409,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- 安心ポイント ---- */}
+      {show("safety") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("safety")}>
           <SectionHeading>安心ポイント</SectionHeading>
@@ -435,8 +449,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- アドバイザー ---- */}
+      {show("advisor") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("advisor")}>
           <SectionHeading>アドバイザー</SectionHeading>
@@ -483,8 +498,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- FAQ ---- */}
+      {show("faq") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("faq")}>
           <SectionHeading>よくある質問（FAQ）</SectionHeading>
@@ -522,8 +538,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- 最終CTA ---- */}
+      {show("closingCta") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("closingCta")}>
           <SectionHeading>最終CTA</SectionHeading>
@@ -554,8 +571,9 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
-      {/* ---- フッター ---- */}
+      {show("footer") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("footer")}>
           <SectionHeading>フッター</SectionHeading>
@@ -586,6 +604,7 @@ export function SelfReflectionEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

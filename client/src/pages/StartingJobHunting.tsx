@@ -1,5 +1,6 @@
 import { useEffect, useState, type ElementType } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
+import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
 import type { ContentPayload } from "@/types/content-payload";
 import {
@@ -9,6 +10,7 @@ import {
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
+import { CmId, CmHtml } from "@/components/contents-manager/CmId";
 import "./starting-job-hunting.css";
 
 const STORAGE_KEY = "starting_job_hunting_content_v1";
@@ -36,6 +38,7 @@ function safeStore(next: StartingJobHuntingContent) {
   }
 }
 
+/** sjh-lp-fields に未登録の HTML 用（編集対象外） */
 function Html({ html, as, className }: { html: string; as?: ElementType; className?: string }) {
   const Tag = as ?? "div";
   return <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />;
@@ -55,11 +58,13 @@ function LineIcon({ className }: { className?: string }) {
 function CtaButton({
   href,
   label,
+  labelCmId,
   className,
   dark,
 }: {
   href: string;
   label: string;
+  labelCmId?: string;
   className?: string;
   dark?: boolean;
 }) {
@@ -72,7 +77,7 @@ function CtaButton({
       onClick={trackMetaPixelLead}
     >
       {!dark && <LineIcon />}
-      {label}
+      {labelCmId ? <CmId id={labelCmId}>{label}</CmId> : label}
     </a>
   );
 }
@@ -81,6 +86,18 @@ export default function StartingJobHunting() {
   const [content, setContent] = useState<StartingJobHuntingContent>(() => {
     if (typeof window === "undefined") return DEFAULT_STARTING_JOB_HUNTING_CONTENT;
     return safeParseStored() ?? DEFAULT_STARTING_JOB_HUNTING_CONTENT;
+  });
+
+  const isCmPreview = useCmPreviewPage({
+    slug: "starting_job_hunting",
+    onDraft: (payload) => {
+      const remote = (payload as ContentPayload | null)?.startingJobHunting;
+      if (remote) {
+        const merged = mergeStartingJobHuntingContent(remote);
+        setContent(merged);
+        safeStore(merged);
+      }
+    },
   });
 
   useEffect(() => {
@@ -138,6 +155,7 @@ export default function StartingJobHunting() {
   }, [content.seo.description, content.seo.title]);
 
   useEffect(() => {
+    if (isCmPreview) return;
     let cancelled = false;
     (async () => {
       const payload = await fetchContentBySlug("starting_job_hunting");
@@ -152,14 +170,19 @@ export default function StartingJobHunting() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isCmPreview]);
 
   const c = content;
 
   return (
     <div id="starting-job-hunting-page">
       <header>
-        <img src={c.header.logoUrl} alt={c.header.logoAlt} className="logo" />
+        <img
+          src={c.header.logoUrl}
+          alt={c.header.logoAlt}
+          className="logo"
+          data-cm-id="sjh-header-logo"
+        />
         <a
           href={c.header.ctaHref}
           className="header-cta"
@@ -168,27 +191,39 @@ export default function StartingJobHunting() {
           onClick={trackMetaPixelLead}
         >
           <LineIcon className="line-icon--header" />
-          <span className="header-cta-label header-cta-label--desktop">{c.header.ctaLabel}</span>
-          <span className="header-cta-label header-cta-label--mobile">
+          <CmId id="sjh-header-cta-label" className="header-cta-label header-cta-label--desktop">
+            {c.header.ctaLabel}
+          </CmId>
+          <CmId id="sjh-header-cta-label-mobile" className="header-cta-label header-cta-label--mobile">
             {c.header.ctaLabelMobile?.trim() || c.header.ctaLabel}
-          </span>
+          </CmId>
         </a>
       </header>
 
-      <div className="fv-kicker">{c.hero.kicker}</div>
-      <div className="fv-image-wrap">
-        <img src={c.hero.heroImageUrl} alt={c.hero.heroImageAlt} />
-      </div>
-      <div className="fv-cta-bar">
-        <CtaButton href={c.hero.primaryCtaHref} label={c.hero.primaryCtaLabel} />
-      </div>
-      <div className="fv-body">
-        <Html html={c.hero.bodyHtml} />
+      <div>
+        <CmId id="sjh-hero-kicker" className="fv-kicker">
+          {c.hero.kicker}
+        </CmId>
+        <div className="fv-image-wrap">
+          <img src={c.hero.heroImageUrl} alt={c.hero.heroImageAlt} data-cm-id="sjh-hero-image" />
+        </div>
+        <div className="fv-cta-bar">
+          <CtaButton
+            href={c.hero.primaryCtaHref}
+            label={c.hero.primaryCtaLabel}
+            labelCmId="sjh-hero-primary-cta-label"
+          />
+        </div>
+        <div className="fv-body">
+          <CmHtml id="sjh-hero-body" html={c.hero.bodyHtml} />
+        </div>
       </div>
 
       <div className="event-info-section">
         <div className="event-info-inner">
-          <div className="event-info-label">{c.eventInfo.label}</div>
+          <CmId id="sjh-event-info-label" className="event-info-label">
+            {c.eventInfo.label}
+          </CmId>
           <div className="event-info-rows">
             {c.eventInfo.rows.map((row, i) => (
               <div key={i} className="event-info-row">
@@ -196,9 +231,17 @@ export default function StartingJobHunting() {
                   <EventInfoIcon label={row.label} />
                 </div>
                 <div className="event-info-content">
-                  <div className="ei-label">{row.label}</div>
-                  <div className="ei-value">{row.value}</div>
-                  {row.sub ? <div className="ei-sub">{row.sub}</div> : null}
+                  <CmId id={`sjh-event-info-row-${i}-label`} className="ei-label">
+                    {row.label}
+                  </CmId>
+                  <CmId id={`sjh-event-info-row-${i}-value`} className="ei-value">
+                    {row.value}
+                  </CmId>
+                  {row.sub ? (
+                    <CmId id={`sjh-event-info-row-${i}-sub`} className="ei-sub">
+                      {row.sub}
+                    </CmId>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -207,60 +250,80 @@ export default function StartingJobHunting() {
       </div>
 
       <section>
-        <div className="section-label">{c.problem.script}</div>
+        <CmId id="sjh-problem-script" className="section-label">
+          {c.problem.script}
+        </CmId>
         <h2>
-          <Html html={c.problem.titleHtml} as="span" />
+          <CmHtml id="sjh-problem-title" html={c.problem.titleHtml} as="span" />
         </h2>
         <ul className="problem-list">
           {c.problem.items.map((item, i) => (
-            <li key={i}>{item}</li>
+            <li key={i}>
+              <CmId id={`sjh-problem-item-${i}`}>{item}</CmId>
+            </li>
           ))}
         </ul>
-        {c.problem.reassurance ? <div className="reassurance">{c.problem.reassurance}</div> : null}
+        {c.problem.reassurance ? (
+          <CmId id="sjh-problem-reassurance" className="reassurance">
+            {c.problem.reassurance}
+          </CmId>
+        ) : null}
       </section>
 
       <section>
-        <div className="section-label">{c.insight.script}</div>
+        <CmId id="sjh-insight-script" className="section-label">
+          {c.insight.script}
+        </CmId>
         <h2>
-          <Html html={c.insight.titleHtml} as="span" />
+          <CmHtml id="sjh-insight-title" html={c.insight.titleHtml} as="span" />
         </h2>
         <div className="bridge-box">
           {c.insight.paragraphs.map((p, i) => (
             <p key={i} style={{ marginBottom: i < c.insight.paragraphs.length - 1 ? "1em" : 0 }}>
-              {p}
+              <CmId id={`sjh-insight-paragraph-${i}`}>{p}</CmId>
             </p>
           ))}
           <p style={{ marginTop: "1.25em" }}>
-            <span className="key">{c.insight.keyLine}</span>
+            <CmId id="sjh-insight-key-line" className="key">
+              {c.insight.keyLine}
+            </CmId>
           </p>
         </div>
       </section>
 
       <section>
-        <div className="section-label">{c.solution.script}</div>
+        <CmId id="sjh-solution-script" className="section-label">
+          {c.solution.script}
+        </CmId>
         <h2>
-          <Html html={c.solution.titleHtml} as="span" />
+          <CmHtml id="sjh-solution-title" html={c.solution.titleHtml} as="span" />
         </h2>
-        <p style={{ marginBottom: "1.5em", lineHeight: 1.9 }}>{c.solution.lead}</p>
-        <p style={{ fontWeight: 700, marginBottom: "1em" }}>{c.solution.deliverablesHeading}</p>
+        <CmId id="sjh-solution-lead" as="p" style={{ marginBottom: "1.5em", lineHeight: 1.9 }}>
+          {c.solution.lead}
+        </CmId>
+        <CmId id="sjh-solution-deliverables-heading" as="p" style={{ fontWeight: 700, marginBottom: "1em" }}>
+          {c.solution.deliverablesHeading}
+        </CmId>
         <div className="deliverables">
-          {c.solution.deliverables.map((d) => (
+          {c.solution.deliverables.map((d, i) => (
             <div key={d.num} className="deliverable-item">
-              <span className="num">{d.num}</span>
-              <span>{d.text}</span>
+              <CmId id={`sjh-solution-deliverable-${i}-num`} className="num">
+                {d.num}
+              </CmId>
+              <CmId id={`sjh-solution-deliverable-${i}-text`}>{d.text}</CmId>
             </div>
           ))}
         </div>
       </section>
 
       <div className="cta-block">
-        <CtaButton href={c.midCta.ctaHref} label={c.midCta.label} />
+        <CtaButton href={c.midCta.ctaHref} label={c.midCta.label} labelCmId="sjh-mid-cta-label" />
       </div>
 
       <section>
         <div className="section-label">{c.program.script}</div>
         <h2>
-          <Html html={c.program.titleHtml} as="span" />
+          <CmHtml id="sjh-program-title" html={c.program.titleHtml} as="span" />
         </h2>
         <div className="program-table-wrap">
           <table className="flow-table">
@@ -273,8 +336,12 @@ export default function StartingJobHunting() {
             <tbody>
               {c.program.rows.map((row, i) => (
                 <tr key={i}>
-                  <td>{row.step}</td>
-                  <td>{row.content}</td>
+                  <td>
+                    <CmId id={`sjh-program-row-${i}-step`}>{row.step}</CmId>
+                  </td>
+                  <td>
+                    <CmId id={`sjh-program-row-${i}-content`}>{row.content}</CmId>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -283,7 +350,7 @@ export default function StartingJobHunting() {
         <div className="flow-points">
           {c.program.points.map((p, i) => (
             <div key={i} className="flow-point">
-              {p}
+              <CmId id={`sjh-program-point-${i}`}>{p}</CmId>
             </div>
           ))}
         </div>
@@ -295,16 +362,24 @@ export default function StartingJobHunting() {
           <Html html={c.facilitator.titleHtml} as="span" />
         </h2>
         <div className="facilitator-card">
-          <img src={c.facilitator.imageUrl} alt={c.facilitator.name} />
+          <img src={c.facilitator.imageUrl} alt={c.facilitator.name} data-cm-id="sjh-facilitator-image" />
           <div>
-            <div className="facilitator-name">{c.facilitator.name}</div>
-            <div className="facilitator-role">{c.facilitator.role}</div>
+            <CmId id="sjh-facilitator-name" className="facilitator-name">
+              {c.facilitator.name}
+            </CmId>
+            <CmId id="sjh-facilitator-role" className="facilitator-role">
+              {c.facilitator.role}
+            </CmId>
             <ul className="facilitator-bio">
               {c.facilitator.bio.map((line, i) => (
-                <li key={i}>{line}</li>
+                <li key={i}>
+                  <CmId id={`sjh-facilitator-bio-${i}`}>{line}</CmId>
+                </li>
               ))}
             </ul>
-            <div className="facilitator-quote">{c.facilitator.quote}</div>
+            <CmId id="sjh-facilitator-quote" className="facilitator-quote">
+              {c.facilitator.quote}
+            </CmId>
           </div>
         </div>
       </section>
@@ -317,8 +392,12 @@ export default function StartingJobHunting() {
         <div className="voices">
           {c.voices.items.map((v, i) => (
             <div key={i} className="voice-card">
-              <div className="school">{v.school}</div>
-              <div className="comment">{v.comment}</div>
+              <CmId id={`sjh-voices-item-${i}-school`} className="school">
+                {v.school}
+              </CmId>
+              <CmId id={`sjh-voices-item-${i}-comment`} className="comment">
+                {v.comment}
+              </CmId>
             </div>
           ))}
         </div>
@@ -331,8 +410,12 @@ export default function StartingJobHunting() {
           <tbody>
             {c.info.scheduleRows.map((row, i) => (
               <tr key={i}>
-                <td>{row.label}</td>
-                <td>{row.value}</td>
+                <td>
+                  <CmId id={`sjh-info-row-${i}-label`}>{row.label}</CmId>
+                </td>
+                <td>
+                  <CmId id={`sjh-info-row-${i}-value`}>{row.value}</CmId>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -349,7 +432,7 @@ export default function StartingJobHunting() {
           </div>
         ) : null}
         <div className="cta-block" style={{ borderTop: "none", paddingTop: 32 }}>
-          <CtaButton href={c.info.ctaHref} label={c.info.ctaLabel} />
+          <CtaButton href={c.info.ctaHref} label={c.info.ctaLabel} labelCmId="sjh-info-cta-label" />
         </div>
       </section>
 
@@ -360,7 +443,9 @@ export default function StartingJobHunting() {
         </h2>
         <ul className="recommend-list">
           {c.recommend.items.map((item, i) => (
-            <li key={i}>{item}</li>
+            <li key={i}>
+              <CmId id={`sjh-recommend-item-${i}`}>{item}</CmId>
+            </li>
           ))}
         </ul>
       </section>
@@ -373,8 +458,12 @@ export default function StartingJobHunting() {
         <div className="faq">
           {c.faq.items.map((item, i) => (
             <div key={i} className="faq-item">
-              <div className="faq-q">{item.q}</div>
-              <div className="faq-a">{item.a}</div>
+              <CmId id={`sjh-faq-item-${i}-q`} className="faq-q">
+                {item.q}
+              </CmId>
+              <CmId id={`sjh-faq-item-${i}-a`} className="faq-a">
+                {item.a}
+              </CmId>
             </div>
           ))}
         </div>
@@ -382,31 +471,40 @@ export default function StartingJobHunting() {
 
       <section className="final-cta">
         <h2>
-          <Html html={c.finalCta.titleHtml} as="span" />
+          <CmHtml id="sjh-final-cta-title" html={c.finalCta.titleHtml} as="span" />
         </h2>
         <div className="sub">
-          <Html html={c.finalCta.subHtml} />
+          <CmHtml id="sjh-final-cta-sub" html={c.finalCta.subHtml} />
         </div>
         <div className="meta">
           {c.finalCta.metaItems.map((m, i) => (
-            <span key={i}>{m}</span>
+            <CmId key={i} id={`sjh-final-cta-meta-${i}`}>
+              {m}
+            </CmId>
           ))}
         </div>
-        <CtaButton href={c.finalCta.ctaHref} label={c.finalCta.ctaLabel} dark />
+        <CtaButton
+          href={c.finalCta.ctaHref}
+          label={c.finalCta.ctaLabel}
+          labelCmId="sjh-final-cta-label"
+          dark
+        />
         <div className="note">
-          <Html html={c.finalCta.noteHtml} />
+          <CmHtml id="sjh-final-cta-note" html={c.finalCta.noteHtml} />
         </div>
       </section>
 
       <footer>
         {c.footer.lines.map((line, i) => (
-          <div key={i}>{line}</div>
+          <CmId key={i} id={`sjh-footer-line-${i}`}>
+            {line}
+          </CmId>
         ))}
-        <div>{c.footer.copyright}</div>
+        <CmId id="sjh-footer-copyright">{c.footer.copyright}</CmId>
       </footer>
 
       <div className="sticky-cta">
-        <CtaButton href={c.stickyCta.ctaHref} label={c.stickyCta.label} />
+        <CtaButton href={c.stickyCta.ctaHref} label={c.stickyCta.label} labelCmId="sjh-sticky-cta-label" />
       </div>
     </div>
   );

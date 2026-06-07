@@ -21,6 +21,7 @@ import type { ContentManifest } from "@/lib/lp-slug";
 import { getStoredPaletteId, setStoredPaletteId } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
 import { CONTENT_JSON_PATH } from "@/types/content-payload";
+import { getStoredHomeCopy, setStoredHomeCopy } from "@/types/home-copy";
 import { getStoredEvents, setStoredEvents } from "@/types/events";
 
 function isContentPayload(v: unknown): v is ContentPayload {
@@ -124,6 +125,7 @@ export function getContentFromLocalStorage(): ContentPayload {
     features: getStoredFeatures(),
     paletteId: getStoredPaletteId(),
     campaign2603Notice: getStoredCampaign2603Notice(),
+    copy: getStoredHomeCopy(),
   };
 }
 
@@ -176,5 +178,8 @@ export function applyContentToLocalStorage(payload: ContentPayload): void {
   }
   if (payload.campaign2603Notice !== undefined) {
     setStoredCampaign2603Notice(payload.campaign2603Notice);
+  }
+  if (payload.copy !== undefined) {
+    setStoredHomeCopy(payload.copy);
   }
 }

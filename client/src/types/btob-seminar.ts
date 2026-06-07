@@ -20,7 +20,10 @@ export type BtobDetailRow = { th: string; tdHtml: string };
 
 export type BtobFaqItem = { q: string; a: string };
 
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
+
 export type BtobSeminarContent = {
+  fieldStyles?: HomeCopyFieldStyles;
   seo: { title: string; description: string };
   header: { logoHtml: string; badgeLabel: string; ctaLabel: string; ctaHref: string };
   hero: {

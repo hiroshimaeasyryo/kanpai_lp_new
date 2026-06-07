@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "@/components/ImageUploader";
+import { shouldShowEditorSection } from "@/lib/content-manager/editor-section";
 import type { BtobSeminarContent } from "@/types/btob-seminar";
 
 interface Props {
   content: BtobSeminarContent;
   onChange: (content: BtobSeminarContent) => void;
+  sectionId?: string | null;
 }
 
 const sectionCls = "mb-8 rounded-xl border border-[#ffd7c3] bg-white p-6";
@@ -24,10 +26,11 @@ const FieldLabel = ({ children }: { children: React.ReactNode }) => (
 const inputCls = "border-[#ffd7c3] text-[#3D281E]";
 const textareaCls = "border-[#ffd7c3] text-[#3D281E] min-h-[80px]";
 
-export function BtobSeminarEditor({ content, onChange }: Props) {
+export function BtobSeminarEditor({ content, onChange, sectionId }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const toggle = (key: string) => setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
-  const isOpen = (key: string) => !collapsed[key];
+  const show = (key: string) => shouldShowEditorSection(sectionId, key);
+  const isOpen = (key: string) => (sectionId ? show(key) : !collapsed[key]);
 
   const update = <K extends keyof BtobSeminarContent>(key: K, value: BtobSeminarContent[K]) => {
     onChange({ ...content, [key]: value });
@@ -35,6 +38,7 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
 
   return (
     <div className="space-y-2">
+      {!sectionId && (
       <div className={sectionCls}>
         <SectionHeading>SEO（title / description）</SectionHeading>
         <div className="space-y-4">
@@ -57,7 +61,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("header") && (
       <div className={sectionCls}>
         <SectionHeading>ヘッダー</SectionHeading>
         <div className="space-y-4">
@@ -98,7 +104,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("hero") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("hero")}>
           <SectionHeading>ヒーロー</SectionHeading>
@@ -206,7 +214,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("empathy") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("empathy")}>
           <SectionHeading>共感セクション</SectionHeading>
@@ -260,7 +270,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("structure") && (
       <div className={sectionCls}>
         <SectionHeading>ループ図（4ステップ）</SectionHeading>
         <div className="space-y-3">
@@ -327,7 +339,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           ))}
         </div>
       </div>
+      )}
 
+      {show("speaker") && (
       <div className={sectionCls}>
         <SectionHeading>講師</SectionHeading>
         <div className="space-y-4">
@@ -414,7 +428,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("experience-takeaway") && (
       <div className={sectionCls}>
         <SectionHeading>体験4カード / 持ち帰り3カード</SectionHeading>
         <div className="space-y-2 mb-4">
@@ -521,7 +537,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         ))}
       </div>
+      )}
 
+      {show("mid-audience-hosts") && (
       <div className={sectionCls}>
         <SectionHeading>中段CTA / 対象者 / 主催</SectionHeading>
         <div className="space-y-4">
@@ -656,7 +674,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           ))}
         </div>
       </div>
+      )}
 
+      {show("details-faq") && (
       <div className={sectionCls}>
         <SectionHeading>開催概要テーブル / FAQ</SectionHeading>
         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -732,7 +752,9 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           </div>
         ))}
       </div>
+      )}
 
+      {show("final-form-footer") && (
       <div className={sectionCls}>
         <SectionHeading>最終CTA / フォーム / フッター</SectionHeading>
         <div className="space-y-4">
@@ -814,6 +836,7 @@ export function BtobSeminarEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
  * すべてのコンテンツ管理項目を1つのJSONで扱う。
  */
 import type { EventImage, FeatureItem } from "@/lib/content-settings";
+import type { HomeCopy } from "@/types/home-copy";
 import type { KanpaiEvent } from "@/types/events";
 
 export interface ContentPayload {
@@ -22,6 +23,8 @@ export interface ContentPayload {
   paletteId?: string | null;
   /** campaign2603用: イベント詳細「場所」下に表示するキャンペーン文言（改行区切り） */
   campaign2603Notice?: string | null;
+  /** Home系LPの固定テキスト（見出し・本文・FAQ 等） */
+  copy?: HomeCopy;
 
   /**
    * /self-reflection 用コンテンツ。
