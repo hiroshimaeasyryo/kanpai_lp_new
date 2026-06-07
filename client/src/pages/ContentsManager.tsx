@@ -3,16 +3,15 @@
    - 温かみのある対話性: 手書き風要素とソフトなインタラクション
 */
 
-import { useEffect, useState } from "react";
-import { ImageUploader } from "@/components/ImageUploader";
-import { SelfReflectionEditor, type SelfReflectionContent } from "@/components/SelfReflectionEditor";
-import { BtobSeminarEditor } from "@/components/BtobSeminarEditor";
-import { StartingJobHuntingEditor } from "@/components/StartingJobHuntingEditor";
-import { SelfStanceEditor } from "@/components/SelfStanceEditor";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { EditPaletteSheet } from "@/components/contents-manager/EditPaletteSheet";
+import { GlobalSettingsPanel } from "@/components/contents-manager/GlobalSettingsPanel";
+import type { HomeElementEditorProps } from "@/components/contents-manager/HomeElementEditor";
+import { PreviewSection } from "@/components/contents-manager/PreviewSection";
+import type { SelfReflectionContent } from "@/components/SelfReflectionEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   CONTENTS_MANAGER_ACCESS_CODE,
   isContentsManagerUnlocked,
@@ -21,8 +20,6 @@ import {
 import { usePalette } from "@/contexts/PaletteContext";
 import type { EventImage, FeatureItem } from "@/lib/content-settings";
 import {
-  DEFAULT_FEATURE_IMAGE_PATHS,
-  DEFAULT_EVENT_FLOW_LABELS,
   DEFAULT_FEATURES,
   generateImageId,
   getStoredEventImages,
@@ -36,10 +33,17 @@ import {
   setStoredHeroImageMobile,
 } from "@/lib/content-settings";
 import { applyContentToLocalStorage, fetchContentBySlug, fetchContentManifest } from "@/lib/content-loader";
+import { applyDraftToPreviewStorage } from "@/lib/content-manager/preview-storage";
 import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
 import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
-import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { ContentPayload } from "@/types/content-payload";
+import {
+  DEFAULT_HOME_COPY,
+  getStoredHomeCopy,
+  mergeHomeCopy,
+  setStoredHomeCopy,
+  type HomeCopy,
+} from "@/types/home-copy";
 import { mergeBtobSeminarContent, type BtobSeminarContent } from "@/types/btob-seminar";
 import {
   mergeStartingJobHuntingContent,
@@ -47,12 +51,7 @@ import {
 } from "@/types/starting-job-hunting";
 import { mergeSelfStanceContent, type SelfStanceContent } from "@/types/self-stance";
 import type { KanpaiEvent } from "@/types/events";
-import {
-  defaultEvents,
-  getStoredEvents,
-  setStoredEvents,
-} from "@/types/events";
-import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
+import { getStoredEvents, setStoredEvents } from "@/types/events";
 import {
   Select,
   SelectContent,
@@ -61,28 +60,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const DEFAULT_SCENES = {
-  scene1: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-1_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTFfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEUucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=UiC7GFhypowGEYqk8ViycmITdVekZlna6NhuEWuS-Zr33ijLwRFYDC7yAEL~qUeUgcWXYfhai64M-l7-RdP5NeGXfYbQCDyxqWpN5NoToeNhd~MTcSIjuso-AWumWPfF3GAAr1YVZKPeB2Sj1e5zSX3ZY879jCud82GLy-S914OG5PNzweYOz7PpVAhH~GuaVbqK4B-VFjlk3rGOH2vI6a-DfgQTflF-5YLpjj8F2yChsPmCDcHtivM8P-oPC1iNKKIva~3hVzGgAIyosZh6iZs2O0chwKY6Tf7WPSPOOUuq~VKxOpnravxxZlkPUfqPmR~CdxoUF~TsjhBbg7W1Hg__",
-  scene2: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-2_1770745912000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTJfMTc3MDc0NTkxMjAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVEkucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=lP1zsaQVot3JZ8j1pmF~ZTduIn4rEbSCnxg5fviHYIMB7ecm2noJEeRqs8RnfQtGeFrNfisNWRxS2NXP6cKYNRTm1GKCiPhAH9uZmejxHHa2sRLjzNPtTkKqzNcLb3adMZF2cNijtcWuu04Up4elWVulYApVZE53c76-8zMGCKDeUFbn~S1DVMkfy-2a5ZvOxwlPDI9NwRiJxZonwhGvWYqkVfJ1uPSUllOTWLklnsJ5M14BPuqrsHcA1z8Hp~gurADg1vOWL5Iyv479l8pVFQeGLmvKubSI5K3ExuXg7neOEm8U7XZSBerh1wpI8EHyLKObaocXTo5hICAVnaPxnQ__",
-  scene3: "https://private-us-east-1.manuscdn.com/sessionFile/g4dhaOLxYmmGndbbSn7m7C/sandbox/1OzvILpYvvrz5cl53JFkXJ-img-3_1770745924000_na1fn_a2FucGFpLWV2ZW50LXNjZW5lLTM.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvZzRkaGFPTHhZbW1HbmRiYlNuN203Qy9zYW5kYm94LzFPenZJTHBZdnZyejVjbDUzSkZrWEotaW1nLTNfMTc3MDc0NTkyNDAwMF9uYTFmbl9hMkZ1Y0dGcExXVjJaVzUwTFhOalpXNWxMVE0ucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=bdeOa8BDiqVI-G-x3nARsTl0lR2zBr-QQUpAKFvJ7tSJLAdrqyI3rA5pCIM407JnzkWz-EuKoXMEPtNmKrNOmnxmBVO4bZeRNNRqVd2yZnDFRK2lx1HRNMh5p3~amaXZIDzrxjRxA~U70ji23I3iO9AEBMTcAbBfg13~mGwX-WPOBkRMvIJiUYDBs7YHbq4GFVsDZlaciBvg~KkScohdrlCxqvxkkUzTZlMdByMyDq82dWBiCWo9j~7xpbYqejHFFuklq4y7pYVU74X4fisqBL9M0JByOhPny9B2wA-moVnkoGzYHV1fUpvdPn7dzTuHKsstSdqgU1-Ny31Cedp24g__",
-};
-
-function createEmptyEvent(order: number): KanpaiEvent {
-  return {
-    id: `ev-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    dateLabel: "",
-    timeRange: "",
-    timeNote: "",
-    location: "",
-    locationNote: "",
-    companiesCount: 4,
-    studentsCount: 20,
-    order,
-  };
-}
-
 export default function ContentsManager() {
-  const navigate = usePreserveQueryNavigate();
   const { paletteId, setPaletteId } = usePalette();
   const [unlocked, setUnlocked] = useState(false);
   const [accessCode, setAccessCode] = useState("");
@@ -96,13 +74,13 @@ export default function ContentsManager() {
     }
   });
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(() =>
-    typeof window !== "undefined" ? getStoredHeroImage() : null
+    typeof window !== "undefined" ? getStoredHeroImage() : null,
   );
   const [heroImageUrlMobile, setHeroImageUrlMobile] = useState<string | null>(() =>
-    typeof window !== "undefined" ? getStoredHeroImageMobile() : null
+    typeof window !== "undefined" ? getStoredHeroImageMobile() : null,
   );
   const [features, setFeatures] = useState<FeatureItem[]>(() =>
-    typeof window !== "undefined" ? getStoredFeatures() : [...DEFAULT_FEATURES]
+    typeof window !== "undefined" ? getStoredFeatures() : [...DEFAULT_FEATURES],
   );
   const [eventImages, setEventImages] = useState<EventImage[]>(() => {
     if (typeof window === "undefined") return [];
@@ -113,30 +91,24 @@ export default function ContentsManager() {
     return [];
   });
   const [events, setEvents] = useState<KanpaiEvent[]>(() => getStoredEvents());
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [addingNew, setAddingNew] = useState(false);
-  const [newEventForm, setNewEventForm] = useState<KanpaiEvent>(() =>
-    createEmptyEvent(events.length)
-  );
   const [repoConfig, setRepoConfig] = useState<RepoConfig | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [githubToken, setGithubToken] = useState("");
-  /** 編集可能なLP一覧（manifest から取得） */
   const [lpSlugs, setLpSlugs] = useState<string[]>([]);
-  /** いま編集しているLPのスラグ */
   const [selectedSlug, setSelectedSlug] = useState<string>(TOP_SLUG);
-  /** campaign2603用: イベント詳細「場所」下のキャンペーン文言 */
   const [campaign2603Notice, setCampaign2603Notice] = useState<string>("");
-  /** self-reflection 用: 構造化コンテンツ */
   const [selfReflectionContent, setSelfReflectionContent] = useState<SelfReflectionContent | null>(null);
-  /** btob_seminar 用: 構造化コンテンツ */
   const [btobSeminarContent, setBtobSeminarContent] = useState<BtobSeminarContent | null>(null);
-  /** starting_job_hunting 用: 構造化コンテンツ */
   const [startingJobHuntingContent, setStartingJobHuntingContent] =
     useState<StartingJobHuntingContent | null>(null);
-  /** self-stance 用: 構造化コンテンツ */
   const [selfStanceContent, setSelfStanceContent] = useState<SelfStanceContent | null>(null);
+  const [homeCopy, setHomeCopy] = useState<HomeCopy>(() =>
+    typeof window !== "undefined" ? getStoredHomeCopy() : DEFAULT_HOME_COPY,
+  );
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [selectedElementLabel, setSelectedElementLabel] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     setUnlocked(isContentsManagerUnlocked());
@@ -157,21 +129,31 @@ export default function ContentsManager() {
 
   useEffect(() => {
     if (!unlocked || !selectedSlug) return;
+    setSelectedElementId(null);
+    setSelectedElementLabel(null);
+    setSheetOpen(false);
     (async () => {
       const payload = await fetchContentBySlug(selectedSlug);
       if (payload) {
         setLogoUrl(payload.logo ?? null);
         setHeroImageUrl(payload.hero ?? null);
         setHeroImageUrlMobile(payload.heroMobile ?? null);
-        setFeatures(payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : [...DEFAULT_FEATURES]);
+        setFeatures(
+          payload.features && payload.features.length >= 3
+            ? payload.features.slice(0, 3)
+            : [...DEFAULT_FEATURES],
+        );
         setEventImages(payload.eventImages && payload.eventImages.length > 0 ? payload.eventImages : []);
         setEvents(
           (payload.events ?? []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
         );
         if (payload.paletteId) setPaletteId(payload.paletteId);
         setCampaign2603Notice(payload.campaign2603Notice ?? "");
+        setHomeCopy(mergeHomeCopy(payload.copy));
         if (selectedSlug === "self-reflection") {
-          setSelfReflectionContent(((payload as ContentPayload).selfReflection ?? null) as SelfReflectionContent | null);
+          setSelfReflectionContent(
+            ((payload as ContentPayload).selfReflection ?? null) as SelfReflectionContent | null,
+          );
         }
         applyContentToLocalStorage(payload);
       }
@@ -187,15 +169,60 @@ export default function ContentsManager() {
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
 
-  const persistEvents = (next: KanpaiEvent[]) => {
-    setEvents(next);
-    setStoredEvents(next);
-  };
+  const buildPayload = useCallback((): ContentPayload => {
+    if (selectedSlug === "self-reflection") {
+      return { selfReflection: selfReflectionContent ?? {} };
+    }
+    if (selectedSlug === "btob_seminar") {
+      return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
+    }
+    if (selectedSlug === "starting_job_hunting") {
+      return {
+        startingJobHunting:
+          startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined),
+      };
+    }
+    if (selectedSlug === "self-stance") {
+      return {
+        selfStance: selfStanceContent ?? mergeSelfStanceContent(undefined),
+      };
+    }
+    return {
+      logo: logoUrl ?? null,
+      hero: heroImageUrl ?? null,
+      heroMobile: heroImageUrlMobile ?? null,
+      eventImages: eventImages.length > 0 ? eventImages : undefined,
+      events: events.length > 0 ? events : undefined,
+      features: features.slice(0, 3),
+      paletteId: paletteId ?? null,
+      copy: homeCopy,
+      ...(selectedSlug === "campaign2603"
+        ? { campaign2603Notice: campaign2603Notice.trim() || null }
+        : {}),
+    };
+  }, [
+    selectedSlug,
+    selfReflectionContent,
+    btobSeminarContent,
+    startingJobHuntingContent,
+    selfStanceContent,
+    logoUrl,
+    heroImageUrl,
+    heroImageUrlMobile,
+    eventImages,
+    events,
+    features,
+    paletteId,
+    campaign2603Notice,
+    homeCopy,
+  ]);
 
-  const persistImages = (next: EventImage[]) => {
-    setEventImages(next);
-    setStoredEventImages(next);
-  };
+  const previewPayload = useMemo(() => buildPayload(), [buildPayload]);
+
+  useEffect(() => {
+    if (!unlocked) return;
+    applyDraftToPreviewStorage(selectedSlug, previewPayload);
+  }, [unlocked, selectedSlug, previewPayload]);
 
   const handleAccessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,30 +235,36 @@ export default function ContentsManager() {
     }
   };
 
+  const persistImages = (next: EventImage[]) => {
+    setEventImages(next);
+    setStoredEventImages(next);
+  };
+
+  const persistFeatures = (next: FeatureItem[]) => {
+    setFeatures(next);
+    setStoredFeatures(next);
+  };
+
   const handleImageUpdate = (id: string, url: string) => {
-    const next = eventImages.map((img) =>
-      img.id === id ? { ...img, url } : img,
-    );
-    persistImages(next);
+    persistImages(eventImages.map((img) => (img.id === id ? { ...img, url } : img)));
   };
 
   const handleEventFlowLabelUpdate = (id: string, label: string) => {
-    const next = eventImages.map((img) =>
-      img.id === id ? { ...img, label: label.trim() || undefined } : img,
+    persistImages(
+      eventImages.map((img) =>
+        img.id === id ? { ...img, label: label.trim() || undefined } : img,
+      ),
     );
-    persistImages(next);
   };
 
   const handleAddImage = () => {
     if (eventImages.length >= 6) return;
-    const next = [...eventImages, { id: generateImageId(), url: "" }];
-    persistImages(next);
+    persistImages([...eventImages, { id: generateImageId(), url: "" }]);
   };
 
   const handleRemoveImage = (id: string) => {
     if (eventImages.length <= 1) return;
-    const next = eventImages.filter((img) => img.id !== id);
-    persistImages(next);
+    persistImages(eventImages.filter((img) => img.id !== id));
   };
 
   const handleLogoUpdate = (url: string) => {
@@ -272,72 +305,8 @@ export default function ContentsManager() {
     setStoredHeroImageMobile(null);
   };
 
-  const persistFeatures = (next: FeatureItem[]) => {
-    setFeatures(next);
-    setStoredFeatures(next);
-  };
-
   const handleFeatureUpdate = (index: number, patch: Partial<FeatureItem>) => {
-    const next = features.slice(0, 3).map((f, i) => (i === index ? { ...f, ...patch } : f));
-    persistFeatures(next);
-  };
-
-  const handleSaveEvent = (updated: KanpaiEvent) => {
-    const next = events.map((e) => (e.id === updated.id ? updated : e));
-    persistEvents(next);
-    setEditingId(null);
-  };
-
-  const handleDeleteEvent = (id: string) => {
-    const next = events.filter((e) => e.id !== id).map((e, i) => ({ ...e, order: i }));
-    persistEvents(next);
-    setEditingId(null);
-  };
-
-  const handleAddEvent = () => {
-    const ev = { ...newEventForm, order: events.length };
-    if (!ev.dateLabel.trim() || !ev.location.trim()) return;
-    persistEvents([...events, ev]);
-    setNewEventForm(createEmptyEvent(events.length + 1));
-    setAddingNew(false);
-  };
-
-  const handleResetEventsToDefault = () => {
-    persistEvents(defaultEvents);
-    setEditingId(null);
-    setAddingNew(false);
-  };
-
-  const buildPayload = (): ContentPayload => {
-    if (selectedSlug === "self-reflection") {
-      return { selfReflection: selfReflectionContent ?? {} };
-    }
-    if (selectedSlug === "btob_seminar") {
-      return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
-    }
-    if (selectedSlug === "starting_job_hunting") {
-      return {
-        startingJobHunting:
-          startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined),
-      };
-    }
-    if (selectedSlug === "self-stance") {
-      return {
-        selfStance: selfStanceContent ?? mergeSelfStanceContent(undefined),
-      };
-    }
-    return {
-      logo: logoUrl ?? null,
-      hero: heroImageUrl ?? null,
-      heroMobile: heroImageUrlMobile ?? null,
-      eventImages: eventImages.length > 0 ? eventImages : undefined,
-      events: events.length > 0 ? events : undefined,
-      features: features.slice(0, 3),
-      paletteId: paletteId ?? null,
-      ...(selectedSlug === "campaign2603"
-        ? { campaign2603Notice: campaign2603Notice.trim() || null }
-        : {}),
-    };
+    persistFeatures(features.slice(0, 3).map((f, i) => (i === index ? { ...f, ...patch } : f)));
   };
 
   const handleDownloadJson = () => {
@@ -350,7 +319,9 @@ export default function ContentsManager() {
     URL.revokeObjectURL(a.href);
     setSaveError("");
     const repoPath = getContentRepoPathForSlug(selectedSlug);
-    setSaveMessage(`${a.download} をダウンロードしました。リポジトリの ${repoPath} に置いてコミット・push するとサイトに反映されます。`);
+    setSaveMessage(
+      `${a.download} をダウンロードしました。リポジトリの ${repoPath} に置いてコミット・push するとサイトに反映されます。`,
+    );
     setTimeout(() => setSaveMessage(""), 6000);
   };
 
@@ -360,7 +331,9 @@ export default function ContentsManager() {
 
   const handleSaveToGitHub = async () => {
     if (!repoConfig) {
-      setSaveError("repo-config.json が未設定です。client/public/repo-config.json に owner / repo を設定してください。");
+      setSaveError(
+        "repo-config.json が未設定です。client/public/repo-config.json に owner / repo を設定してください。",
+      );
       return;
     }
     setSaveError("");
@@ -385,6 +358,63 @@ export default function ContentsManager() {
       setSaveError(e instanceof Error ? e.message : "保存に失敗しました");
     }
   };
+
+  const handleElementSelect = useCallback((id: string, label?: string) => {
+    setSelectedElementId(id);
+    setSelectedElementLabel(label ?? null);
+    setSheetOpen(true);
+  }, []);
+
+  const homeElementEditorProps: HomeElementEditorProps | null = useMemo(
+    () => ({
+      sectionId: selectedElementId ?? "",
+      selectedSlug,
+      logoUrl,
+      heroImageUrl,
+      heroImageUrlMobile,
+      features,
+      eventImages,
+      events,
+      campaign2603Notice,
+      homeCopy,
+      onHomeCopyChange: (next) => {
+        setHomeCopy((prev) => {
+          const merged = typeof next === "function" ? next(prev) : next;
+          setStoredHomeCopy(merged);
+          return merged;
+        });
+      },
+      onLogoUpdate: handleLogoUpdate,
+      onLogoReset: handleLogoReset,
+      onHeroUpdate: handleHeroImageUpdate,
+      onHeroReset: handleHeroImageReset,
+      onHeroMobileUpdate: handleHeroImageMobileUpdate,
+      onHeroMobileReset: handleHeroImageMobileReset,
+      onFeatureUpdate: handleFeatureUpdate,
+      onFeaturesReset: () => persistFeatures([...DEFAULT_FEATURES]),
+      onImageUpdate: handleImageUpdate,
+      onEventFlowLabelUpdate: handleEventFlowLabelUpdate,
+      onAddImage: handleAddImage,
+      onRemoveImage: handleRemoveImage,
+      onEventsChange: (next) => {
+        setEvents(next);
+        setStoredEvents(next);
+      },
+      onCampaign2603NoticeChange: setCampaign2603Notice,
+    }),
+    [
+      selectedElementId,
+      selectedSlug,
+      logoUrl,
+      heroImageUrl,
+      heroImageUrlMobile,
+      features,
+      eventImages,
+      events,
+      campaign2603Notice,
+      homeCopy,
+    ],
+  );
 
   if (!unlocked) {
     return (
@@ -431,829 +461,163 @@ export default function ContentsManager() {
     >
       <header className="bg-white border-b border-[#ffd7c3] py-6">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg
-                className="w-8 h-8 text-[#3D281E]"
-                viewBox="0 0 40 40"
-                fill="none"
-              >
-                <path
-                  d="M10 30V14c0-2 1-4 3-5l2-1v22m0 0c0 0-1 0-1-1v-2"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M30 30V14c0-2-1-4-3-5l-2-1v22m0 0c0 0 1 0 1-1v-2"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 10l4-4m12 4l-4-4"
-                  stroke="#D4845A"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div>
-                <h1
-                  className="text-xl font-bold text-[#3D281E]"
-                  style={{ fontFamily: "'Shippori Mincho', serif" }}
-                >
-                  コンテンツ管理
-                </h1>
-                <p className="text-xs text-[#5C3E2A]">
-                  KANPAI就活 ランディングページ
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={() => navigate(selectedSlug === TOP_SLUG ? "/" : `/${selectedSlug}`)}
-              variant="outline"
-              className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-            >
-              プレビューを見る
-            </Button>
-          </div>
+          <h1
+            className="text-xl font-bold text-[#3D281E]"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            コンテンツ管理
+          </h1>
+          <p className="text-xs text-[#5C3E2A]">KANPAI就活 ランディングページ</p>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* 編集するLPの選択 */}
-          {lpSlugs.length > 0 && (
-            <div className="mb-8 rounded-xl border border-[#ffd7c3] bg-white p-4">
-              <Label className="text-[#3D281E] text-sm font-medium block mb-2">編集するLP</Label>
-              <Select value={selectedSlug} onValueChange={setSelectedSlug}>
-                <SelectTrigger className="max-w-xs border-[#ffd7c3] text-[#3D281E]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {lpSlugs.map((slug) => (
-                    <SelectItem key={slug} value={slug}>
-                      {slug === TOP_SLUG ? "トップ (/)" : `/${slug}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-[#5C3E2A] mt-2">
-                選択したLPのコンテンツを編集・保存します。プレビューは選択中のLPのURLで開きます。
-              </p>
-            </div>
-          )}
+      <main className="container mx-auto px-6 py-8 space-y-8 max-w-5xl">
+        {/* 1. 編集する LP */}
+        {lpSlugs.length > 0 && (
+          <section className="rounded-xl border border-[#ffd7c3] bg-white p-4">
+            <Label className="text-[#3D281E] text-sm font-medium block mb-2">編集するLP</Label>
+            <Select value={selectedSlug} onValueChange={setSelectedSlug}>
+              <SelectTrigger className="max-w-xs border-[#ffd7c3] text-[#3D281E]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {lpSlugs.map((slug) => (
+                  <SelectItem key={slug} value={slug}>
+                    {slug === TOP_SLUG ? "トップ (/)" : `/${slug}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </section>
+        )}
 
-          {/* campaign2603: 地方学生限定キャンペーン文言 */}
-          {selectedSlug === "campaign2603" && (
-            <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
-              <h2
-                className="text-xl font-bold text-[#3D281E] mb-2"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                地方学生限定キャンペーン文言
-              </h2>
-              <p className="text-sm text-[#5C3E2A] mb-4">
-                /campaign2603 のイベント詳細「場所」の下に表示するテキストです。改行はLP上でも反映されます。
-              </p>
-              <Textarea
-                value={campaign2603Notice}
-                onChange={(e) => setCampaign2603Notice(e.target.value)}
-                placeholder={`※地方学生限定キャンペーン実施中です※
-
-KANPAI就活は27卒向けラスト2回。
-「行きたいけど遠い」という方へ、今回限り交通費サポートを用意しました。
-先着5名・上限あり。
-詳細はご予約後に運営よりご案内します。`}
-                className="min-h-[180px] border-[#ffd7c3] text-[#3D281E] placeholder:text-[#5C3E2A]/60"
-                rows={8}
-              />
-            </div>
-          )}
-
-          {selectedSlug === "btob_seminar" && btobSeminarContent && (
-            <div className="mb-10">
-              <h2
-                className="text-xl font-bold text-[#3D281E] mb-2"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                /btob_seminar コンテンツ編集
-              </h2>
-              <p className="text-sm text-[#5C3E2A] mb-4">
-                各セクションを編集して「保存してデプロイ」すると{" "}
-                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/btob_seminar</code> に反映されます。
-              </p>
-              <BtobSeminarEditor content={btobSeminarContent} onChange={setBtobSeminarContent} />
-            </div>
-          )}
-
-          {selectedSlug === "starting_job_hunting" && startingJobHuntingContent && (
-            <div className="mb-10">
-              <h2
-                className="text-xl font-bold text-[#3D281E] mb-2"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                /starting_job_hunting コンテンツ編集
-              </h2>
-              <p className="text-sm text-[#5C3E2A] mb-4">
-                各セクションを編集して「保存してデプロイ」すると{" "}
-                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/starting_job_hunting</code>{" "}
-                に反映されます。
-              </p>
-              <StartingJobHuntingEditor
-                content={startingJobHuntingContent}
-                onChange={setStartingJobHuntingContent}
-              />
-            </div>
-          )}
-
-          {selectedSlug === "self-stance" && selfStanceContent && (
-            <div className="mb-10">
-              <h2
-                className="text-xl font-bold text-[#3D281E] mb-2"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                /self-stance コンテンツ編集
-              </h2>
-              <p className="text-sm text-[#5C3E2A] mb-4">
-                各セクションを編集して「保存してデプロイ」すると{" "}
-                <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/self-stance</code> に反映されます。
-              </p>
-              <SelfStanceEditor content={selfStanceContent} onChange={setSelfStanceContent} />
-            </div>
-          )}
-
-          {/* self-reflection: ビジュアルエディタ */}
-          {selectedSlug === "self-reflection" && selfReflectionContent && (
-            <div className="mb-10">
-              <h2
-                className="text-xl font-bold text-[#3D281E] mb-2"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                /self-reflection コンテンツ編集
-              </h2>
-              <p className="text-sm text-[#5C3E2A] mb-4">
-                各セクションを編集して「保存してデプロイ」すると <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">/self-reflection</code> に反映されます。
-              </p>
-              <SelfReflectionEditor
-                content={selfReflectionContent}
-                onChange={setSelfReflectionContent}
-              />
-            </div>
-          )}
-
-          {/* 保存して反映（端末間同期） */}
-          <div className="mb-10 rounded-xl border border-[#ffd7c3] bg-white p-6">
-            <h2
-              className="text-xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              保存して反映
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              編集内容は <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content-{selectedSlug}.json</code> として保存すると、選択中の LP に反映されます。どちらか一方を選んでください。
-            </p>
-            <div className="flex flex-wrap gap-3 items-center mb-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                onClick={handleDownloadJson}
-              >
-                JSONをダウンロード
-              </Button>
-              <span className="text-sm text-[#5C3E2A]">
-                ダウンロードしたファイルをリポジトリの <code className="bg-[#fffaf5] px-1 rounded text-xs">{getContentRepoPathForSlug(selectedSlug)}</code> に置き、コミット・push するとサイトに反映されます（トークン不要）。
-              </span>
-            </div>
-            {useSaveApi ? (
-              <p className="text-sm text-[#5C3E2A] mb-3">
-                保存 API が設定されています。トークン入力は不要です。下のボタンでそのまま保存してデプロイできます。
-              </p>
-            ) : (
-              <div className="space-y-2 mb-2">
-                <Label className="text-[#3D281E] text-sm">GitHub トークン（保存してデプロイする場合のみ）</Label>
-                <Input
-                  type="password"
-                  placeholder="ghp_xxxx..."
-                  value={githubToken}
-                  onChange={(e) => setGithubToken(e.target.value)}
-                  className="max-w-md border-[#ffd7c3]"
-                />
-                <p className="text-xs text-[#5C3E2A]">
-                  トークンはこの画面でのみ使用し、保存されません。非エンジニア向けには、GCP に保存 API を1回デプロイし、repo-config に saveApiUrl / saveApiSecret を設定するとトークン入力不要になります。
-                </p>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-3 items-center">
-              <Button
-                type="button"
-                className="bg-[#d4844b] hover:bg-[#c47540] text-white"
-                onClick={handleSaveToGitHub}
-              >
-                {useSaveApi ? "保存してデプロイ" : "保存してデプロイ（GitHub）"}
-              </Button>
-              {saveMessage && <span className="text-sm text-green-700">{saveMessage}</span>}
-              {saveError && <span className="text-sm text-red-600">{saveError}</span>}
-            </div>
-          </div>
-          {selectedSlug === "self-reflection" ||
-          selectedSlug === "btob_seminar" ||
-          selectedSlug === "starting_job_hunting" ||
-          selectedSlug === "self-stance" ? null : (
-            <>
-          {/* ブランドロゴ */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              ブランドロゴ
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              ヘッダー・フッターに表示されるロゴです。未設定の場合はデフォルトのアイコンが表示されます。
-            </p>
-            <div className="max-w-xs">
-              <ImageUploader
-                label="ブランドロゴ"
-                currentImage={logoUrl ?? undefined}
-                onImageUpload={handleLogoUpdate}
-              />
-              {logoUrl && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                  onClick={handleLogoReset}
-                >
-                  デフォルトのロゴに戻す
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* ヒーロー画像 */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              ヒーロー画像
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              トップのヒーローセクションに表示する画像です。未設定の場合はプレースホルダーが表示されます。16:10程度の横長画像がおすすめです。PC用とモバイル用を分けると、スマホでは軽い画像だけ読み込まれて表示が速くなります。
-            </p>
-            <div className="max-w-md space-y-6">
-              <div>
-                <ImageUploader
-                  label="ヒーロー画像（PC）"
-                  currentImage={heroImageUrl ?? undefined}
-                  onImageUpload={handleHeroImageUpdate}
-                />
-                {heroImageUrl && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                    onClick={handleHeroImageReset}
-                  >
-                    ヒーロー画像（PC）を削除
-                  </Button>
-                )}
-              </div>
-              <div>
-                <ImageUploader
-                  label="ヒーロー画像（モバイル）"
-                  currentImage={heroImageUrlMobile ?? undefined}
-                  onImageUpload={handleHeroImageMobileUpdate}
-                />
-                <p className="text-xs text-[#5C3E2A] mt-1 mb-2">
-                  未設定の場合はPC用画像（または hero-mobile.png）が使われます。縦長・小さい解像度でOKです。
-                </p>
-                {heroImageUrlMobile && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                    onClick={handleHeroImageMobileReset}
-                  >
-                    ヒーロー画像（モバイル）を削除
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Unique Features（3つの特徴） */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              Unique Features（3つの特徴）
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              「他の就活イベントにはない、3つの特徴」の見出し・本文・画像を編集できます。画像は任意です。未設定時は client/public/feature-1.png 〜 feature-3.png が使われます。
-            </p>
-            <div className="space-y-8">
-              {[0, 1, 2].map((index) => {
-                const item = features[index] ?? DEFAULT_FEATURES[index];
-                const defaultImagePath = DEFAULT_FEATURE_IMAGE_PATHS[index];
-                return (
-                  <div
-                    key={index}
-                    className="p-6 bg-white border border-[#ffd7c3] rounded-2xl"
-                  >
-                    <h3 className="text-lg font-bold text-[#3D281E] mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                      特徴 {index + 1}
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-[#3D281E]">見出し</Label>
-                        <Input
-                          value={item.title}
-                          onChange={(e) => handleFeatureUpdate(index, { title: e.target.value })}
-                          placeholder="例: 最初はカジュアルに、話しやすく。"
-                          className="mt-1 border-[#ffd7c3]"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[#3D281E]">本文</Label>
-                        <Textarea
-                          value={item.body}
-                          onChange={(e) => handleFeatureUpdate(index, { body: e.target.value })}
-                          placeholder="本文（改行はそのまま反映されます）"
-                          className="mt-1 border-[#ffd7c3] min-h-[120px]"
-                          rows={5}
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-[#3D281E]">画像（任意）</Label>
-                        <div className="mt-2 max-w-xs">
-                          <ImageUploader
-                            label={`特徴 ${index + 1} の画像`}
-                            currentImage={item.imageUrl?.trim() ? item.imageUrl : undefined}
-                            onImageUpload={(url) => handleFeatureUpdate(index, { imageUrl: url })}
-                          />
-                          {(item.imageUrl && item.imageUrl.trim() !== "") && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="mt-2 w-full border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                              onClick={() => handleFeatureUpdate(index, { imageUrl: defaultImagePath })}
-                            >
-                              デフォルト（{defaultImagePath.replace("/", "")}）に戻す
-                            </Button>
-                          )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 w-full text-[#5C3E2A] hover:text-[#3D281E]"
-                            onClick={() => handleFeatureUpdate(index, { imageUrl: null })}
-                          >
-                            画像を削除
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mt-4 text-[#5C3E2A] hover:text-[#3D281E]"
-              onClick={() => persistFeatures([...DEFAULT_FEATURES])}
-            >
-              3つの特徴をデフォルトに戻す
-            </Button>
-          </div>
-
-          {/* イベント画像 */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              イベント画像の管理
-            </h2>
-<p className="text-sm text-[#5C3E2A] mb-4">
-               Aboutセクションに表示されるイベント画像をアップロードできます。1〜3枚目は「当日の過ごし方」のカルーセルにも使われます。表示ラベル（第1回・第7回・第13回など）は任意で変更できます。画像の追加・削除も可能です（最大6枚）。
-            </p>
-            <div className="grid md:grid-cols-3 gap-6">
-              {eventImages.map((img, i) => (
-                <div key={img.id} className="relative">
-                  <ImageUploader
-                    label={`イベント画像 ${i + 1}`}
-                    currentImage={img.url || undefined}
-                    onImageUpload={(url) => handleImageUpdate(img.id, url)}
-                  />
-                  {i < 3 && (
-                    <div className="mt-3">
-                      <Label className="text-[#3D281E] text-xs">
-                        EVENT FLOW 表示ラベル（例: 第1回・第7回・第13回）
-                      </Label>
-                      <Input
-                        value={img.label ?? ""}
-                        onChange={(e) =>
-                          handleEventFlowLabelUpdate(img.id, e.target.value)
-                        }
-                        placeholder={DEFAULT_EVENT_FLOW_LABELS[i]}
-                        className="mt-1 border-[#ffd7c3] text-sm"
-                      />
-                    </div>
-                  )}
-                  {eventImages.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 w-full text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleRemoveImage(img.id)}
-                    >
-                      この画像を削除
-                    </Button>
-                  )}
-                </div>
-              ))}
-              {eventImages.length < 6 && (
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="border-2 border-dashed border-[#ffd7c3] rounded-xl flex flex-col items-center justify-center min-h-[200px] hover:border-[#d4844b] transition-colors gap-2"
-                >
-                  <svg className="w-8 h-8 text-[#d4844b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 5v14M5 12h14"/>
-                  </svg>
-                  <span className="text-sm text-[#d4844b] font-medium">画像を追加</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* テーマ（カラーパレット） */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              テーマ（カラーパレット）
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              LP全体の配色を切り替えることができます。選択するとプレビューに即時反映されます。
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {COLOR_PALETTES.map((palette) => (
-                <button
-                  key={palette.id}
-                  type="button"
-                  onClick={() => setPaletteId(palette.id)}
-                  className={`p-3 rounded-xl border-2 transition-all text-left ${
-                    paletteId === palette.id
-                      ? "border-[#d4844b] shadow-md ring-1 ring-[#d4844b]/30"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex gap-1.5 mb-2">
-                    <div
-                      className="w-6 h-6 rounded-full border border-gray-200"
-                      style={{ background: palette.colors.primary }}
-                    />
-                    <div
-                      className="w-6 h-6 rounded-full border border-gray-200"
-                      style={{ background: palette.colors.textHeading }}
-                    />
-                    <div
-                      className="w-6 h-6 rounded-full border border-gray-200"
-                      style={{ background: palette.colors.bgWarm }}
-                    />
-                    <div
-                      className="w-6 h-6 rounded-full border border-gray-200"
-                      style={{ background: palette.colors.border }}
-                    />
-                  </div>
-                  <p className="text-xs font-medium text-[#3D281E]">
-                    {palette.nameJa}
-                  </p>
-                  <p className="text-[10px] text-[#5C3E2A]">{palette.name}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* イベント管理 */}
-          <div className="mb-10">
-            <h2
-              className="text-2xl font-bold text-[#3D281E] mb-2"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              イベント管理
-            </h2>
-            <p className="text-sm text-[#5C3E2A] mb-4">
-              「次回のイベント詳細」に表示する内容を編集できます。一覧の先頭から最大3件がLPに表示され、表示順に第1回・第2回・第3回として回次が付きます。
-            </p>
-
-            <div className="space-y-4 mb-6">
-              {events.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="p-5 bg-white border border-[#ffd7c3] rounded-2xl"
-                >
-                  {editingId === ev.id ? (
-                    <EventForm
-                      event={ev}
-                      onSave={handleSaveEvent}
-                      onCancel={() => setEditingId(null)}
-                      onDelete={() => handleDeleteEvent(ev.id)}
-                    />
-                  ) : (
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="font-medium text-[#3D281E]">
-                          {[
-                            ev.eventNumber != null && `第${ev.eventNumber}回`,
-                            ev.eventNote?.trim(),
-                          ].filter(Boolean).join(" ")}
-                          {(ev.eventNumber != null || ev.eventNote?.trim()) ? " — " : ""}
-                          {ev.dateLabel || "（日時未設定）"}
-                        </p>
-                        <p className="text-sm text-[#5C3E2A]">
-                          {ev.location}
-                          {ev.locationNote ? ` ${ev.locationNote}` : ""}
-                        </p>
-                        <p className="text-xs text-[#5C3E2A] mt-1">
-                          参加企業 {ev.companiesCount}社 / 参加学生 {ev.studentsCount}名
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="flex-shrink-0 border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                        onClick={() => setEditingId(ev.id)}
-                      >
-                        編集
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {addingNew ? (
-              <div className="p-5 bg-white border border-[#ffd7c3] rounded-2xl border-dashed">
-                <EventForm
-                  event={newEventForm}
-                  onCancel={() => setAddingNew(false)}
-                  isNew
-                  onChange={setNewEventForm}
-                />
-                <div className="mt-4 flex gap-2">
-                  <Button
-                    type="button"
-                    className="bg-[#d4844b] hover:bg-[#c47540] text-white"
-                    onClick={handleAddEvent}
-                  >
-                    追加する
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setAddingNew(false)}
-                  >
-                    キャンセル
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
-                onClick={() => {
-                  setNewEventForm(createEmptyEvent(events.length));
-                  setAddingNew(true);
-                }}
-              >
-                ＋ イベントを追加
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mt-4 text-[#5C3E2A] hover:text-[#3D281E]"
-              onClick={handleResetEventsToDefault}
-            >
-              イベントをデフォルトに戻す
-            </Button>
-          </div>
-
-          <div className="mt-12 p-6 bg-white rounded-2xl border border-[#ffd7c3]">
-            <h3
-              className="text-lg font-bold text-[#3D281E] mb-4"
-              style={{ fontFamily: "'Shippori Mincho', serif" }}
-            >
-              使い方
-            </h3>
-            <ul className="space-y-2 text-sm text-[#5C3E2A]">
-              <li className="flex items-start gap-2">
-                <span className="text-[#d4844b] font-bold">1.</span>
-                <span>
-                  ブランドロゴ・ヒーロー画像・3つの特徴（見出し・本文・画像）・イベント画像はLP全体に反映されます。「プレビューを見る」で確認できます。
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#d4844b] font-bold">2.</span>
-                <span>
-                  イベント画像は追加・削除が可能です（最大6枚）。ファイル名はプログラムが自動で管理するため、好きな画像を選ぶだけでOKです。
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#d4844b] font-bold">3.</span>
-                <span>
-                  テーマ（カラーパレット）を選択すると、LP全体の配色が即座に切り替わります。
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#d4844b] font-bold">4.</span>
-                <span>
-                  イベントは複数登録できます。一覧の先頭から3件が「次回のイベント詳細」に第1回・第2回・第3回として表示されます。
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#d4844b] font-bold">5.</span>
-                <span>
-                  日時・場所・参加企業数・参加学生数を変更すると、次回イベント詳細に反映されます。
-                </span>
-              </li>
-            </ul>
-          </div>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function EventForm({
-  event,
-  onSave,
-  onCancel,
-  onDelete,
-  isNew,
-  onChange,
-}: {
-  event: KanpaiEvent;
-  onSave?: (e: KanpaiEvent) => void;
-  onCancel: () => void;
-  onDelete?: () => void;
-  isNew?: boolean;
-  onChange?: (e: KanpaiEvent) => void;
-}) {
-  const [form, setForm] = useState<KanpaiEvent>(event);
-
-  const update = (patch: Partial<KanpaiEvent>) => {
-    const next = { ...form, ...patch };
-    setForm(next);
-    onChange?.(next);
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-[#3D281E]">回次（表示用）</Label>
-        <Input
-          type="number"
-          min={1}
-          value={form.eventNumber ?? ""}
-          onChange={(e) => {
-            const v = e.target.value;
-            update({ eventNumber: v === "" ? undefined : Math.max(1, parseInt(v, 10) || 1) });
-          }}
-          placeholder="例: 1（未入力時は表示順で第1回・第2回…）"
-          className="mt-1 border-[#ffd7c3]"
-        />
-      </div>
-      <div>
-        <Label className="text-[#3D281E]">回の備考（任意）</Label>
-        <Input
-          value={form.eventNote ?? ""}
-          onChange={(e) => update({ eventNote: e.target.value || undefined })}
-          placeholder="例: 大規模特別回（未入力時はLPに表示しません）"
-          className="mt-1 border-[#ffd7c3]"
-        />
-      </div>
-      <div>
-        <Label className="text-[#3D281E]">日時（表示用）</Label>
-        <Input
-          value={form.dateLabel}
-          onChange={(e) => update({ dateLabel: e.target.value })}
-          placeholder="例: 2025年3月15日（土）18:00〜21:00"
-          className="mt-1 border-[#ffd7c3]"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label className="text-[#3D281E]">時間帯（概要用）</Label>
-          <Input
-            value={form.timeRange ?? ""}
-            onChange={(e) => update({ timeRange: e.target.value })}
-            placeholder="例: 16:00 – 20:00"
-            className="mt-1 border-[#ffd7c3]"
-          />
-        </div>
-        <div>
-          <Label className="text-[#3D281E]">時間の補足</Label>
-          <Input
-            value={form.timeNote ?? ""}
-            onChange={(e) => update({ timeNote: e.target.value })}
-            placeholder="例: 夕方〜夜にかけて"
-            className="mt-1 border-[#ffd7c3]"
-          />
-        </div>
-      </div>
-      <div>
-        <Label className="text-[#3D281E]">場所</Label>
-        <Input
-          value={form.location}
-          onChange={(e) => update({ location: e.target.value })}
-          placeholder="例: 東京都内（お申し込み後にご案内）"
-          className="mt-1 border-[#ffd7c3]"
-        />
-      </div>
-      <div>
-        <Label className="text-[#3D281E]">場所の補足</Label>
-        <Input
-          value={form.locationNote ?? ""}
-          onChange={(e) => update({ locationNote: e.target.value })}
-          placeholder="例: ※詳細は参加確定後にご案内"
-          className="mt-1 border-[#ffd7c3]"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label className="text-[#3D281E]">参加企業数（社）</Label>
-          <Input
-            type="number"
-            min={1}
-            value={form.companiesCount}
-            onChange={(e) =>
-              update({ companiesCount: parseInt(e.target.value, 10) || 0 })
-            }
-            className="mt-1 border-[#ffd7c3]"
-          />
-        </div>
-        <div>
-          <Label className="text-[#3D281E]">参加学生数（名）</Label>
-          <Input
-            type="number"
-            min={1}
-            value={form.studentsCount}
-            onChange={(e) =>
-              update({ studentsCount: parseInt(e.target.value, 10) || 0 })
-            }
-            className="mt-1 border-[#ffd7c3]"
-          />
-        </div>
-      </div>
-      {!isNew && (
-        <div className="flex gap-2 pt-2">
-          <Button
-            type="button"
-            size="sm"
-            className="bg-[#d4844b] hover:bg-[#c47540] text-white"
-            onClick={() => onSave?.(form)}
+        {/* 2. 保存して反映 */}
+        <section className="rounded-xl border border-[#ffd7c3] bg-white p-6">
+          <h2
+            className="text-lg font-bold text-[#3D281E] mb-2"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
-            保存
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-            キャンセル
-          </Button>
-          {onDelete && (
+            保存して反映
+          </h2>
+          <p className="text-sm text-[#5C3E2A] mb-4">
+            編集内容は{" "}
+            <code className="bg-[#fffaf5] px-1.5 py-0.5 rounded">content-{selectedSlug}.json</code>{" "}
+            として保存すると、選択中の LP に反映されます。
+          </p>
+          <div className="flex flex-wrap gap-3 items-center mb-4">
             <Button
               type="button"
-              variant="ghost"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={onDelete}
+              variant="outline"
+              className="border-[#d4844b] text-[#d4844b] hover:bg-[#fffaf5]"
+              onClick={handleDownloadJson}
             >
-              削除
+              JSONをダウンロード
             </Button>
+          </div>
+          {!useSaveApi && (
+            <div className="space-y-2 mb-4">
+              <Label className="text-[#3D281E] text-sm">GitHub トークン（デプロイ時）</Label>
+              <Input
+                type="password"
+                placeholder="ghp_xxxx..."
+                value={githubToken}
+                onChange={(e) => setGithubToken(e.target.value)}
+                className="max-w-md border-[#ffd7c3]"
+              />
+            </div>
           )}
-        </div>
-      )}
+          <div className="flex flex-wrap gap-3 items-center">
+            <Button
+              type="button"
+              className="bg-[#d4844b] hover:bg-[#c47540] text-white"
+              onClick={handleSaveToGitHub}
+            >
+              {useSaveApi ? "保存してデプロイ" : "保存してデプロイ（GitHub）"}
+            </Button>
+            {saveMessage && <span className="text-sm text-green-700">{saveMessage}</span>}
+            {saveError && <span className="text-sm text-red-600">{saveError}</span>}
+          </div>
+        </section>
+
+        {/* 3. 全体設定 */}
+        <section className="rounded-xl border border-[#ffd7c3] bg-white p-6">
+          <h2
+            className="text-lg font-bold text-[#3D281E] mb-4"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            全体設定
+          </h2>
+          <GlobalSettingsPanel
+            selectedSlug={selectedSlug}
+            btobSeminarContent={btobSeminarContent}
+            onBtobSeminarChange={setBtobSeminarContent}
+            startingJobHuntingContent={startingJobHuntingContent}
+            onStartingJobHuntingChange={setStartingJobHuntingContent}
+            selfStanceContent={selfStanceContent}
+            onSelfStanceChange={setSelfStanceContent}
+          />
+        </section>
+
+        {/* 4. プレビュー画面 */}
+        <section>
+          <h2
+            className="text-lg font-bold text-[#3D281E] mb-3"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            プレビュー画面
+          </h2>
+          <PreviewSection
+            selectedSlug={selectedSlug}
+            payload={previewPayload}
+            onElementSelect={handleElementSelect}
+          />
+        </section>
+
+        {/* 5. 使い方 */}
+        <section className="rounded-xl border border-[#ffd7c3] bg-white p-6">
+          <h2
+            className="text-lg font-bold text-[#3D281E] mb-4"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            使い方
+          </h2>
+          <ul className="space-y-2 text-sm text-[#5C3E2A]">
+            <li>
+              <span className="text-[#d4844b] font-bold">1.</span>{" "}
+              プレビュー上の要素をクリックすると、下から編集パレットが開きます。
+            </li>
+            <li>
+              <span className="text-[#d4844b] font-bold">2.</span>{" "}
+              編集内容はプレビューに即時反映されます（保存前の確認用）。
+            </li>
+            <li>
+              <span className="text-[#d4844b] font-bold">3.</span>{" "}
+              テーマ（Home系）や SEO（特殊LP）は「全体設定」から変更できます。
+            </li>
+            <li>
+              <span className="text-[#d4844b] font-bold">4.</span>{" "}
+              確定した内容は「保存してデプロイ」でサイトに反映してください。
+            </li>
+          </ul>
+        </section>
+      </main>
+
+      <EditPaletteSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        selectedSlug={selectedSlug}
+        elementId={selectedElementId}
+        elementLabel={selectedElementLabel}
+        homeProps={homeElementEditorProps}
+        btobSeminarContent={btobSeminarContent}
+        onBtobSeminarChange={setBtobSeminarContent}
+        selfReflectionContent={selfReflectionContent}
+        onSelfReflectionChange={setSelfReflectionContent}
+        startingJobHuntingContent={startingJobHuntingContent}
+        onStartingJobHuntingChange={setStartingJobHuntingContent}
+        selfStanceContent={selfStanceContent}
+        onSelfStanceChange={setSelfStanceContent}
+      />
     </div>
   );
 }

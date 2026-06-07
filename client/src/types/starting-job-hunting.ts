@@ -1,6 +1,7 @@
 /** /starting_job_hunting 専用コンテンツ（ContentPayload.startingJobHunting） */
 
 import seed from "../../public/content/starting_job_hunting.json";
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const STARTING_JOB_HUNTING_ASSETS = {
   favicon: "/starting_job_hunting/favicon.png",
@@ -18,6 +19,7 @@ export type VoiceItem = { school: string; comment: string };
 export type FaqItem = { q: string; a: string };
 
 export type StartingJobHuntingContent = {
+  fieldStyles?: HomeCopyFieldStyles;
   seo: { title: string; description: string };
   header: {
     logoUrl: string;

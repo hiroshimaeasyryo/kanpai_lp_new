@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { CmHtml, CmId } from "@/components/contents-manager/CmId";
 import { fetchContentBySlug } from "@/lib/content-loader";
+import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
+import type { ContentPayload } from "@/types/content-payload";
 
 /** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
 function trackSelfReflectionCtaClick() {
@@ -245,6 +248,22 @@ export default function SelfReflection() {
   });
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
+  const isCmPreview = useCmPreviewPage({
+    slug: "self-reflection",
+    onDraft: (payload) => {
+      const remote = (payload as ContentPayload).selfReflection as SelfReflectionContent | undefined;
+      if (remote) {
+        const fixed = normalizeSelfReflectionImages(remote);
+        setContent(fixed);
+        safeStore(fixed);
+      }
+    },
+    onScrollToId: (id) => {
+      const m = /^sr-faq-item-(\d+)-/.exec(id);
+      if (m) setOpenFaqIndex(Number(m[1]));
+    },
+  });
+
   // /self-reflection 専用: タイトル・favicon を表示中だけ差し替え
   useEffect(() => {
     const prevTitle = document.title;
@@ -276,6 +295,7 @@ export default function SelfReflection() {
   }, [content.footer.brand]);
 
   useEffect(() => {
+    if (isCmPreview) return;
     let cancelled = false;
     (async () => {
       const payload = await fetchContentBySlug("self-reflection");
@@ -290,7 +310,7 @@ export default function SelfReflection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isCmPreview]);
 
   const css = useMemo(() => {
     return `
@@ -582,29 +602,45 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <header className="site-header">
         <div className="logo-wrap">
-          <div className="logo-main">{content.footer.brand}</div>
-          <div className="logo-sub">{content.footer.brandSub}</div>
+          <CmId id="sr-footer-brand" as="div" className="logo-main">
+            {content.footer.brand}
+          </CmId>
+          <CmId id="sr-footer-brand-sub" as="div" className="logo-sub">
+            {content.footer.brandSub}
+          </CmId>
         </div>
       </header>
 
       <section className="hero" id="top">
-        <div className="hero-bg" />
+        <CmId id="sr-hero-bg-image" as="div" className="hero-bg" />
         <div className="hero-inner">
-          <h1 className="hero-main-copy" dangerouslySetInnerHTML={{ __html: content.hero.titleHtml }} />
-          <p className="hero-sub-copy">{content.hero.sub}</p>
+          <CmHtml id="sr-hero-title" html={content.hero.titleHtml} as="h1" className="hero-main-copy" />
+          <CmId id="sr-hero-sub" as="p" className="hero-sub-copy">
+            {content.hero.sub}
+          </CmId>
           <a href={content.ctaUrl} className="cta-btn large" onClick={trackSelfReflectionCtaClick}>
-            {content.hero.ctaLabel}
+            <CmId id="sr-hero-cta-label">{content.hero.ctaLabel}</CmId>
           </a>
         </div>
       </section>
 
       <div className="s01b">
         <div className="s01b-inner">
-          <div className="s01b-label">{content.eventInfo.label}</div>
-          <div className="s01b-date">{content.eventInfo.date}</div>
-          <div className="s01b-time">{content.eventInfo.time}</div>
-          <div className="s01b-venue">{content.eventInfo.venue}</div>
-          <div className="s01b-address">{content.eventInfo.address}</div>
+          <CmId id="sr-event-info-label" as="div" className="s01b-label">
+            {content.eventInfo.label}
+          </CmId>
+          <CmId id="sr-event-info-date" as="div" className="s01b-date">
+            {content.eventInfo.date}
+          </CmId>
+          <CmId id="sr-event-info-time" as="div" className="s01b-time">
+            {content.eventInfo.time}
+          </CmId>
+          <CmId id="sr-event-info-venue" as="div" className="s01b-venue">
+            {content.eventInfo.venue}
+          </CmId>
+          <CmId id="sr-event-info-address" as="div" className="s01b-address">
+            {content.eventInfo.address}
+          </CmId>
           <div className="s01b-map" aria-label="Work as Life の地図">
             <iframe
               title="Work as Life 地図"
@@ -621,9 +657,9 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </div>
           <div className="s01b-tags">
             {content.eventInfo.tags.map((t, i) => (
-              <span key={`${t}-${i}`} className="s01b-tag">
+              <CmId key={`${t}-${i}`} id={`sr-event-info-tag-${i}`} as="span" className="s01b-tag">
                 {t}
-              </span>
+              </CmId>
             ))}
           </div>
         </div>
@@ -631,12 +667,14 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s02">
         <div className="sec-inner left">
-          <h2 className="sec-heading">{content.issue.heading}</h2>
+          <CmId id="sr-issue-heading" as="h2" className="sec-heading">
+            {content.issue.heading}
+          </CmId>
           <ul className="issue-list">
             {content.issue.items.map((txt, i) => (
               <li key={i} className="issue-item">
                 <span className="issue-dot" />
-                {txt}
+                <CmId id={`sr-issue-item-${i}`}>{txt}</CmId>
               </li>
             ))}
           </ul>
@@ -645,13 +683,19 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s03">
         <div className="sec-inner left">
-          <p className="body-text bold">{content.cause.boldLead}</p>
-          <blockquote className="blockquote" dangerouslySetInnerHTML={{ __html: content.cause.quoteHtml }} />
-          <p className="body-text">{content.cause.body}</p>
-          <div className="sub-copy-center">{content.cause.subCenter}</div>
+          <CmId id="sr-cause-bold-lead" as="p" className="body-text bold">
+            {content.cause.boldLead}
+          </CmId>
+          <CmHtml id="sr-cause-quote" html={content.cause.quoteHtml} as="blockquote" className="blockquote" />
+          <CmId id="sr-cause-body" as="p" className="body-text">
+            {content.cause.body}
+          </CmId>
+          <CmId id="sr-cause-sub-center" as="div" className="sub-copy-center">
+            {content.cause.subCenter}
+          </CmId>
           <div style={{ textAlign: "center" }}>
             <a href={content.ctaUrl} className="cta-btn" onClick={trackSelfReflectionCtaClick}>
-              {content.cause.ctaLabel}
+              <CmId id="sr-cause-cta-label">{content.cause.ctaLabel}</CmId>
             </a>
           </div>
         </div>
@@ -659,10 +703,10 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s04">
         <div className="sec-inner center">
-          <p className="concept-copy" dangerouslySetInnerHTML={{ __html: content.concept.copyHtml }} />
+          <CmHtml id="sr-concept-copy" html={content.concept.copyHtml} as="p" className="concept-copy" />
           <div className="tag-grid">
             {content.concept.tagsHtml.map((html, i) => (
-              <span key={i} className="concept-tag" dangerouslySetInnerHTML={{ __html: html }} />
+              <CmHtml key={i} id={`sr-concept-tag-${i}`} html={html} as="span" className="concept-tag" />
             ))}
           </div>
         </div>
@@ -670,19 +714,33 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s05">
         <div className="sec-inner left">
-          <h2 className="sec-heading">{content.steps.heading}</h2>
+          <CmId id="sr-steps-heading" as="h2" className="sec-heading">
+            {content.steps.heading}
+          </CmId>
           <ul className="step-list">
             {content.steps.items.map((s, i) => (
               <li key={i} className="step-item">
                 <div className="step-num-block">
                   <span className="step-label">STEP</span>
-                  <span className="step-num">{s.num}</span>
-                  <span className="step-min">{s.min}</span>
+                  <CmId id={`sr-steps-item-${i}-num`} as="span" className="step-num">
+                    {s.num}
+                  </CmId>
+                  <CmId id={`sr-steps-item-${i}-min`} as="span" className="step-min">
+                    {s.min}
+                  </CmId>
                 </div>
                 <div className="step-content">
-                  <div className="step-title">{s.title}</div>
-                  <div className="step-tagline">{s.tagline}</div>
-                  {s.desc ? <div className="step-desc">{s.desc}</div> : null}
+                  <CmId id={`sr-steps-item-${i}-title`} as="div" className="step-title">
+                    {s.title}
+                  </CmId>
+                  <CmId id={`sr-steps-item-${i}-tagline`} as="div" className="step-tagline">
+                    {s.tagline}
+                  </CmId>
+                  {s.desc ? (
+                    <CmId id={`sr-steps-item-${i}-desc`} as="div" className="step-desc">
+                      {s.desc}
+                    </CmId>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -697,7 +755,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </div>
           <div className="s05-cta">
             <a href={content.ctaUrl} className="cta-btn large" onClick={trackSelfReflectionCtaClick}>
-              {content.steps.ctaLabel}
+              <CmId id="sr-steps-cta-label">{content.steps.ctaLabel}</CmId>
             </a>
           </div>
         </div>
@@ -705,8 +763,12 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s06">
         <div className="sec-inner center">
-          <h2 className="sec-heading">{content.voices.heading}</h2>
-          <p
+          <CmId id="sr-voices-heading" as="h2" className="sec-heading">
+            {content.voices.heading}
+          </CmId>
+          <CmId
+            id="sr-voices-sub"
+            as="p"
             style={{
               fontFamily: "'Shippori Mincho', serif",
               fontSize: "clamp(18px,2.5vw,24px)",
@@ -717,12 +779,16 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
             }}
           >
             {content.voices.sub}
-          </p>
+          </CmId>
           <div className="voice-grid">
             {content.voices.cards.map((v, i) => (
               <div key={i} className="voice-card">
-                <div className="voice-change">{v.change}</div>
-                <div className="voice-quote">{v.quote}</div>
+                <CmId id={`sr-voices-card-${i}-change`} as="div" className="voice-change">
+                  {v.change}
+                </CmId>
+                <CmId id={`sr-voices-card-${i}-quote`} as="div" className="voice-quote">
+                  {v.quote}
+                </CmId>
               </div>
             ))}
           </div>
@@ -731,12 +797,18 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s07">
         <div className="sec-inner center">
-          <h2 className="sec-heading">{content.safety.heading}</h2>
+          <CmId id="sr-safety-heading" as="h2" className="sec-heading">
+            {content.safety.heading}
+          </CmId>
           <div className="safety-grid">
             {content.safety.items.map((it, i) => (
               <div key={i} className="safety-item">
-                <div className="safety-label">{it.label}</div>
-                <div className="safety-desc">{it.desc}</div>
+                <CmId id={`sr-safety-item-${i}-label`} as="div" className="safety-label">
+                  {it.label}
+                </CmId>
+                <CmId id={`sr-safety-item-${i}-desc`} as="div" className="safety-desc">
+                  {it.desc}
+                </CmId>
               </div>
             ))}
           </div>
@@ -747,27 +819,38 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
         <div className="sec-inner">
           <div className="advisor-card">
             <div className="advisor-img-wrap">
-              <picture>
+              <CmId id="sr-advisor-photo" as="picture">
                 <source srcSet={toWebP(content.advisor.photoUrl)} type="image/webp" />
-                <img className="advisor-photo" src={content.advisor.photoUrl} alt={content.advisor.name} loading="lazy" />
-              </picture>
+                <img
+                  className="advisor-photo"
+                  src={content.advisor.photoUrl}
+                  alt={content.advisor.name}
+                  loading="lazy"
+                />
+              </CmId>
               <div className="advisor-overlay">
-                <div className="advisor-name">{content.advisor.name}</div>
-                <div className="advisor-title">{content.advisor.title}</div>
+                <CmId id="sr-advisor-name" as="div" className="advisor-name">
+                  {content.advisor.name}
+                </CmId>
+                <CmId id="sr-advisor-title" as="div" className="advisor-title">
+                  {content.advisor.title}
+                </CmId>
               </div>
             </div>
           </div>
           <div className="advisor-text">
             {content.advisor.bio.slice(0, 3).map((p, i) => (
-              <p key={i} className="advisor-bio">
+              <CmId key={i} id={`sr-advisor-bio-${i}`} as="p" className="advisor-bio">
                 {p}
-              </p>
+              </CmId>
             ))}
-            <div className="advisor-highlight">{content.advisor.highlight}</div>
+            <CmId id="sr-advisor-highlight" as="div" className="advisor-highlight">
+              {content.advisor.highlight}
+            </CmId>
             {content.advisor.bio.slice(3).map((p, i) => (
-              <p key={`tail-${i}`} className="advisor-bio">
+              <CmId key={`tail-${i}`} id={`sr-advisor-bio-${i + 3}`} as="p" className="advisor-bio">
                 {p}
-              </p>
+              </CmId>
             ))}
           </div>
         </div>
@@ -775,27 +858,50 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s09">
         <div className="sec-inner center">
-          <h2 className="sec-heading">{content.faq.heading}</h2>
+          <CmId id="sr-faq-heading" as="h2" className="sec-heading">
+            {content.faq.heading}
+          </CmId>
           <ul className="faq-list">
             {faqItems.map((it, i) => {
               const open = openFaqIndex === i;
               return (
                 <li key={i} className={`faq-item ${open ? "open" : ""}`}>
-                  <div
-                    className="faq-q"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setOpenFaqIndex(open ? null : i)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") setOpenFaqIndex(open ? null : i);
-                    }}
-                    aria-expanded={open}
-                  >
-                    <span className="faq-q-label">Q</span>
-                    {it.q}
-                    <span className="faq-q-toggle">+</span>
-                  </div>
-                  <div className="faq-a">{it.a}</div>
+                  {isCmPreview ? (
+                    <div className="faq-q">
+                      <span className="faq-q-label">Q</span>
+                      <CmId id={`sr-faq-item-${i}-q`} className="flex-1 min-w-0">
+                        {it.q}
+                      </CmId>
+                      <button
+                        type="button"
+                        data-faq-toggle
+                        className="faq-q-toggle border-0 bg-transparent p-0 cursor-pointer"
+                        aria-expanded={open}
+                        aria-label={open ? "回答を閉じる" : "回答を開く"}
+                        onClick={() => setOpenFaqIndex(open ? null : i)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="faq-q"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setOpenFaqIndex(open ? null : i)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") setOpenFaqIndex(open ? null : i);
+                      }}
+                      aria-expanded={open}
+                    >
+                      <span className="faq-q-label">Q</span>
+                      <CmId id={`sr-faq-item-${i}-q`}>{it.q}</CmId>
+                      <span className="faq-q-toggle">+</span>
+                    </div>
+                  )}
+                  <CmId id={`sr-faq-item-${i}-a`} as="div" className="faq-a">
+                    {it.a}
+                  </CmId>
                 </li>
               );
             })}
@@ -805,27 +911,50 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
 
       <section className="s10" id="apply">
         <div className="sec-inner center">
-          <h2 className="sec-heading" style={{ marginBottom: 16 }}>
+          <CmId id="sr-closing-cta-heading" as="h2" className="sec-heading" style={{ marginBottom: 16 }}>
             {content.closingCta.heading}
-          </h2>
-          <p className="s10-sub">{content.closingCta.sub}</p>
+          </CmId>
+          <CmId id="sr-closing-cta-sub" as="p" className="s10-sub">
+            {content.closingCta.sub}
+          </CmId>
           <div className="s10-info">
-            <div className="s10-date">{content.closingCta.infoDate}</div>
-            <div className="s10-venue" dangerouslySetInnerHTML={{ __html: content.closingCta.infoVenueHtml }} />
+            <CmId id="sr-closing-cta-info-date" as="div" className="s10-date">
+              {content.closingCta.infoDate}
+            </CmId>
+            <CmHtml
+              id="sr-closing-cta-info-venue"
+              html={content.closingCta.infoVenueHtml}
+              as="div"
+              className="s10-venue"
+            />
           </div>
           <a href={content.ctaUrl} className="cta-btn dark-bg large" onClick={trackSelfReflectionCtaClick}>
-            {content.closingCta.ctaLabel}
+            <CmId id="sr-closing-cta-label">{content.closingCta.ctaLabel}</CmId>
           </a>
         </div>
       </section>
 
       <footer>
-        <div className="footer-logo">{content.footer.brand}</div>
-        <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.4)", marginBottom: 12 }}>
+        <CmId id="sr-footer-brand" as="div" className="footer-logo">
+          {content.footer.brand}
+        </CmId>
+        <CmId
+          id="sr-footer-brand-sub"
+          as="div"
+          style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.4)", marginBottom: 12 }}
+        >
           {content.footer.brandSub}
-        </div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 16 }}>{content.footer.company}</div>
-        <p className="footer-copy">{content.footer.copyright}</p>
+        </CmId>
+        <CmId
+          id="sr-footer-company"
+          as="div"
+          style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginBottom: 16 }}
+        >
+          {content.footer.company}
+        </CmId>
+        <CmId id="sr-footer-copyright" as="p" className="footer-copy">
+          {content.footer.copyright}
+        </CmId>
       </footer>
     </div>
   );

@@ -7,8 +7,9 @@
    - タイポグラフィ: Shippori Mincho (見出し) + Zen Kaku Gothic New (本文)
 */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
@@ -24,12 +25,24 @@ import {
   getStoredHeroImage,
   migrateOldImageFormat,
 } from "@/lib/content-settings";
+import type { ContentPayload } from "@/types/content-payload";
+import {
+  CAMPAIGN2603_FAQ_QUESTION,
+  getStoredHomeCopy,
+  mergeHomeCopy,
+  type HomeCopy,
+} from "@/types/home-copy";
 import { applyContentToLocalStorage, fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
 import { TOP_SLUG } from "@/lib/lp-slug";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
+import { usePalette } from "@/contexts/PaletteContext";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+import {
+  createHomeCopyStyleHelpers,
+  MINCHO_STYLE,
+} from "@/lib/content-manager/home-copy-preview-styles";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
 
 /** campaign2603用: キャンペーン文言のデフォルト（未設定時表示） */
@@ -54,6 +67,7 @@ export interface HomeProps {
 
 export default function Home({ lpSlug }: HomeProps) {
   const contentSlug = lpSlug ?? TOP_SLUG;
+  const { setPaletteId } = usePalette();
   useSmoothScroll({ offset: 56 });
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -76,9 +90,69 @@ export default function Home({ lpSlug }: HomeProps) {
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [homeCopy, setHomeCopy] = useState<HomeCopy>(() => getStoredHomeCopy());
+  /** コンテンツ管理プレビュー: FAQ の開閉状態 */
+  const [previewOpenFaq, setPreviewOpenFaq] = useState<Set<number>>(() => new Set());
 
-  const lineCtaLabel = contentSlug === "campaign2603" ? "地方からの参加もお気軽に" : "参加申し込みをする";
-  const lineSignupLabel = contentSlug === "campaign2603" ? "キャンペーンで申し込み" : "参加申し込みをする";
+  const lineCtaLabel = homeCopy.cta.primaryLabel;
+  const lineSignupLabel = homeCopy.cta.stickyLabel;
+  const defaultLineHref =
+    contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL;
+  const { cms, cmh } = createHomeCopyStyleHelpers(homeCopy, defaultLineHref);
+
+  const applyPayloadToState = useCallback((payload: ContentPayload) => {
+    try {
+      applyContentToLocalStorage(payload);
+    } catch {
+      /* Safari 等でストレージ上限 */
+    }
+    const events = (payload.events ?? []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    setNextEvents(events.slice(0, 3));
+    const list = payload.eventImages ?? [];
+    if (list.length > 0) {
+      setEventImages(list.map((img) => img.url));
+    }
+    const flowItems: { url: string; label: string }[] = [];
+    for (let i = 0; i < 3; i++) {
+      const item = list[i];
+      flowItems.push({
+        url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
+        label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) ?? DEFAULT_EVENT_FLOW_LABELS[i],
+      });
+    }
+    setEventFlowItems(flowItems);
+    setLogoUrl(payload.logo || "/logo.png");
+    setHeroImageUrl(payload.hero ?? DEFAULT_HERO_IMAGE_PATH);
+    setHeroImageMobileUrl(payload.heroMobile || null);
+    setHeroImageLoadError(false);
+    setFeatures(
+      payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : getStoredFeatures(),
+    );
+    setFeatureImageErrors(new Set());
+    if (payload.paletteId) setPaletteId(payload.paletteId);
+    setHomeCopy(mergeHomeCopy(payload.copy));
+  }, [setPaletteId]);
+
+  const togglePreviewFaq = useCallback((index: number) => {
+    setPreviewOpenFaq((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  }, []);
+
+  const isCmPreview = useCmPreviewPage({
+    slug: contentSlug,
+    onDraft: applyPayloadToState,
+    onScrollToId: (id) => {
+      const m = /^faq-item-(\d+)-/.exec(id);
+      if (m) {
+        const index = Number(m[1]);
+        setPreviewOpenFaq((prev) => new Set(prev).add(index));
+      }
+    },
+  });
 
   // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
   useEffect(() => {
@@ -91,6 +165,7 @@ export default function Home({ lpSlug }: HomeProps) {
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
+    if (isCmPreview) return;
 
     let cancelled = false;
 
@@ -101,35 +176,7 @@ export default function Home({ lpSlug }: HomeProps) {
       if (cancelled) return;
 
       if (payload) {
-        // 端末間同期: content.json を正として表示。QuotaExceededError 時は保存を諦め表示は継続
-        try {
-          applyContentToLocalStorage(payload);
-        } catch {
-          /* Safari 等でストレージ上限: 表示は継続 */
-        }
-        const events = (payload.events ?? [])
-          .slice()
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        setNextEvents(events.slice(0, 3));
-        const list = payload.eventImages ?? [];
-        if (list.length > 0) {
-          setEventImages(list.map((img) => img.url));
-        }
-        const flowItems: { url: string; label: string }[] = [];
-        for (let i = 0; i < 3; i++) {
-          const item = list[i];
-          flowItems.push({
-            url: item?.url || DEFAULT_EVENT_FLOW_IMAGE_PATHS[i],
-            label: (item?.label?.trim() || DEFAULT_EVENT_FLOW_LABELS[i]) ?? DEFAULT_EVENT_FLOW_LABELS[i],
-          });
-        }
-        setEventFlowItems(flowItems);
-        setLogoUrl(payload.logo || "/logo.png");
-        setHeroImageUrl(payload.hero ?? DEFAULT_HERO_IMAGE_PATH);
-        setHeroImageMobileUrl(payload.heroMobile || null);
-        setHeroImageLoadError(false);
-        setFeatures(payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : getStoredFeatures());
-        setFeatureImageErrors(new Set());
+        applyPayloadToState(payload);
         return;
       }
 
@@ -156,12 +203,13 @@ export default function Home({ lpSlug }: HomeProps) {
       setHeroImageLoadError(false);
       setFeatures(local.features && local.features.length >= 3 ? local.features.slice(0, 3) : getStoredFeatures());
       setFeatureImageErrors(new Set());
+      setHomeCopy(getStoredHomeCopy());
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [contentSlug]);
+  }, [contentSlug, isCmPreview, applyPayloadToState]);
 
 
   // /logo.png が存在しない場合（404）はデフォルトの SVG に切り替え
@@ -207,7 +255,7 @@ export default function Home({ lpSlug }: HomeProps) {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="#" className="flex items-center text-lp-text-heading no-underline">
+          <a href="#" className="flex items-center text-lp-text-heading no-underline" data-cm-id="brand-logo">
             {logoUrl ? (
               <img src={logoUrl} alt="ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
             ) : (
@@ -216,13 +264,15 @@ export default function Home({ lpSlug }: HomeProps) {
           </a>
           <div className="flex items-center gap-3">
             <a
-              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              href={cmh("nav-header-cta")}
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
+              data-cm-id="nav-header-cta"
+              style={cms("nav-header-cta")}
               className="inline-flex items-center gap-1.5 px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
-              イベントに参加する
+              {homeCopy.nav.headerCta}
             </a>
           </div>
         </div>
@@ -237,10 +287,12 @@ export default function Home({ lpSlug }: HomeProps) {
       >
         <div className="px-4 pt-3 pb-1">
           <a
-            href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+            href={cmh("hero-sticky-cta")}
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackMetaPixelLead}
+            data-cm-id="hero-sticky-cta"
+            style={cms("hero-sticky-cta")}
             className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
           >
             {lineSignupLabel}
@@ -259,7 +311,7 @@ export default function Home({ lpSlug }: HomeProps) {
           }}
         />
         {/* ヒーロー画像ブロック: 固定アスペクトで CLS 防止。スケルトンで読み込み中を表示 */}
-        <div className="relative w-full flex-shrink-0 aspect-[3/4] md:absolute md:inset-0 md:aspect-auto z-0">
+        <div className="relative w-full flex-shrink-0 aspect-[3/4] md:absolute md:inset-0 md:aspect-auto z-0" data-cm-id="hero-image">
           {/* スケルトン: 画像読み込み中は同じ領域を確保しレイアウトを安定させる */}
           {!heroImageLoaded && !heroImageLoadError && (
             <div
@@ -316,25 +368,28 @@ export default function Home({ lpSlug }: HomeProps) {
                   fontSize: 'clamp(1.75rem, 8vw, 3.75rem)',
                 }}
               >
-                <span className="inline min-[400px]:block md:inline">見えないものに、</span>
-                触れる。
+                <span className="inline min-[400px]:block md:inline" data-cm-id="hero-title-line1" style={cms("hero-title-line1")}>{homeCopy.hero.titleLine1}</span>
+                <span data-cm-id="hero-title-line2" style={cms("hero-title-line2")}>{homeCopy.hero.titleLine2}</span>
               </h1>
               <p
-                className="text-sm md:text-lg leading-relaxed md:leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
-                style={{
+                data-cm-id="hero-subcopy"
+                className="text-sm md:text-lg leading-relaxed md:leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] whitespace-pre-line [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
+                style={cms("hero-subcopy", {
                   animationDelay: '0.4s',
                   animationFillMode: 'forwards',
-                  fontFamily: "'Shippori Mincho', serif",
-                }}
+                  ...MINCHO_STYLE,
+                })}
               >
-                普段見えない、企業の素と、自分の本音。<br />互いが飾らず語らう中で<br />あなたなりの正解の手がかりが、見つかる場所。
+                {homeCopy.hero.subcopy}
               </p>
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
                 <a
-                  href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                  href={cmh("hero-cta")}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={trackMetaPixelLead}
+                  data-cm-id="hero-cta"
+                  style={cms("hero-cta")}
                   className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
                 >
                   {lineCtaLabel}
@@ -357,9 +412,9 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="text-center mb-10 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Next Event</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              次回のイベント詳細
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="next-event-eyebrow" style={cms("next-event-eyebrow")}>{homeCopy.nextEvent.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("next-event-heading", MINCHO_STYLE)} data-cm-id="next-event-heading">
+              {homeCopy.nextEvent.heading}
             </h2>
           </div>
           {/* 直近3イベントの手動カルーセル（ボタン・ドット・横スワイプ対応）※モバイルはカード幅優先でボタンは重ねて表示 */}
@@ -503,21 +558,21 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-8 md:px-6">
         <div className="max-w-2xl mx-auto text-left md:text-center">
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0s', animationFillMode: 'forwards' }}>
-            <p className="text-lg md:text-2xl text-lp-text-heading leading-relaxed text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              どこを選べばいいのか、<br className="md:hidden" /><em className="font-bold bg-gradient-to-r from-transparent via-[#ffd7c3] to-transparent bg-no-repeat bg-[length:100%_60%] bg-[position:0_60%]" style={{ fontStyle: 'normal' }}>「正解」がわからない。</em>
+            <p className="text-lg md:text-2xl text-lp-text-heading leading-relaxed text-center whitespace-pre-line" style={cms("problem-lead", MINCHO_STYLE)} data-cm-id="problem-lead">
+              {homeCopy.problem.lead}
             </p>
           </div>
           <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                説明会やサイトで企業を見ても、<br/>そこで語られるのは、給料、年間休日、福利厚生のような「条件」や企業の良い面だけ。<br/><br/>企業で働く人の、等身大の声や葛藤は包み隠されたまま。<br/>それでは、自分に合うかどうか、確信が持てない。
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto whitespace-pre-line" style={cms("problem-p1", MINCHO_STYLE)} data-cm-id="problem-p1">
+                {homeCopy.problem.paragraph1}
               </p>
             </div>
             <div className="w-12 h-0.5 bg-lp-primary rounded mx-0 md:mx-auto my-9 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}></div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.36s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                自己分析もやった。就活軸も整理した。<br/>周りには「いいんじゃない？」と言われる。選考も通る。<br/>でも、なんかしっくりこない。<br/><br/><em className="font-bold" style={{ fontStyle: 'normal' }}>まだ自分が気づいていない、大事にしている何かがある気がする。</em>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose max-w-xl mx-0 md:mx-auto whitespace-pre-line" style={cms("problem-p2", MINCHO_STYLE)} data-cm-id="problem-p2">
+                {homeCopy.problem.paragraph2}
               </p>
             </div>
           </div>
@@ -528,23 +583,25 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-8 md:px-6 bg-lp-bg-warm">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">About</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              KANPAI就活は、<br/>「見えないもの」に触れる場所。
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="about-eyebrow" style={cms("about-eyebrow")}>{homeCopy.about.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight whitespace-pre-line" style={cms("about-heading", MINCHO_STYLE)} data-cm-id="about-heading">
+              {homeCopy.about.heading}
             </h2>
           </div>
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-11" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                お酒を交えた対話の中で、企業と学生が飾らず語り合う、対面イベント。<br/><br/>最初に会社名は伝えません。<br/>肩書きではなく「人」として出会い、<br/>条件ではなく「価値観」で語り合う。<br/><br/>就活サイトでは見えないもの、<br/>説明会では聞けないもの——<br/>                その先にある本質に、触れる時間です。
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-center mb-11 whitespace-pre-line" style={cms("about-body", MINCHO_STYLE)} data-cm-id="about-body">
+                {homeCopy.about.body}
               </p>
             </div>
             <div className="mt-6 md:mt-8 w-full max-w-sm mx-auto hidden md:block">
               <a
-                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                href={cmh("about-cta")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
+                data-cm-id="about-cta"
+                style={cms("about-cta")}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
                 {lineCtaLabel}
@@ -552,7 +609,7 @@ export default function Home({ lpSlug }: HomeProps) {
               </a>
             </div>
             {eventImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }} data-cm-id="about-images">
                 {eventImages.map((url, i) => (
                   <div key={i} className="aspect-video bg-lp-bg-card rounded-lg overflow-hidden">
                     <img src={url} alt={`KANPAI就活イベントの様子${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -568,59 +625,34 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-8 md:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Values</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              ここで触れられる、3つのこと。
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="values-eyebrow" style={cms("values-eyebrow")}>{homeCopy.values.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("values-heading", MINCHO_STYLE)} data-cm-id="values-heading">
+              {homeCopy.values.heading}
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                num: "01",
-                label: "企業の「素」",
-                title: "採用サイトには、載っていないこと。",
-                body: "会社が今、何に課題を感じていて、どう乗り越えようとしているのか。働く人は、何に葛藤し、何に誇りを持っているのか。\n\nコンプライアンスが厳しいこの時代に、生々しい言葉で語られる、ここだけの話。その「素」を知ることが、入社後のギャップをなくす一番の近道です。",
-              },
-              {
-                num: "02",
-                label: "自分の「本音」",
-                title: "しっくりこない就活軸の、その先へ。",
-                body: "さまざまな社会人の「やりがい」や「こだわり」に触れる中で、自分が共感する部分、違和感を覚える部分が見えてくる。\n\n誰かに評価されるためではなく、対話を通じて、見つかる本音。それが「人」として出会うからこそ出会い直せる自分です。",
-                note: "対話の中で見つかった気づきは、メッセージカードとして持ち帰ることができます。",
-              },
-              {
-                num: "03",
-                label: "信頼できる人事",
-                title: "厳しい参加要件を満たした、信頼して話せる人事との出会い。",
-                body: "KANPAI就活に参加できる企業には、厳格な基準があります。\n\n学生を対等に見てくれるか。一人ひとりの声に耳を傾けられるか。自社の課題も含め、等身大の姿を見せられるか。温かみのある関係性を大切にしているか。リスペクトのあるフィードバックを学生にできるか。\n\nこの基準を満たした人事だけが、この場にいます。尊敬できる社会人の先輩との出会いは、就活のその先まで続く財産になるはずです。",
-              },
-            ].map((item, i) => (
+            {homeCopy.values.items.map((item, i) => (
               <div key={i} className="bg-white border border-lp-border rounded-3xl p-10 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
-                {/* モバイル: 上段に番号と見出し、下段に本文を全幅表示 */}
                 <div className="flex flex-wrap gap-6">
-                  <div className="text-4xl font-bold text-[#ffd7c3] shrink-0" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.num}</div>
+                  <div className="text-4xl font-bold text-[#ffd7c3] shrink-0" style={{ fontFamily: "'Shippori Mincho', serif" }}>{String(i + 1).padStart(2, "0")}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-1">{item.label}</p>
-                    <h3 className="text-xl font-bold text-lp-text-heading leading-tight md:mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
+                    <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-1" data-cm-id={`values-card-${i}-label`} style={cms(`values-card-${i}-label`)}>{item.label}</p>
+                    <h3 className="text-xl font-bold text-lp-text-heading leading-tight md:mb-3" style={cms(`values-card-${i}-title`, MINCHO_STYLE)} data-cm-id={`values-card-${i}-title`}>{item.title}</h3>
                   </div>
-                  {/* PCでもカード全幅で本文を表示（flexで次の行に折り返し） */}
-                  <div className="w-full hidden md:block">
-                    <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
-                    {item.note && (
-                      <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
-                        <p className="text-sm text-lp-text-heading">{item.note}</p>
-                      </div>
-                    )}
+                  <div className="w-full" data-cm-id={`values-card-${i}-body`}>
+                    <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line hidden md:block" style={cms(`values-card-${i}-body`)}>{item.body}</p>
+                    <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line md:hidden" style={cms(`values-card-${i}-body`)}>{item.body}</p>
                   </div>
-                  {/* モバイルでは下段で本文を全幅表示 */}
-                  <div className="w-full md:hidden">
-                    <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
-                    {item.note && (
-                      <div className="mt-4 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' }}>
-                        <p className="text-sm text-lp-text-heading">{item.note}</p>
-                      </div>
-                    )}
-                  </div>
+                  {item.note ? (
+                    <div
+                      className="w-full mt-4 p-4 rounded-2xl"
+                      data-cm-id={`values-card-${i}-note`}
+                      style={cms(`values-card-${i}-note`, { background: 'linear-gradient(135deg, color-mix(in srgb, var(--lp-accent-light) 10%, transparent) 0%, color-mix(in srgb, var(--lp-bg-card) 20%, transparent) 100%)', borderLeft: '4px solid var(--lp-accent-light)' })}
+                    >
+                      <p className="text-sm text-lp-text-heading hidden md:block">{item.note}</p>
+                      <p className="text-sm text-lp-text-heading md:hidden">{item.note}</p>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -632,28 +664,23 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-8 md:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Event Flow</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              当日の過ごし方
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="event-flow-eyebrow" style={cms("event-flow-eyebrow")}>{homeCopy.eventFlow.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("event-flow-heading", MINCHO_STYLE)} data-cm-id="event-flow-heading">
+              {homeCopy.eventFlow.heading}
             </h2>
           </div>
 
           <div className="relative">
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-lp-primary to-lp-accent-light"></div>
-            {[
-              { num: "01", title: "オリエンテーション", time: "10分", desc: "今日の時間で大切にしてほしいことをお伝えします。" },
-              { num: "02", title: "KANPAI", time: "35分 × 4回", desc: "最初は会社名を伝えず、価値観ゲームからスタート。その後、お酒を交えたフリートーク。「説明」ではなく「対話」。肩書きではなく「人」として語り合う時間。" },
-              { num: "03", title: "メッセージ交換", time: "10分 × 4回", desc: "各KANPAIの最後に、企業と学生が手書きのメッセージを交換。対話の余韻を、形に残す時間。" },
-              { num: "04", title: "エンディング", time: "5分", desc: "気になった企業とはLINE交換もOK。次につながる出会いを、あなたのペースで。" },
-            ].map((item, i) => (
+            {homeCopy.eventFlow.steps.map((item, i) => (
               <div key={i} className="flex gap-6 mb-8 opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards' }}>
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-lp-primary flex items-center justify-center font-bold text-lp-text-heading relative z-10" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {item.num}
+                  {String(i + 1).padStart(2, "0")}
                 </div>
                 <div className="flex-1 pt-1">
-                  <h3 className="font-bold text-lp-text-heading mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
-                  <p className="text-xs text-lp-primary font-medium mb-1">{item.time}</p>
-                  <p className="text-sm text-lp-text-body leading-relaxed">{item.desc}</p>
+                  <h3 className="font-bold text-lp-text-heading mb-1" style={cms(`event-flow-step-${i}-title`, MINCHO_STYLE)} data-cm-id={`event-flow-step-${i}-title`}>{item.title}</h3>
+                  <p className="text-xs text-lp-primary font-medium mb-1" data-cm-id={`event-flow-step-${i}-time`} style={cms(`event-flow-step-${i}-time`)}>{item.time}</p>
+                  <p className="text-sm text-lp-text-body leading-relaxed" data-cm-id={`event-flow-step-${i}-description`} style={cms(`event-flow-step-${i}-description`)}>{item.description}</p>
                 </div>
               </div>
             ))}
@@ -662,6 +689,7 @@ export default function Home({ lpSlug }: HomeProps) {
           {/* 当日の過ごし方イメージ（第1回・第7回・第13回）カルーセル：モバイルは全幅、PCはmax-w-6xl */}
           {eventFlowItems.length > 0 && (
             <div
+              data-cm-id="event-flow-images"
               className="mt-14 overflow-hidden opacity-0 animate-fadeUp w-[100vw] max-w-[100vw] relative left-1/2 -translate-x-1/2 md:w-full md:max-w-none md:left-auto md:translate-x-0"
               style={{ animationDelay: '0.08s', animationFillMode: 'forwards' }}
             >
@@ -702,7 +730,7 @@ export default function Home({ lpSlug }: HomeProps) {
           )}
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
             <a
-              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              href={cmh("hero-cta")}
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
@@ -719,9 +747,9 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Unique Features</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              他の就活イベントにはない、<br/>3つの特徴。
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="features-intro-eyebrow" style={cms("features-intro-eyebrow")}>{homeCopy.featuresIntro.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight whitespace-pre-line" style={cms("features-intro-heading", MINCHO_STYLE)} data-cm-id="features-intro-heading">
+              {homeCopy.featuresIntro.heading}
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -730,7 +758,7 @@ export default function Home({ lpSlug }: HomeProps) {
               return (
               <div key={i} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp overflow-hidden" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 {hasImage && (
-                  <div className="-mx-8 -mt-8 mb-6 h-[180px] overflow-hidden bg-lp-bg-warm shadow-lg ring-1 ring-black/5 relative">
+                  <div className="-mx-8 -mt-8 mb-6 h-[180px] overflow-hidden bg-lp-bg-warm shadow-lg ring-1 ring-black/5 relative" data-cm-id={`feature-${i}-image`}>
                     <picture className="absolute inset-0 block w-full h-full">
                       {getDefaultFeatureWebpPath(item.imageUrl!) && (
                         <source type="image/webp" srcSet={getDefaultFeatureWebpPath(item.imageUrl!)!} />
@@ -755,8 +783,8 @@ export default function Home({ lpSlug }: HomeProps) {
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lp-primary to-lp-primary-hover flex items-center justify-center text-white font-bold text-sm mb-4 shadow-md" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <h3 className="text-lg font-bold text-lp-text-heading leading-tight mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.title}</h3>
-                <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line">{item.body}</p>
+                <h3 className="text-lg font-bold text-lp-text-heading leading-tight mb-3" style={cms(`feature-${i}-title`, MINCHO_STYLE)} data-cm-id={`feature-${i}-title`}>{item.title}</h3>
+                <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line" data-cm-id={`feature-${i}-body`} style={cms(`feature-${i}-body`)}>{item.body}</p>
               </div>
             );})}
           </div>
@@ -767,30 +795,24 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-6 bg-lp-bg-warm">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Voices</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              参加した人の、リアルな声。
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="voices-eyebrow" style={cms("voices-eyebrow")}>{homeCopy.voices.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("voices-heading", MINCHO_STYLE)} data-cm-id="voices-heading">
+              {homeCopy.voices.heading}
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { quote: "自分が気づいていなかった価値観に気づけた。人事の方の「仕事への葛藤」を聞いて、自分が本当に大事にしたいことが少し見えた気がします。", label: "早稲田大学 社会科学部 3年" },
-              { quote: "説明会では教えてくれない生々しい話が聞けました。会社の課題や、会社の理念に対して、社員が実際にどう感じているのか聞けて興味を持った。", label: "明治大学 商学部 3年" },
-              { quote: "人事の方が本当に一人ひとりを見てくれた。「途中参加でも、積極的に会話に入っていった姿を見て、会社で活躍している姿が浮かんだ」とメッセージカードをもらい、「こんな感じでいいんだ」と思えた。", label: "順天堂大学大学院 スポーツ健康科学研究科" },
-              { quote: "知らなかったけど「いい会社」に出会えた。就活サイトでは見落としていた企業だが、「こんな風に仕事をしたい」と思えた。", label: "國學院大学 経済学部 3年" },
-              { quote: "人事の人に「ito」のルールを教えるところからフリートークが始まって、その後も一緒にほろ酔いになって打ち解けられたので、面接でまた人事の人と話せるのが楽しみになりました。", label: "日本大学 法学部 3年" },
-            ].map((item, i) => (
+            {homeCopy.voices.items.map((item, i) => (
               <div key={i} className="bg-white border border-lp-border rounded-2xl p-6 opacity-0 animate-fadeUp" style={{ animationDelay: `${(i % 3) * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
-                <p className="text-sm text-lp-text-muted leading-relaxed mb-4 border-l-3 border-lp-primary pl-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>{item.quote}</p>
-                <p className="text-xs text-lp-text-body font-medium">
-                  {item.label}
+                <p className="text-sm text-lp-text-muted leading-relaxed mb-4 border-l-3 border-lp-primary pl-4" style={cms(`voices-card-${i}-quote`, MINCHO_STYLE)} data-cm-id={`voices-card-${i}-quote`}>{item.quote}</p>
+                <p className="text-xs text-lp-text-body font-medium" data-cm-id={`voices-card-${i}-attribution`} style={cms(`voices-card-${i}-attribution`)}>
+                  {item.attribution}
                 </p>
               </div>
             ))}
           </div>
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
             <a
-              href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+              href={cmh("hero-cta")}
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
@@ -807,38 +829,32 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-8 md:px-6 bg-white">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Screening</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              すべての企業に、<br/>私たちの基準があります。
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="screening-eyebrow" style={cms("screening-eyebrow")}>{homeCopy.screening.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight whitespace-pre-line" style={cms("screening-heading", MINCHO_STYLE)} data-cm-id="screening-heading">
+              {homeCopy.screening.heading}
             </h2>
           </div>
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-9">
-                KANPAI就活は、どんな企業でも参加できるわけではありません。<br/>私たちが大切にしている価値観に共感し、<br/>学生一人ひとりと誠実に向き合える企業だけをお迎えしています。
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-9 whitespace-pre-line" data-cm-id="screening-intro" style={cms("screening-intro")}>
+                {homeCopy.screening.intro}
               </p>
             </div>
             <div className="space-y-3 mb-9">
-            {[
-              "学生を対等な存在として向き合える",
-              "一人ひとりの声に、丁寧に耳を傾けられる",
-              "自社の課題も含め、等身大の姿を見せられる",
-              "温かみのある関係性を大切にしている",
-              "リスペクトのあるフィードバックを学生にできる"
-            ].map((item, i) => (
+            {homeCopy.screening.criteria.map((item, i) => (
               <div key={i} className="flex items-start gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.12 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center text-lp-primary mt-0.5">
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M13 4L6 11L3 8"/>
                   </svg>
                 </div>
-                <p className="text-sm text-lp-text-heading pt-0.5">{item}</p>
+                <p className="text-sm text-lp-text-heading pt-0.5" data-cm-id={`screening-criterion-${i}`} style={cms(`screening-criterion-${i}`)}>{item}</p>
               </div>
             ))}
             </div>
-            <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <p className="text-sm text-lp-text-heading">
-                運営元は、マイナビ出資企業である<strong>株式会社ワークアズライフ</strong>。<br/>マイナビが実現できない深い部分にこだわった就活支援を行っています。<br/>上場企業も参加する、信頼のあるイベントです。
+            <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }} data-cm-id="screening-trust">
+              <p className="text-sm text-lp-text-heading whitespace-pre-line" style={cms("screening-trust")}>
+                {homeCopy.screening.trustNote}
               </p>
             </div>
           </div>
@@ -849,36 +865,32 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-6 bg-lp-bg-warm">
         <div className="max-w-2xl mx-auto">
           <div>
-            <h3 className="text-lg font-bold text-lp-text-heading text-center mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>安全開催のための取り組み</h3>
-            <p className="text-xs text-lp-primary text-center mb-5">安心して参加いただくために、以下のルールを設けています。</p>
+            <h3 className="text-lg font-bold text-lp-text-heading text-center mb-2" style={cms("safety-heading", MINCHO_STYLE)} data-cm-id="safety-heading">{homeCopy.safety.heading}</h3>
+            <p className="text-xs text-lp-primary text-center mb-5" data-cm-id="safety-subheading" style={cms("safety-subheading")}>{homeCopy.safety.subheading}</p>
             <div className="space-y-3">
-              {[
-                { icon: "bottle", title: "飲み物は缶で提供", desc: "すべてのドリンクを缶のままお渡しします。開封済みの飲料は使用せず、混入のリスクをゼロにしています。" },
-                { icon: "ban", title: "人事と学生の二次会禁止", desc: "イベント終了後、人事と学生での二次会は禁止としています。安全で健全な関係性を守ります。" },
-                { icon: "shield", title: "不適切な参加者への対応", desc: "参加にそぐわない目的の方には、運営より退出をお願いする場合があります。全員が安心できる場を守ります。" },
-              ].map((item, i) => (
+              {homeCopy.safety.items.map((item, i) => (
                 <div key={i} className="flex gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.6 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                   <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-lp-bg-warm flex items-center justify-center text-lp-primary">
-                    {item.icon === "bottle" && (
+                    {i === 0 && (
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M9 2h6v4l2 2v14H7V8l2-2V2z"/>
                       </svg>
                     )}
-                    {item.icon === "ban" && (
+                    {i === 1 && (
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                       </svg>
                     )}
-                    {item.icon === "shield" && (
+                    {i === 2 && (
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                       </svg>
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-lp-text-heading mb-0.5">{item.title}</p>
-                    <p className="text-xs text-lp-text-body leading-relaxed">{item.desc}</p>
+                    <p className="text-sm font-medium text-lp-text-heading mb-0.5" data-cm-id={`safety-item-${i}-title`} style={cms(`safety-item-${i}-title`)}>{item.title}</p>
+                    <p className="text-xs text-lp-text-body leading-relaxed" data-cm-id={`safety-item-${i}-description`} style={cms(`safety-item-${i}-description`)}>{item.description}</p>
                   </div>
                 </div>
               ))}
@@ -891,39 +903,94 @@ export default function Home({ lpSlug }: HomeProps) {
       <section className="py-24 px-6 bg-white">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">FAQ</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              よくあるご質問
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="faq-eyebrow" style={cms("faq-eyebrow")}>{homeCopy.faq.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("faq-heading", MINCHO_STYLE)} data-cm-id="faq-heading">
+              {homeCopy.faq.heading}
             </h2>
           </div>
           <div className="space-y-0 opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-            {(() => {
-              const baseFaq = [
-                { q: "お酒が飲めなくても参加できますか？", a: "はい、もちろん参加いただけます。ソフトドリンクもご用意しています。お酒はあくまで「飾らない対話」のきっかけです。" },
-                { q: "志望業界が決まっていなくても大丈夫ですか？", a: "むしろ、まだ決まっていない方にこそおすすめです。さまざまな業界の社会人と対話する中で、新しい気づきが得られます。" },
-                { q: "どんな企業が参加していますか？", a: "大手からベンチャーまで、運営の厳格な基準を通過した企業のみが参加しています。業界は幅広く、毎回異なります。" },
-                { q: "当日エントリーや選考を強要されませんか？", a: "一切ありません。対話を楽しんでいただくことが目的です。気になる企業があれば、その後のつながり方はあなた次第です。" },
-                { q: "服装はスーツですか？", a: "私服でお越しください。飾らない、自然体の場です。" },
-                { q: "参加費はかかりますか？", a: "参加費は無料です。飲食も企業様のご提供でご用意しています。" },
-                ...(contentSlug === "campaign2603" ? [{ q: "交通費はどうやって支払われますか？", a: "後日振り込みを予定しています。詳細は予約いただいた方に、運営から2〜3分ほどお電話でお伝えいたします。" }] : []),
-                { q: "一人で参加しても大丈夫ですか？", a: "多くの方がお一人で参加されています。アイスブレイクから始まるので、自然に打ち解けられます。" },
-              ];
-              return baseFaq;
-            })().map((item, i) => (
+            {homeCopy.faq.items.map((item, i) => {
+              if (contentSlug !== "campaign2603" && item.question === CAMPAIGN2603_FAQ_QUESTION) {
+                return null;
+              }
+              const faqOpen = previewOpenFaq.has(i);
+              const faqToggleBtn = (
+                <button
+                  type="button"
+                  data-faq-toggle
+                  aria-expanded={faqOpen}
+                  aria-label={faqOpen ? "回答を閉じる" : "回答を開く"}
+                  onClick={() => togglePreviewFaq(i)}
+                  className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center transition-colors cursor-pointer hover:bg-lp-border"
+                >
+                  <svg
+                    className={`w-4 h-4 text-lp-primary transition-transform ${faqOpen ? "rotate-45" : ""}`}
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M8 3v10M3 8h10"/>
+                  </svg>
+                </button>
+              );
+
+              if (isCmPreview) {
+                return (
+                  <div key={i} className="border-b border-lp-border">
+                    <div className="flex items-center justify-between gap-3 py-5">
+                      <span
+                        className="flex-1 min-w-0 text-left text-lp-text-heading font-medium text-sm"
+                        data-cm-id={`faq-item-${i}-question`}
+                        style={cms(`faq-item-${i}-question`)}
+                      >
+                        {item.question}
+                      </span>
+                      {faqToggleBtn}
+                    </div>
+                    {faqOpen && (
+                      <div
+                        className="pb-5 text-sm text-lp-text-body leading-relaxed"
+                        data-cm-id={`faq-item-${i}-answer`}
+                        style={cms(`faq-item-${i}-answer`)}
+                      >
+                        {item.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
               <details key={i} className="border-b border-lp-border group">
-                <summary className="py-5 cursor-pointer flex items-center justify-between text-lp-text-heading font-medium text-sm hover:text-lp-primary transition-colors">
-                  {item.q}
-                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center group-open:bg-lp-border transition-colors">
-                    <svg className="w-4 h-4 text-lp-primary group-open:rotate-45 transition-transform" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <summary className="py-5 cursor-pointer flex items-center justify-between gap-3 text-lp-text-heading font-medium text-sm hover:text-lp-primary transition-colors list-none [&::-webkit-details-marker]:hidden">
+                  {item.question}
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center group-open:bg-lp-border transition-colors pointer-events-none">
+                    <svg
+                      className="w-4 h-4 text-lp-primary group-open:rotate-45 transition-transform"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M8 3v10M3 8h10"/>
                     </svg>
                   </span>
                 </summary>
-                <div className="pb-5 text-sm text-lp-text-body leading-relaxed">
-                  {item.a}
+                <div
+                  className="pb-5 text-sm text-lp-text-body leading-relaxed"
+                  data-cm-id={`faq-item-${i}-answer`}
+                  style={cms(`faq-item-${i}-answer`)}
+                >
+                  {item.answer}
                 </div>
               </details>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>
@@ -934,31 +1001,30 @@ export default function Home({ lpSlug }: HomeProps) {
           <div className="mx-6 md:mx-0">
             <div className="opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
               <h2 className="text-4xl md:text-5xl font-bold text-lp-text-heading mb-6 leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                <span className="whitespace-nowrap">見えないものに、</span> <span className="whitespace-nowrap">触れてみよう。</span>
+                <span className="whitespace-nowrap" data-cm-id="final-cta-line1" style={cms("final-cta-line1")}>{homeCopy.finalCta.headingLine1}</span>{" "}
+                <span className="whitespace-nowrap" data-cm-id="final-cta-line2" style={cms("final-cta-line2")}>{homeCopy.finalCta.headingLine2}</span>
               </h2>
             </div>
-            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
-              <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose text-left md:text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                この時間、この出会いだけで「正解」はわからないかもしれない。<br/>でも、あなたなりの正解の手がかりは、きっと見つかる。
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }} data-cm-id="final-cta-body">
+              <p className="text-sm md:text-base text-lp-text-body mb-9 leading-loose text-left md:text-center whitespace-pre-line" style={cms("final-cta-body", MINCHO_STYLE)}>
+                {homeCopy.finalCta.body}
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
               <a
-                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                href={cmh("hero-cta")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
+                data-cm-id="hero-cta"
+                style={cms("hero-cta")}
                 className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
               >
                 {lineCtaLabel}
                 <img src="/line-logo.png" alt="LINE" className="w-7 h-7 object-contain" loading="lazy" />
               </a>
-              <p className="text-xs text-lp-primary font-medium tracking-wide">
-                <span>参加費無料</span>
-                <span className="mx-1">・</span>
-                <span>私服OK</span>
-                <span className="mx-1">・</span>
-                <span>1人参加歓迎</span>
+              <p className="text-xs text-lp-primary font-medium tracking-wide" data-cm-id="final-cta-note" style={cms("final-cta-note")}>
+                {homeCopy.cta.footerNote}
               </p>
             </div>
           </div>
@@ -966,16 +1032,16 @@ export default function Home({ lpSlug }: HomeProps) {
       </section>
 
       {/* 次回イベント詳細 */}
-      <section id="event-detail" className="py-24 px-6 bg-white relative overflow-hidden">
+      <section id="event-detail" className="py-24 px-6 bg-white relative overflow-hidden" data-cm-id="event-detail">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute w-72 h-72 -top-20 -right-20 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-border) 35%, transparent) 0%, transparent 70%)' }} />
           <div className="absolute w-48 h-48 -bottom-10 -left-10 rounded-full opacity-40" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--lp-primary) 10%, transparent) 0%, transparent 70%)' }} />
         </div>
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">Next Event</p>
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">{homeCopy.nextEvent.eyebrow}</p>
             <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              次回のイベント詳細
+              {homeCopy.nextEvent.heading}
             </h2>
           </div>
           <div className="space-y-6 opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
@@ -1018,7 +1084,7 @@ export default function Home({ lpSlug }: HomeProps) {
                     const { title, body } = getCampaign2603NoticeParts();
                     if (!title && !body) return null;
                     return (
-                      <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2">
+                      <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2" data-cm-id="campaign2603-notice">
                         {title && <p className="font-medium text-lp-primary">{title}</p>}
                         {body && (
                           <p className="whitespace-pre-line" style={{ fontFamily: "'Shippori Mincho', serif" }}>
@@ -1053,7 +1119,7 @@ export default function Home({ lpSlug }: HomeProps) {
             ))}
             <div className="pt-2">
               <a
-                href={contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL}
+                href={cmh("hero-sticky-cta")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
@@ -1070,7 +1136,7 @@ export default function Home({ lpSlug }: HomeProps) {
       {/* Footer */}
       <footer className="py-11 px-6 border-t border-lp-border bg-white">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center text-lp-text-heading">
+          <div className="flex items-center text-lp-text-heading" data-cm-id="brand-logo">
             {logoUrl ? (
               <img src={logoUrl} alt="ロゴ" className="h-5 w-auto object-contain" loading="lazy" onError={handleLogoError} />
             ) : (
@@ -1078,8 +1144,8 @@ export default function Home({ lpSlug }: HomeProps) {
             )}
           </div>
           <div className="text-center">
-            <p className="text-xs font-medium text-lp-text-heading">
-              <a href="https://workaslife-inc.com/" target="_blank" rel="noopener noreferrer" className="text-lp-text-heading hover:text-lp-primary transition-colors underline">株式会社ワークアズライフ</a>（マイナビ出資企業）
+            <p className="text-xs font-medium text-lp-text-heading whitespace-pre-line" data-cm-id="footer-company" style={cms("footer-company")}>
+              {homeCopy.footer.companyNote}
             </p>
           </div>
           <p className="text-xs text-lp-text-body opacity-50">

@@ -1,6 +1,7 @@
 /** /self-stance 専用コンテンツ（ContentPayload.selfStance） */
 
 import seed from "../../public/content/self-stance.json";
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const SELF_STANCE_ASSETS = {
   favicon: "/self_stance/favicon.png",
@@ -16,6 +17,7 @@ export type VoiceItem = { who: string; text: string };
 export type FaqItem = { q: string; a: string };
 
 export type SelfStanceContent = {
+  fieldStyles?: HomeCopyFieldStyles;
   seo: { title: string; description: string };
   header: {
     logoUrl: string;

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "@/components/ImageUploader";
+import { shouldShowEditorSection } from "@/lib/content-manager/editor-section";
 import type {
   DeliverableItem,
   FaqItem,
@@ -16,6 +17,7 @@ import type {
 interface Props {
   content: StartingJobHuntingContent;
   onChange: (content: StartingJobHuntingContent) => void;
+  sectionId?: string | null;
 }
 
 const sectionCls = "mb-8 rounded-xl border border-[#ffd7c3] bg-white p-6";
@@ -141,10 +143,11 @@ function LabelValueRowsEditor({
   );
 }
 
-export function StartingJobHuntingEditor({ content, onChange }: Props) {
+export function StartingJobHuntingEditor({ content, onChange, sectionId }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const toggle = (key: string) => setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
-  const isOpen = (key: string) => !collapsed[key];
+  const show = (key: string) => shouldShowEditorSection(sectionId, key);
+  const isOpen = (key: string) => (sectionId ? show(key) : !collapsed[key]);
 
   const update = <K extends keyof StartingJobHuntingContent>(
     key: K,
@@ -155,6 +158,7 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
 
   return (
     <div className="space-y-2">
+      {!sectionId && (
       <div className={sectionCls}>
         <SectionHeading>SEO</SectionHeading>
         <div className="space-y-4">
@@ -177,7 +181,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("header-sticky") && (
       <div className={sectionCls}>
         <SectionHeading>ヘッダー・固定CTA</SectionHeading>
         <div className="space-y-4">
@@ -249,7 +255,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("hero") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("hero")}>
           <SectionHeading>ファーストビュー</SectionHeading>
@@ -315,7 +323,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("eventInfo") && (
       <div className={sectionCls}>
         <button
           type="button"
@@ -342,7 +352,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("problem") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("problem")}>
           <SectionHeading>Problem</SectionHeading>
@@ -392,7 +404,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("insight") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("insight")}>
           <SectionHeading>Insight</SectionHeading>
@@ -437,7 +451,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("solution") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("solution")}>
           <SectionHeading>Solution</SectionHeading>
@@ -539,7 +555,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("midCta") && (
       <div className={sectionCls}>
         <SectionHeading>中間CTA</SectionHeading>
         <div className="grid grid-cols-2 gap-4">
@@ -561,7 +579,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("program") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("program")}>
           <SectionHeading>Program</SectionHeading>
@@ -641,7 +661,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("facilitator") && (
       <div className={sectionCls}>
         <button
           type="button"
@@ -700,7 +722,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("voices") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("voices")}>
           <SectionHeading>参加者の声</SectionHeading>
@@ -761,7 +785,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("info") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("info")}>
           <SectionHeading>開催情報・地図</SectionHeading>
@@ -802,7 +828,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("recommend") && (
       <div className={sectionCls}>
         <button
           type="button"
@@ -821,7 +849,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("faq") && (
       <div className={sectionCls}>
         <button type="button" className="w-full flex justify-between items-center" onClick={() => toggle("faq")}>
           <SectionHeading>FAQ</SectionHeading>
@@ -882,7 +912,9 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
 
+      {show("finalCta") && (
       <div className={sectionCls}>
         <button
           type="button"
@@ -964,6 +996,7 @@ export function StartingJobHuntingEditor({ content, onChange }: Props) {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

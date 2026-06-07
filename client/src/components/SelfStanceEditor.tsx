@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "@/components/ImageUploader";
+import { shouldShowEditorSection } from "@/lib/content-manager/editor-section";
 import type {
   FaqItem,
   FlowStep,
@@ -14,6 +15,7 @@ import type {
 interface Props {
   content: SelfStanceContent;
   onChange: (content: SelfStanceContent) => void;
+  sectionId?: string | null;
 }
 
 const sectionCls = "mb-8 rounded-xl border border-[#ffd7c3] bg-white p-6";
@@ -326,13 +328,15 @@ function CtaFields({
   );
 }
 
-export function SelfStanceEditor({ content, onChange }: Props) {
+export function SelfStanceEditor({ content, onChange, sectionId }: Props) {
   const update = <K extends keyof SelfStanceContent>(key: K, value: SelfStanceContent[K]) => {
     onChange({ ...content, [key]: value });
   };
+  const show = (key: string) => shouldShowEditorSection(sectionId, key);
 
   return (
     <div className="space-y-2">
+      {!sectionId && (
       <div className={sectionCls}>
         <SectionHeading>SEO</SectionHeading>
         <div className="space-y-4">
@@ -355,7 +359,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("header-sticky") && (
       <div className={sectionCls}>
         <SectionHeading>ヘッダー・固定CTA</SectionHeading>
         <div className="space-y-4">
@@ -389,7 +395,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("hero") && (
       <div className={sectionCls}>
         <SectionHeading>ファーストビュー</SectionHeading>
         <div className="space-y-4">
@@ -431,7 +439,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           </div>
         </div>
       </div>
+      )}
 
+      {show("eventInfo") && (
       <div className={sectionCls}>
         <SectionHeading>イベント情報（上部）</SectionHeading>
         <div className="space-y-4">
@@ -449,7 +459,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("problem") && (
       <div className={sectionCls}>
         <SectionHeading>悩み（PROBLEM）</SectionHeading>
         <div className="space-y-4">
@@ -471,7 +483,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("solution") && (
       <div className={sectionCls}>
         <SectionHeading>ソリューション</SectionHeading>
         <div className="space-y-4">
@@ -517,7 +531,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("program") && (
       <div className={sectionCls}>
         <SectionHeading>プログラム</SectionHeading>
         <div className="space-y-4">
@@ -549,7 +565,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("facilitator") && (
       <div className={sectionCls}>
         <SectionHeading>ファシリテーター</SectionHeading>
         <div className="space-y-4">
@@ -592,7 +610,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("voices") && (
       <div className={sectionCls}>
         <SectionHeading>参加者の声</SectionHeading>
         <div className="space-y-4">
@@ -612,7 +632,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("info") && (
       <div className={sectionCls}>
         <SectionHeading>開催情報（詳細）</SectionHeading>
         <div className="space-y-4">
@@ -649,7 +671,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("target") && (
       <div className={sectionCls}>
         <SectionHeading>おすすめ対象</SectionHeading>
         <div className="space-y-4">
@@ -669,7 +693,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("faq") && (
       <div className={sectionCls}>
         <SectionHeading>FAQ</SectionHeading>
         <div className="space-y-4">
@@ -689,7 +715,9 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
 
+      {show("final-footer") && (
       <div className={sectionCls}>
         <SectionHeading>最終CTA・フッター</SectionHeading>
         <div className="space-y-4">
@@ -727,6 +755,7 @@ export function SelfStanceEditor({ content, onChange }: Props) {
           />
         </div>
       </div>
+      )}
     </div>
   );
 }
