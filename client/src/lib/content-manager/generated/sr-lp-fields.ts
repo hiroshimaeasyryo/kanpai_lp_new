@@ -2,6 +2,7 @@
 import {
   text,
   image,
+  style,
   indexedFields,
   indexedSimple,
   type LpFieldDef,

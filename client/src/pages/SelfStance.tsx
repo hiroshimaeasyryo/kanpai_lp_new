@@ -188,7 +188,7 @@ export default function SelfStance() {
   return (
     <FieldStylesProvider value={c.fieldStyles}>
     <div id="self-stance-page">
-      <div className="sticky">
+      <CmId id="ss-sticky-cta-bar" className="sticky">
         <CmId
           id="ss-sticky-cta-label"
           as="a"
@@ -200,7 +200,7 @@ export default function SelfStance() {
           <LineIcon />
           {c.stickyCta.label}
         </CmId>
-      </div>
+      </CmId>
 
       <header className="site-header">
         <div className="header-inner">

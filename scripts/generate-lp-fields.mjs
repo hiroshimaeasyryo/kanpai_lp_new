@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, "../client/src/lib/content-manager/generated");
 
 function emitFile(name, constName, bodyLines) {
-  const content = `/** 自動生成 — scripts/generate-lp-fields.mjs */\nimport {\n  text,\n  image,\n  indexedFields,\n  indexedSimple,\n  type LpFieldDef,\n} from "../lp-field-types";\n\nexport const ${constName}: LpFieldDef[] = [\n${bodyLines.join("\n")}\n];\n`;
+  const content = `/** 自動生成 — scripts/generate-lp-fields.mjs */\nimport {\n  text,\n  image,\n  style,\n  indexedFields,\n  indexedSimple,\n  type LpFieldDef,\n} from "../lp-field-types";\n\nexport const ${constName}: LpFieldDef[] = [\n${bodyLines.join("\n")}\n];\n`;
   writeFileSync(join(outDir, name), content, "utf8");
 }
 
@@ -23,6 +23,12 @@ function t(id, label, path, multiline = false, rows = 4) {
 function img(id, label, path, def) {
   const d = def ? `, "${def}"` : "";
   return `  image("${id}", "${label}", "${path}"${d}),`;
+}
+
+function sty(id, label, containerOnly = false) {
+  return containerOnly
+    ? `  style("${id}", "${label}", { containerOnly: true }),`
+    : `  style("${id}", "${label}"),`;
 }
 
 function idxSimple(prefix, label, count, arrayPath) {
@@ -274,6 +280,7 @@ emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
   img("ss-header-logo", "ヘッダー · ロゴ", "header.logoUrl"),
   t("ss-header-logo-alt", "ヘッダー · ロゴalt", "header.logoAlt"),
   t("ss-header-cta-label", "ヘッダー · CTA", "header.ctaLabel"),
+  sty("ss-sticky-cta-bar", "固定CTA · バー", true),
   t("ss-sticky-cta-label", "固定CTA · 文言", "stickyCta.label"),
   t("ss-hero-eyebrow", "FV · ラベル", "hero.eyebrow"),
   img("ss-hero-image", "FV · 画像", "hero.heroImageUrl"),
