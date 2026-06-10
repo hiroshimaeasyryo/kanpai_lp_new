@@ -26,7 +26,7 @@ export interface HomeFaqItem {
   answer: string;
 }
 
-import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
+import { mergeFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export interface HomeCopy {
   hero: {
@@ -476,26 +476,6 @@ export function mergeHomeCopy(raw: unknown): HomeCopy {
     },
     fieldStyles: mergeFieldStylesFromRaw(c.fieldStyles, base.fieldStyles),
   };
-}
-
-function mergeFieldStylesFromRaw(
-  raw: unknown,
-  base?: HomeCopy["fieldStyles"],
-): HomeCopyFieldStyles | undefined {
-  if (!raw || typeof raw !== "object") return base;
-  const out: HomeCopyFieldStyles = { ...(base ?? {}) };
-  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
-    if (!val || typeof val !== "object") continue;
-    const o = val as Record<string, unknown>;
-    const prev = out[id] ?? {};
-    out[id] = {
-      fontSize: typeof o.fontSize === "string" ? o.fontSize : prev.fontSize,
-      color: typeof o.color === "string" ? o.color : prev.color,
-      fontFamily: typeof o.fontFamily === "string" ? o.fontFamily : prev.fontFamily,
-      href: typeof o.href === "string" ? o.href : prev.href,
-    };
-  }
-  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 export function getStoredHomeCopy(): HomeCopy {
