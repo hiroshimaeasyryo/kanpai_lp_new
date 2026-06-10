@@ -1,4 +1,11 @@
-import { createContext, useContext, type CSSProperties, type ElementType, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import { fieldStyleToCss, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 /**
@@ -27,23 +34,27 @@ function useCmStyle(id: string, style?: CSSProperties): CSSProperties | undefine
   return { ...fromField, ...style };
 }
 
-/** プレビュー選択用 data-cm-id ラッパー */
-export function CmId({
-  id,
-  as: Tag = "span",
-  className,
-  style,
-  children,
-}: {
+type CmIdProps<T extends ElementType = "span"> = {
   id: string;
-  as?: ElementType;
+  as?: T;
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
-}) {
+} & Omit<ComponentPropsWithoutRef<T>, "id" | "as" | "style" | "className" | "children">;
+
+/** プレビュー選択用 data-cm-id ラッパー */
+export function CmId<T extends ElementType = "span">({
+  id,
+  as,
+  className,
+  style,
+  children,
+  ...rest
+}: CmIdProps<T>) {
+  const Tag = (as ?? "span") as ElementType;
   const merged = useCmStyle(id, style);
   return (
-    <Tag data-cm-id={id} className={className} style={merged}>
+    <Tag data-cm-id={id} className={className} style={merged} {...rest}>
       {children}
     </Tag>
   );

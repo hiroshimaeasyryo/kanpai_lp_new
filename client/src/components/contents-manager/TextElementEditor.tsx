@@ -23,6 +23,40 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 const fieldCls = "mt-1 border-[#ffd7c3]";
 const labelCls = "text-[#3D281E]";
 
+function ColorField({
+  label,
+  value,
+  placeholder,
+  defaultPickerColor,
+  onChange,
+}: {
+  label: string;
+  value?: string;
+  placeholder: string;
+  defaultPickerColor: string;
+  onChange: (color: string) => void;
+}) {
+  return (
+    <div>
+      <Label className={labelCls}>{label}</Label>
+      <div className="flex gap-2 mt-1">
+        <Input
+          type="color"
+          value={value?.startsWith("#") ? value : defaultPickerColor}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 p-1 border-[#ffd7c3] cursor-pointer"
+        />
+        <Input
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`${fieldCls} flex-1`}
+        />
+      </div>
+    </div>
+  );
+}
+
 type Props = {
   text: string;
   onTextChange: (value: string) => void;
@@ -112,23 +146,21 @@ export function TextElementEditor({
           />
         </div>
 
-        <div>
-          <Label className={labelCls}>テキストカラー</Label>
-          <div className="flex gap-2 mt-1">
-            <Input
-              type="color"
-              value={style?.color?.startsWith("#") ? style.color : "#3D281E"}
-              onChange={(e) => onStyleChange({ color: e.target.value })}
-              className="h-10 w-12 p-1 border-[#ffd7c3] cursor-pointer"
-            />
-            <Input
-              value={style?.color ?? ""}
-              onChange={(e) => onStyleChange({ color: e.target.value })}
-              placeholder="#3D281E"
-              className={`${fieldCls} flex-1`}
-            />
-          </div>
-        </div>
+        <ColorField
+          label="テキストカラー"
+          value={style?.color}
+          placeholder="#3D281E"
+          defaultPickerColor="#3D281E"
+          onChange={(color) => onStyleChange({ color })}
+        />
+
+        <ColorField
+          label="背景色"
+          value={style?.backgroundColor}
+          placeholder="未設定（LP既定）"
+          defaultPickerColor="#3D281E"
+          onChange={(backgroundColor) => onStyleChange({ backgroundColor })}
+        />
 
         <div>
           <Label className={labelCls}>テキストフォント</Label>

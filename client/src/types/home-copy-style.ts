@@ -1,12 +1,14 @@
 import type { CSSProperties } from "react";
 
-/** 要素ID（data-cm-id）ごとのテキスト装飾 */
+/** 要素ID（data-cm-id）ごとの装飾（テキスト・背景など） */
 export type TextFieldStyle = {
   fontSize?: string;
   color?: string;
   fontFamily?: string;
   /** リンク要素向け。空ならLP既定の遷移先を使用 */
   href?: string;
+  /** 背景色。空ならLP既定のCSSを使用 */
+  backgroundColor?: string;
 };
 
 export type HomeCopyFieldStyles = Record<string, TextFieldStyle>;
@@ -42,7 +44,40 @@ export function fieldStyleToCss(style?: TextFieldStyle): CSSProperties {
   if (style.fontSize?.trim()) out.fontSize = style.fontSize.trim();
   if (style.color?.trim()) out.color = style.color.trim();
   if (style.fontFamily?.trim()) out.fontFamily = style.fontFamily.trim();
+  if (style.backgroundColor?.trim()) {
+    out.backgroundColor = style.backgroundColor.trim();
+    // LP CSS の gradient 等を打ち消し、単色背景を反映する
+    out.backgroundImage = "none";
+  }
   return out;
+}
+
+export function normalizeTextFieldStyle(
+  raw: Record<string, unknown>,
+  prev: TextFieldStyle = {},
+): TextFieldStyle {
+  return {
+    fontSize: typeof raw.fontSize === "string" ? raw.fontSize : prev.fontSize,
+    color: typeof raw.color === "string" ? raw.color : prev.color,
+    fontFamily: typeof raw.fontFamily === "string" ? raw.fontFamily : prev.fontFamily,
+    href: typeof raw.href === "string" ? raw.href : prev.href,
+    backgroundColor:
+      typeof raw.backgroundColor === "string" ? raw.backgroundColor : prev.backgroundColor,
+  };
+}
+
+/** JSON 等の raw fieldStyles をマージ（動的キーを保持） */
+export function mergeFieldStylesFromRaw(
+  raw: unknown,
+  base?: HomeCopyFieldStyles,
+): HomeCopyFieldStyles | undefined {
+  if (!raw || typeof raw !== "object") return base;
+  const out: HomeCopyFieldStyles = { ...(base ?? {}) };
+  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (!val || typeof val !== "object") continue;
+    out[id] = normalizeTextFieldStyle(val as Record<string, unknown>, out[id]);
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 export function mergeFieldStyles(

@@ -62,6 +62,23 @@ function CtaButton({
   className?: string;
   showLineIcon?: boolean;
 }) {
+  if (labelCmId) {
+    return (
+      <CmId
+        id={labelCmId}
+        as="a"
+        href={href}
+        className={className}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={trackMetaPixelLead}
+      >
+        {showLineIcon && <LineIcon />}
+        {label}
+      </CmId>
+    );
+  }
+
   return (
     <a
       href={href}
@@ -71,7 +88,7 @@ function CtaButton({
       onClick={trackMetaPixelLead}
     >
       {showLineIcon && <LineIcon />}
-      {labelCmId ? <CmId id={labelCmId}>{label}</CmId> : label}
+      {label}
     </a>
   );
 }
@@ -172,15 +189,17 @@ export default function SelfStance() {
     <FieldStylesProvider value={c.fieldStyles}>
     <div id="self-stance-page">
       <div className="sticky">
-        <a
+        <CmId
+          id="ss-sticky-cta-label"
+          as="a"
           href={c.stickyCta.ctaHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={trackMetaPixelLead}
         >
           <LineIcon />
-          <CmId id="ss-sticky-cta-label">{c.stickyCta.label}</CmId>
-        </a>
+          {c.stickyCta.label}
+        </CmId>
       </div>
 
       <header className="site-header">
@@ -194,18 +213,18 @@ export default function SelfStance() {
           <CmId id="ss-header-logo-alt" className="sr-only">
             {c.header.logoAlt}
           </CmId>
-          <a
+          <CmId
+            id="ss-header-cta-label"
+            as="a"
             href={c.header.ctaHref}
             className="header-btn"
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackMetaPixelLead}
           >
-            <CmId id="ss-header-cta-label" as="span">
-              {c.header.ctaLabel}
-            </CmId>
+            {c.header.ctaLabel}
             <LineIcon />
-          </a>
+          </CmId>
         </div>
       </header>
       <div className="deco-line" />
