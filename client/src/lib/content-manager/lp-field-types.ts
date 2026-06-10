@@ -1,7 +1,7 @@
 import type { ElementDefinition } from "@/lib/content-manager/content-element-registry";
 import type { LpKind } from "@/lib/content-manager/cm-preview";
 
-export type LpFieldKind = "text" | "image";
+export type LpFieldKind = "text" | "image" | "style";
 
 export type LpFieldDef = {
   id: string;
@@ -12,6 +12,8 @@ export type LpFieldDef = {
   rows?: number;
   /** 画像フィールドのデフォルトパス */
   imageDefault?: string;
+  /** style フィールド向け: 背景色のみ編集 */
+  containerOnly?: boolean;
 };
 
 export function toElementDefinition(field: LpFieldDef): ElementDefinition {
@@ -31,6 +33,11 @@ export function text(
 
 export function image(id: string, label: string, path: string, imageDefault?: string): LpFieldDef {
   return { id, label, path, kind: "image", imageDefault };
+}
+
+/** テキストなし・装飾のみ編集する要素（固定バー背景など） */
+export function style(id: string, label: string, opts?: { containerOnly?: boolean }): LpFieldDef {
+  return { id, label, path: "", kind: "style", containerOnly: opts?.containerOnly };
 }
 
 export function indexedFields(

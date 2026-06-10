@@ -2,6 +2,7 @@
 import {
   text,
   image,
+  style,
   indexedFields,
   indexedSimple,
   type LpFieldDef,
@@ -11,6 +12,7 @@ export const SS_LP_FIELDS: LpFieldDef[] = [
   image("ss-header-logo", "ヘッダー · ロゴ", "header.logoUrl"),
   text("ss-header-logo-alt", "ヘッダー · ロゴalt", "header.logoAlt"),
   text("ss-header-cta-label", "ヘッダー · CTA", "header.ctaLabel"),
+  style("ss-sticky-cta-bar", "固定CTA · バー", { containerOnly: true }),
   text("ss-sticky-cta-label", "固定CTA · 文言", "stickyCta.label"),
   text("ss-hero-eyebrow", "FV · ラベル", "hero.eyebrow"),
   image("ss-hero-image", "FV · 画像", "hero.heroImageUrl"),
