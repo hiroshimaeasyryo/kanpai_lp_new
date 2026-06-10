@@ -10,7 +10,7 @@ import {
   type SelfStanceContent,
 } from "@/types/self-stance";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml } from "@/components/contents-manager/CmId";
+import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./self-stance.css";
 
 const STORAGE_KEY = "self_stance_content_v1";
@@ -169,6 +169,7 @@ export default function SelfStance() {
   const c = content;
 
   return (
+    <FieldStylesProvider value={c.fieldStyles}>
     <div id="self-stance-page">
       <div className="sticky">
         <a
@@ -535,5 +536,6 @@ export default function SelfStance() {
         <CmId id="ss-footer-copyright">{c.footer.copyright}</CmId>
       </footer>
     </div>
+    </FieldStylesProvider>
   );
 }

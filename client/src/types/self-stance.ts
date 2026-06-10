@@ -1,7 +1,7 @@
 /** /self-stance 専用コンテンツ（ContentPayload.selfStance） */
 
 import seed from "../../public/content/self-stance.json";
-import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
+import type { HomeCopyFieldStyles, TextFieldStyle } from "@/types/home-copy-style";
 
 export const SELF_STANCE_ASSETS = {
   favicon: "/self_stance/favicon.png",
@@ -111,9 +111,41 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
   }
 }
 
+/**
+ * fieldStyles は要素ID（ss-*）をキーにした動的マップ。
+ * mergeDeep は `if (!(k in target)) continue` のため、デフォルトseedに無い
+ * 新規キー（新たに装飾した要素）を破棄してしまう。そのためここで個別にマージし、
+ * 動的キーを保持する（home-copy の mergeFieldStylesFromRaw と同方針）。
+ */
+function mergeFieldStyles(
+  raw: unknown,
+  base?: HomeCopyFieldStyles,
+): HomeCopyFieldStyles | undefined {
+  if (!raw || typeof raw !== "object") return base;
+  const out: HomeCopyFieldStyles = { ...(base ?? {}) };
+  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (!val || typeof val !== "object") continue;
+    const o = val as Record<string, unknown>;
+    const prev: TextFieldStyle = out[id] ?? {};
+    out[id] = {
+      fontSize: typeof o.fontSize === "string" ? o.fontSize : prev.fontSize,
+      color: typeof o.color === "string" ? o.color : prev.color,
+      fontFamily: typeof o.fontFamily === "string" ? o.fontFamily : prev.fontFamily,
+      href: typeof o.href === "string" ? o.href : prev.href,
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export function mergeSelfStanceContent(raw: unknown): SelfStanceContent {
   const d = cloneDefault();
   if (!raw || typeof raw !== "object") return d;
   mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
+  // mergeDeep が動的キーを落とすため、fieldStyles は専用ロジックで上書きマージする
+  const merged = mergeFieldStyles(
+    (raw as Record<string, unknown>).fieldStyles,
+    d.fieldStyles,
+  );
+  if (merged) d.fieldStyles = merged;
   return d;
 }
