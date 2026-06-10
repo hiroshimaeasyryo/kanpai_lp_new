@@ -239,7 +239,7 @@
         "color": "#5D4037"
       },
       "ss-hero-primary-cta-label": {
-        "color": "#8E1624",
+        "color": "#5D4037",
         "fontFamily": "'Zen Kaku Gothic New', sans-serif"
       },
       "ss-event-info-row-0-value": {
@@ -257,6 +257,9 @@
       },
       "ss-detail-cta-label": {
         "color": "#5D4037"
+      },
+      "ss-sticky-cta-label": {
+        "color": "#f03c00"
       }
     }
   }
