@@ -232,7 +232,7 @@
     },
     "fieldStyles": {
       "ss-header-cta-label": {
-        "color": "#5D4037"
+        "color": "#ffffff"
       },
       "ss-hero-eyebrow": {
         "fontSize": "15px",
@@ -259,7 +259,7 @@
         "color": "#5D4037"
       },
       "ss-sticky-cta-label": {
-        "color": "#f03c00"
+        "color": "#ffffff"
       }
     }
   }
