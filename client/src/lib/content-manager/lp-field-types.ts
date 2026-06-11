@@ -14,6 +14,8 @@ export type LpFieldDef = {
   imageDefault?: string;
   /** style フィールド向け: 背景色のみ編集 */
   containerOnly?: boolean;
+  /** CTAラベル等: リンク先の content パス（例: header.ctaHref） */
+  hrefPath?: string;
 };
 
 export function toElementDefinition(field: LpFieldDef): ElementDefinition {
@@ -26,9 +28,17 @@ export function text(
   id: string,
   label: string,
   path: string,
-  opts?: { multiline?: boolean; rows?: number },
+  opts?: { multiline?: boolean; rows?: number; hrefPath?: string },
 ): LpFieldDef {
-  return { id, label, path, kind: "text", multiline: opts?.multiline, rows: opts?.rows };
+  return {
+    id,
+    label,
+    path,
+    kind: "text",
+    multiline: opts?.multiline,
+    rows: opts?.rows,
+    hrefPath: opts?.hrefPath,
+  };
 }
 
 export function image(id: string, label: string, path: string, imageDefault?: string): LpFieldDef {

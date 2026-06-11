@@ -33,6 +33,7 @@ export interface HomeElementEditorProps {
   events: KanpaiEvent[];
   campaign2603Notice: string;
   homeCopy: HomeCopy;
+  defaultLineHref?: string;
   onHomeCopyChange: (next: HomeCopy | ((prev: HomeCopy) => HomeCopy)) => void;
   onLogoUpdate: (url: string) => void;
   onLogoReset: () => void;
@@ -59,6 +60,7 @@ export function HomeElementEditor(props: HomeElementEditorProps) {
         copy={props.homeCopy}
         onChange={props.onHomeCopyChange}
         sectionId={sectionId}
+        defaultLineHref={props.defaultLineHref}
       />
     );
   }
@@ -272,7 +274,7 @@ export function HomeElementEditor(props: HomeElementEditorProps) {
 
   if (sectionId === "campaign2603-notice") {
     return (
-      <div className="max-w-lg space-y-4">
+      <div className="w-full space-y-4">
         <p className="text-sm text-[#5C3E2A] mb-2">
           イベント詳細「場所」の下に表示するテキストです。改行はLP上でも反映されます。
         </p>

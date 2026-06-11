@@ -26,13 +26,30 @@ export function FieldStylesProvider({
   return <FieldStylesContext.Provider value={value}>{children}</FieldStylesContext.Provider>;
 }
 
+function useFieldStyles(): HomeCopyFieldStyles | undefined {
+  return useContext(FieldStylesContext);
+}
+
 /** コンテキストの fieldStyles と明示 style をマージ（明示 style を優先） */
 function useCmStyle(id: string, style?: CSSProperties): CSSProperties | undefined {
-  const fieldStyles = useContext(FieldStylesContext);
+  const fieldStyles = useFieldStyles();
   const fromField = fieldStyleToCss(fieldStyles?.[id]);
   if (Object.keys(fromField).length === 0) return style;
   return { ...fromField, ...style };
 }
+
+/** fieldStyles の href または props の href を解決（props 優先） */
+function resolveCmHref(
+  id: string,
+  fieldStyles: HomeCopyFieldStyles | undefined,
+  propHref?: string,
+): string | undefined {
+  const explicit = propHref?.trim();
+  if (explicit) return explicit;
+  return fieldStyles?.[id]?.href?.trim() || undefined;
+}
+
+const CM_LINK_PROPS = { target: "_blank", rel: "noopener noreferrer" } as const;
 
 type CmIdProps<T extends ElementType = "span"> = {
   id: string;
@@ -49,12 +66,22 @@ export function CmId<T extends ElementType = "span">({
   className,
   style,
   children,
+  href: propHref,
   ...rest
 }: CmIdProps<T>) {
-  const Tag = (as ?? "span") as ElementType;
+  const fieldStyles = useFieldStyles();
+  const linkHref = resolveCmHref(id, fieldStyles, typeof propHref === "string" ? propHref : undefined);
+  const requestedAs = as ?? "span";
+  const Tag = (linkHref ? "a" : requestedAs) as ElementType;
   const merged = useCmStyle(id, style);
   return (
-    <Tag data-cm-id={id} className={className} style={merged} {...rest}>
+    <Tag
+      data-cm-id={id}
+      className={className}
+      style={merged}
+      {...(linkHref ? { href: linkHref, ...CM_LINK_PROPS } : {})}
+      {...rest}
+    >
       {children}
     </Tag>
   );
@@ -66,19 +93,25 @@ export function CmHtml({
   as: Tag = "span",
   className,
   style,
+  href: propHref,
 }: {
   id: string;
   html: string;
   as?: ElementType;
   className?: string;
   style?: CSSProperties;
+  href?: string;
 }) {
+  const fieldStyles = useFieldStyles();
+  const linkHref = resolveCmHref(id, fieldStyles, propHref);
   const merged = useCmStyle(id, style);
+  const ActualTag = (linkHref ? "a" : Tag) as ElementType;
   return (
-    <Tag
+    <ActualTag
       data-cm-id={id}
       className={className}
       style={merged}
+      {...(linkHref ? { href: linkHref, ...CM_LINK_PROPS } : {})}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

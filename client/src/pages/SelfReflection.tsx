@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { CmHtml, CmId } from "@/components/contents-manager/CmId";
+import { CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import type { ContentPayload } from "@/types/content-payload";
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 /** Meta Pixel: コンバージョン（CTAクリック）送信（index.html で fbq が初期化済み） */
 function trackSelfReflectionCtaClick() {
@@ -12,6 +13,7 @@ function trackSelfReflectionCtaClick() {
 }
 
 type SelfReflectionContent = {
+  fieldStyles?: HomeCopyFieldStyles;
   ctaUrl: string;
   floatingCtaLabel: string;
   hero: { titleHtml: string; sub: string; ctaLabel: string; bgImageUrl: string };
@@ -593,6 +595,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
   const faqItems = content.faq.items ?? [];
 
   return (
+    <FieldStylesProvider value={content.fieldStyles}>
     <div className="sr-body">
       <style>{css}</style>
 
@@ -957,6 +960,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
         </CmId>
       </footer>
     </div>
+    </FieldStylesProvider>
   );
 }
 

@@ -112,7 +112,7 @@ export function DualImageElementEditor({
   const effectiveMobile = mobileUrl?.trim() ? mobileUrl : pcUrl;
 
   return (
-    <div className="space-y-4 max-w-lg">
+    <div className="w-full space-y-4">
       <ImageSlot label={pcLabel} url={pcUrl} onUpload={onPcUpload} onDelete={onPcDelete} />
       {showMobile && (
         <ImageSlot

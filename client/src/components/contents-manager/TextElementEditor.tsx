@@ -14,6 +14,8 @@ type Props = {
   onStyleChange: (patch: Partial<TextFieldStyle>) => void;
   multiline?: boolean;
   rows?: number;
+  href?: string;
+  onHrefChange?: (href: string) => void;
 };
 
 export function TextElementEditor({
@@ -23,9 +25,11 @@ export function TextElementEditor({
   onStyleChange,
   multiline = false,
   rows = 4,
+  href,
+  onHrefChange,
 }: Props) {
   return (
-    <div className="space-y-4 max-w-lg">
+    <div className="w-full space-y-4">
       <div>
         <Label className={labelCls}>テキスト</Label>
         {multiline ? (
@@ -44,7 +48,12 @@ export function TextElementEditor({
         )}
       </div>
 
-      <FieldStyleEditor style={style} onStyleChange={onStyleChange} />
+      <FieldStyleEditor
+        style={style}
+        onStyleChange={onStyleChange}
+        href={href}
+        onHrefChange={onHrefChange}
+      />
     </div>
   );
 }

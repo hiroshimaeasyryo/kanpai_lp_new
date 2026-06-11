@@ -10,7 +10,7 @@ import {
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml } from "@/components/contents-manager/CmId";
+import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./starting-job-hunting.css";
 
 const STORAGE_KEY = "starting_job_hunting_content_v1";
@@ -175,6 +175,7 @@ export default function StartingJobHunting() {
   const c = content;
 
   return (
+    <FieldStylesProvider value={c.fieldStyles}>
     <div id="starting-job-hunting-page">
       <header>
         <img
@@ -507,5 +508,6 @@ export default function StartingJobHunting() {
         <CtaButton href={c.stickyCta.ctaHref} label={c.stickyCta.label} labelCmId="sjh-sticky-cta-label" />
       </div>
     </div>
+    </FieldStylesProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
-import { CmHtml, CmId } from "@/components/contents-manager/CmId";
+import { CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { scrollToAnchor } from "@/lib/smooth-scroll";
@@ -176,6 +176,7 @@ export default function BtobSeminar() {
   })();
 
   return (
+    <FieldStylesProvider value={content.fieldStyles}>
     <div id="btob-seminar-page" ref={rootRef}>
       <header className="site-header">
         <div className="container">
@@ -626,5 +627,6 @@ export default function BtobSeminar() {
         </div>
       </footer>
     </div>
+    </FieldStylesProvider>
   );
 }

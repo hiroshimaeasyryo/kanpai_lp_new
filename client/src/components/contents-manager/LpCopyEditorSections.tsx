@@ -22,6 +22,7 @@ export function LpCopyEditorSections<T extends WithLpFieldStyles>({
   field,
 }: Props<T>) {
   const text = getFieldPath(content, field.path);
+  const href = field.hrefPath ? getFieldPath(content, field.hrefPath) : undefined;
 
   return (
     <TextElementEditor
@@ -35,6 +36,12 @@ export function LpCopyEditorSections<T extends WithLpFieldStyles>({
           ...prev,
           fieldStyles: patchFieldStyle(prev.fieldStyles, sectionId, partial),
         }))
+      }
+      href={href}
+      onHrefChange={
+        field.hrefPath
+          ? (value) => onChange((prev) => setFieldPath(prev, field.hrefPath!, value) as T)
+          : undefined
       }
       multiline={field.multiline}
       rows={field.rows ?? 4}

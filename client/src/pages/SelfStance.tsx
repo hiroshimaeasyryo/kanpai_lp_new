@@ -10,7 +10,7 @@ import {
   type SelfStanceContent,
 } from "@/types/self-stance";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmId, CmHtml } from "@/components/contents-manager/CmId";
 import "./self-stance.css";
 
 const STORAGE_KEY = "self_stance_content_v1";
@@ -62,23 +62,6 @@ function CtaButton({
   className?: string;
   showLineIcon?: boolean;
 }) {
-  if (labelCmId) {
-    return (
-      <CmId
-        id={labelCmId}
-        as="a"
-        href={href}
-        className={className}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={trackMetaPixelLead}
-      >
-        {showLineIcon && <LineIcon />}
-        {label}
-      </CmId>
-    );
-  }
-
   return (
     <a
       href={href}
@@ -88,7 +71,7 @@ function CtaButton({
       onClick={trackMetaPixelLead}
     >
       {showLineIcon && <LineIcon />}
-      {label}
+      {labelCmId ? <CmId id={labelCmId}>{label}</CmId> : label}
     </a>
   );
 }
@@ -186,21 +169,18 @@ export default function SelfStance() {
   const c = content;
 
   return (
-    <FieldStylesProvider value={c.fieldStyles}>
     <div id="self-stance-page">
-      <CmId id="ss-sticky-cta-bar" className="sticky">
-        <CmId
-          id="ss-sticky-cta-label"
-          as="a"
+      <div className="sticky">
+        <a
           href={c.stickyCta.ctaHref}
           target="_blank"
           rel="noopener noreferrer"
           onClick={trackMetaPixelLead}
         >
           <LineIcon />
-          {c.stickyCta.label}
-        </CmId>
-      </CmId>
+          <CmId id="ss-sticky-cta-label">{c.stickyCta.label}</CmId>
+        </a>
+      </div>
 
       <header className="site-header">
         <div className="header-inner">
@@ -213,18 +193,18 @@ export default function SelfStance() {
           <CmId id="ss-header-logo-alt" className="sr-only">
             {c.header.logoAlt}
           </CmId>
-          <CmId
-            id="ss-header-cta-label"
-            as="a"
+          <a
             href={c.header.ctaHref}
             className="header-btn"
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackMetaPixelLead}
           >
-            {c.header.ctaLabel}
+            <CmId id="ss-header-cta-label" as="span">
+              {c.header.ctaLabel}
+            </CmId>
             <LineIcon />
-          </CmId>
+          </a>
         </div>
       </header>
       <div className="deco-line" />
@@ -555,6 +535,5 @@ export default function SelfStance() {
         <CmId id="ss-footer-copyright">{c.footer.copyright}</CmId>
       </footer>
     </div>
-    </FieldStylesProvider>
   );
 }

@@ -14,9 +14,11 @@ function emitFile(name, constName, bodyLines) {
   writeFileSync(join(outDir, name), content, "utf8");
 }
 
-function t(id, label, path, multiline = false, rows = 4) {
-  const opts =
-    multiline ? `, { multiline: true, rows: ${rows} }` : "";
+function t(id, label, path, multiline = false, rows = 4, hrefPath) {
+  const parts = [];
+  if (multiline) parts.push(`multiline: true`, `rows: ${rows}`);
+  if (hrefPath) parts.push(`hrefPath: "${hrefPath}"`);
+  const opts = parts.length ? `, { ${parts.join(", ")} }` : "";
   return `  text("${id}", "${label}", "${path}"${opts}),`;
 }
 
@@ -51,7 +53,7 @@ mkdirSync(outDir, { recursive: true });
 emitFile("btob-lp-fields.ts", "BTOB_LP_FIELDS", [
   t("btob-header-logo", "ヘッダー · ロゴ", "header.logoHtml", true, 2),
   t("btob-header-badge", "ヘッダー · バッジ", "header.badgeLabel"),
-  t("btob-header-cta-label", "ヘッダー · CTA文言", "header.ctaLabel"),
+  t("btob-header-cta-label", "ヘッダー · CTA文言", "header.ctaLabel", false, 4, "header.ctaHref"),
   t("btob-hero-category-pill", "ヒーロー · カテゴリ", "hero.categoryPillHtml", true, 2),
   t("btob-hero-category-meta", "ヒーロー · カテゴリ補足", "hero.categoryMeta"),
   t("btob-hero-seminar-name", "ヒーロー · セミナー名", "hero.seminarName"),
@@ -61,7 +63,7 @@ emitFile("btob-lp-fields.ts", "BTOB_LP_FIELDS", [
     t(`btob-hero-info-${i}-label`, `ヒーロー · 情報${i + 1}ラベル`, `hero.info[${i}].label`),
     t(`btob-hero-info-${i}-value`, `ヒーロー · 情報${i + 1}値`, `hero.info[${i}].value`),
   ]).flat(),
-  t("btob-hero-primary-cta-label", "ヒーロー · CTA文言", "hero.primaryCtaLabel"),
+  t("btob-hero-primary-cta-label", "ヒーロー · CTA文言", "hero.primaryCtaLabel", false, 4, "hero.primaryCtaHref"),
   t("btob-hero-primary-cta-fine-print", "ヒーロー · CTA注記", "hero.primaryCtaFinePrint"),
   t("btob-empathy-script", "共感 · スクリプト", "empathy.script"),
   t("btob-empathy-title", "共感 · 見出し", "empathy.titleHtml", true, 3),
@@ -105,7 +107,7 @@ emitFile("btob-lp-fields.ts", "BTOB_LP_FIELDS", [
   t("btob-mid-cta-eyebrow", "中段CTA · ラベル", "midCta.eyebrow"),
   t("btob-mid-cta-title", "中段CTA · 見出し", "midCta.title"),
   t("btob-mid-cta-meta", "中段CTA · 補足", "midCta.meta"),
-  t("btob-mid-cta-label", "中段CTA · ボタン", "midCta.ctaLabel"),
+  t("btob-mid-cta-label", "中段CTA · ボタン", "midCta.ctaLabel", false, 4, "midCta.ctaHref"),
   t("btob-audience-script", "対象者 · スクリプト", "audience.script"),
   t("btob-audience-title", "対象者 · 見出し", "audience.titleHtml", true, 3),
   idxSimple("btob-audience-item", "対象者", 3, "audience.items"),
@@ -135,11 +137,11 @@ emitFile("btob-lp-fields.ts", "BTOB_LP_FIELDS", [
   t("btob-final-cta-h2", "最終CTA · 見出し", "finalCta.h2Html", true, 3),
   t("btob-final-cta-lead", "最終CTA · リード", "finalCta.leadHtml", true, 3),
   t("btob-final-cta-fine-print", "最終CTA · 注記", "finalCta.finePrint"),
-  t("btob-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel"),
+  t("btob-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel", false, 4, "finalCta.ctaHref"),
   t("btob-form-title", "フォーム · 見出し", "form.title"),
   t("btob-form-sub", "フォーム · サブ", "form.subHtml", true, 3),
   t("btob-form-fallback-text", "フォーム · 代替テキスト", "form.fallbackText"),
-  t("btob-form-fallback-link-label", "フォーム · 代替リンク", "form.fallbackLinkLabel"),
+  t("btob-form-fallback-link-label", "フォーム · 代替リンク", "form.fallbackLinkLabel", false, 4, "form.fallbackUrl"),
   t("btob-footer-copyright", "フッター · 著作権", "footer.copyright"),
 ]);
 
@@ -147,7 +149,7 @@ emitFile("btob-lp-fields.ts", "BTOB_LP_FIELDS", [
 emitFile("sr-lp-fields.ts", "SR_LP_FIELDS", [
   t("sr-hero-title", "ヒーロー · 見出し", "hero.titleHtml", true, 4),
   t("sr-hero-sub", "ヒーロー · サブ", "hero.sub"),
-  t("sr-hero-cta-label", "ヒーロー · CTA", "hero.ctaLabel"),
+  t("sr-hero-cta-label", "ヒーロー · CTA", "hero.ctaLabel", false, 4, "ctaUrl"),
   img("sr-hero-bg-image", "ヒーロー · 背景画像", "hero.bgImageUrl"),
   t("sr-event-info-label", "イベント · ラベル", "eventInfo.label"),
   t("sr-event-info-date", "イベント · 日付", "eventInfo.date"),
@@ -161,7 +163,7 @@ emitFile("sr-lp-fields.ts", "SR_LP_FIELDS", [
   t("sr-cause-quote", "原因 · 引用", "cause.quoteHtml", true, 4),
   t("sr-cause-body", "原因 · 本文", "cause.body", true, 5),
   t("sr-cause-sub-center", "原因 · サブ", "cause.subCenter"),
-  t("sr-cause-cta-label", "原因 · CTA", "cause.ctaLabel"),
+  t("sr-cause-cta-label", "原因 · CTA", "cause.ctaLabel", false, 4, "ctaUrl"),
   t("sr-concept-copy", "コンセプト · コピー", "concept.copyHtml", true, 4),
   idxSimple("sr-concept-tag", "コンセプト · タグ", 6, "concept.tagsHtml"),
   t("sr-steps-heading", "ステップ · 見出し", "steps.heading"),
@@ -172,7 +174,7 @@ emitFile("sr-lp-fields.ts", "SR_LP_FIELDS", [
     { suffix: "tagline", label: "タグライン" },
     { suffix: "desc", label: "説明", multiline: true, rows: 4 },
   ]),
-  t("sr-steps-cta-label", "ステップ · CTA", "steps.ctaLabel"),
+  t("sr-steps-cta-label", "ステップ · CTA", "steps.ctaLabel", false, 4, "ctaUrl"),
   t("sr-voices-heading", "体験者 · 見出し", "voices.heading"),
   t("sr-voices-sub", "体験者 · サブ", "voices.sub"),
   idxFields("sr-voices-card", "体験者", 4, "voices.cards", [
@@ -198,7 +200,7 @@ emitFile("sr-lp-fields.ts", "SR_LP_FIELDS", [
   t("sr-closing-cta-sub", "最終CTA · サブ", "closingCta.sub"),
   t("sr-closing-cta-info-date", "最終CTA · 日時", "closingCta.infoDate"),
   t("sr-closing-cta-info-venue", "最終CTA · 会場", "closingCta.infoVenueHtml", true, 2),
-  t("sr-closing-cta-label", "最終CTA · ボタン", "closingCta.ctaLabel"),
+  t("sr-closing-cta-label", "最終CTA · ボタン", "closingCta.ctaLabel", false, 4, "ctaUrl"),
   t("sr-footer-brand", "フッター · ブランド", "footer.brand"),
   t("sr-footer-brand-sub", "フッター · サブ", "footer.brandSub"),
   t("sr-footer-company", "フッター · 会社", "footer.company"),
@@ -209,13 +211,13 @@ emitFile("sr-lp-fields.ts", "SR_LP_FIELDS", [
 emitFile("sjh-lp-fields.ts", "SJH_LP_FIELDS", [
   img("sjh-header-logo", "ヘッダー · ロゴ", "header.logoUrl"),
   t("sjh-header-logo-alt", "ヘッダー · ロゴalt", "header.logoAlt"),
-  t("sjh-header-cta-label", "ヘッダー · CTA", "header.ctaLabel"),
-  t("sjh-header-cta-label-mobile", "ヘッダー · CTA（SP）", "header.ctaLabelMobile"),
-  t("sjh-sticky-cta-label", "固定CTA · 文言", "stickyCta.label"),
+  t("sjh-header-cta-label", "ヘッダー · CTA", "header.ctaLabel", false, 4, "header.ctaHref"),
+  t("sjh-header-cta-label-mobile", "ヘッダー · CTA（SP）", "header.ctaLabelMobile", false, 4, "header.ctaHref"),
+  t("sjh-sticky-cta-label", "固定CTA · 文言", "stickyCta.label", false, 4, "stickyCta.ctaHref"),
   t("sjh-hero-kicker", "FV · キッカー", "hero.kicker"),
   img("sjh-hero-image", "FV · 画像", "hero.heroImageUrl"),
   t("sjh-hero-image-alt", "FV · 画像alt", "hero.heroImageAlt"),
-  t("sjh-hero-primary-cta-label", "FV · CTA", "hero.primaryCtaLabel"),
+  t("sjh-hero-primary-cta-label", "FV · CTA", "hero.primaryCtaLabel", false, 4, "hero.primaryCtaHref"),
   t("sjh-hero-body", "FV · 本文", "hero.bodyHtml", true, 5),
   t("sjh-event-info-label", "イベント · ラベル", "eventInfo.label"),
   idxFields("sjh-event-info-row", "イベント", 4, "eventInfo.rows", [
@@ -239,7 +241,7 @@ emitFile("sjh-lp-fields.ts", "SJH_LP_FIELDS", [
     { suffix: "num", label: "番号" },
     { suffix: "text", label: "内容", multiline: true, rows: 3 },
   ]),
-  t("sjh-mid-cta-label", "中間CTA · ボタン", "midCta.label"),
+  t("sjh-mid-cta-label", "中間CTA · ボタン", "midCta.label", false, 4, "midCta.ctaHref"),
   t("sjh-program-title", "Program · 見出し", "program.titleHtml", true, 3),
   idxFields("sjh-program-row", "Program", 5, "program.rows", [
     { suffix: "step", label: "ステップ" },
@@ -260,7 +262,7 @@ emitFile("sjh-lp-fields.ts", "SJH_LP_FIELDS", [
     { suffix: "value", label: "値" },
     { suffix: "sub", label: "補足" },
   ]),
-  t("sjh-info-cta-label", "開催情報 · CTA", "info.ctaLabel"),
+  t("sjh-info-cta-label", "開催情報 · CTA", "info.ctaLabel", false, 4, "info.ctaHref"),
   idxSimple("sjh-recommend-item", "おすすめ", 5, "recommend.items"),
   idxFields("sjh-faq-item", "FAQ", 7, "faq.items", [
     { suffix: "q", label: "質問" },
@@ -269,7 +271,7 @@ emitFile("sjh-lp-fields.ts", "SJH_LP_FIELDS", [
   t("sjh-final-cta-title", "最終CTA · 見出し", "finalCta.titleHtml", true, 3),
   t("sjh-final-cta-sub", "最終CTA · サブ", "finalCta.subHtml", true, 3),
   idxSimple("sjh-final-cta-meta", "最終CTA · メタ", 3, "finalCta.metaItems"),
-  t("sjh-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel"),
+  t("sjh-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel", false, 4, "finalCta.ctaHref"),
   t("sjh-final-cta-note", "最終CTA · 注記", "finalCta.noteHtml", true, 2),
   idxSimple("sjh-footer-line", "フッター", 2, "footer.lines"),
   t("sjh-footer-copyright", "フッター · 著作権", "footer.copyright"),
@@ -279,13 +281,13 @@ emitFile("sjh-lp-fields.ts", "SJH_LP_FIELDS", [
 emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
   img("ss-header-logo", "ヘッダー · ロゴ", "header.logoUrl"),
   t("ss-header-logo-alt", "ヘッダー · ロゴalt", "header.logoAlt"),
-  t("ss-header-cta-label", "ヘッダー · CTA", "header.ctaLabel"),
+  t("ss-header-cta-label", "ヘッダー · CTA", "header.ctaLabel", false, 4, "header.ctaHref"),
   sty("ss-sticky-cta-bar", "固定CTA · バー", true),
-  t("ss-sticky-cta-label", "固定CTA · 文言", "stickyCta.label"),
+  t("ss-sticky-cta-label", "固定CTA · 文言", "stickyCta.label", false, 4, "stickyCta.ctaHref"),
   t("ss-hero-eyebrow", "FV · ラベル", "hero.eyebrow"),
   img("ss-hero-image", "FV · 画像", "hero.heroImageUrl"),
   t("ss-hero-image-alt", "FV · 画像alt", "hero.heroImageAlt"),
-  t("ss-hero-primary-cta-label", "FV · CTA", "hero.primaryCtaLabel"),
+  t("ss-hero-primary-cta-label", "FV · CTA", "hero.primaryCtaLabel", false, 4, "hero.primaryCtaHref"),
   t("ss-hero-body", "FV · 本文", "hero.bodyHtml", true, 5),
   t("ss-event-info-label", "イベント · ラベル", "eventInfo.label"),
   idxFields("ss-event-info-row", "イベント", 4, "eventInfo.rows", [
@@ -301,7 +303,7 @@ emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
   t("ss-solution-body", "ソリューション · 本文", "solution.body", true, 4),
   t("ss-solution-benefits-heading", "ソリューション · 小見出し", "solution.benefitsHeading"),
   idxSimple("ss-solution-benefit", "メリット", 5, "solution.benefits"),
-  t("ss-solution-cta-label", "ソリューション · CTA", "solution.ctaLabel"),
+  t("ss-solution-cta-label", "ソリューション · CTA", "solution.ctaLabel", false, 4, "solution.ctaHref"),
   t("ss-program-label", "Program · ラベル", "program.label"),
   t("ss-program-title", "Program · 見出し", "program.titleHtml", true, 3),
   idxFields("ss-program-step", "Program", 5, "program.steps", [
@@ -330,7 +332,7 @@ emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
     { suffix: "label", label: "ラベル" },
     { suffix: "value", label: "値" },
   ]),
-  t("ss-detail-cta-label", "開催情報 · CTA", "detail.ctaLabel"),
+  t("ss-detail-cta-label", "開催情報 · CTA", "detail.ctaLabel", false, 4, "detail.ctaHref"),
   t("ss-target-label", "おすすめ · ラベル", "target.label"),
   t("ss-target-title", "おすすめ · 見出し", "target.title"),
   idxSimple("ss-target-item", "おすすめ", 5, "target.items"),
@@ -342,7 +344,7 @@ emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
   ]),
   t("ss-final-cta-title", "最終CTA · 見出し", "finalCta.titleHtml", true, 3),
   idxSimple("ss-final-cta-paragraph", "最終CTA", 4, "finalCta.paragraphs"),
-  t("ss-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel"),
+  t("ss-final-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel", false, 4, "finalCta.ctaHref"),
   t("ss-final-cta-note", "最終CTA · 注記", "finalCta.note"),
   idxSimple("ss-footer-line", "フッター", 2, "footer.lines"),
   t("ss-footer-copyright", "フッター · 著作権", "footer.copyright"),
@@ -350,7 +352,7 @@ emitFile("ss-lp-fields.ts", "SS_LP_FIELDS", [
 
 // ─── JS Self Analysis ───
 emitFile("jsa-lp-fields.ts", "JSA_LP_FIELDS", [
-  t("jsa-floating-cta-label", "固定CTA · 文言", "floatingCta.label"),
+  t("jsa-floating-cta-label", "固定CTA · 文言", "floatingCta.label", false, 4, "floatingCta.ctaHref"),
   img("jsa-header-logo", "ヘッダー · ロゴ", "header.logoUrl", "/js_self_analysis/logo.jpg"),
   t("jsa-header-logo-alt", "ヘッダー · ロゴalt", "header.logoAlt"),
   img("jsa-hero-image", "FV · 画像", "hero.imageUrl", "/js_self_analysis/hero.png"),
@@ -359,13 +361,13 @@ emitFile("jsa-lp-fields.ts", "JSA_LP_FIELDS", [
     { suffix: "label", label: "ラベル" },
     { suffix: "value", label: "値" },
   ]),
-  t("jsa-hero-cta-label", "FV · CTA", "hero.ctaLabel"),
+  t("jsa-hero-cta-label", "FV · CTA", "hero.ctaLabel", false, 4, "hero.ctaHref"),
   t("jsa-hero-micro", "FV · 注記", "hero.micro"),
   t("jsa-empathy-label", "共感 · ラベル", "empathy.label"),
   t("jsa-empathy-title", "共感 · 見出し", "empathy.titleHtml", true, 3),
   idxSimple("jsa-empathy-item", "共感", 3, "empathy.items"),
   t("jsa-empathy-close", "共感 · 締め", "empathy.closeHtml", true, 3),
-  t("jsa-empathy-cta-label", "共感 · CTA", "empathy.ctaLabel"),
+  t("jsa-empathy-cta-label", "共感 · CTA", "empathy.ctaLabel", false, 4, "empathy.ctaHref"),
   t("jsa-problem-label", "課題 · ラベル", "problem.label"),
   t("jsa-problem-title", "課題 · 見出し", "problem.titleHtml", true, 3),
   t("jsa-problem-body", "課題 · 本文", "problem.bodyHtml", true, 4),
@@ -383,7 +385,7 @@ emitFile("jsa-lp-fields.ts", "JSA_LP_FIELDS", [
     { suffix: "desc", label: "説明", multiline: true, rows: 3 },
   ]),
   idxSimple("jsa-schedule-note", "当日の流れ · 注記", 3, "schedule.notes"),
-  t("jsa-schedule-cta-label", "当日の流れ · CTA", "schedule.ctaLabel"),
+  t("jsa-schedule-cta-label", "当日の流れ · CTA", "schedule.ctaLabel", false, 4, "schedule.ctaHref"),
   t("jsa-schedule-micro", "当日の流れ · 注記文", "schedule.micro"),
   t("jsa-facilitator-label", "Facilitator · ラベル", "facilitator.label"),
   t("jsa-facilitator-title", "Facilitator · 見出し", "facilitator.title"),
@@ -418,7 +420,7 @@ emitFile("jsa-lp-fields.ts", "JSA_LP_FIELDS", [
   t("jsa-final-cta-eyebrow", "最終CTA · ラベル", "finalCta.label"),
   t("jsa-final-cta-title", "最終CTA · 見出し", "finalCta.title"),
   t("jsa-final-cta-body", "最終CTA · 本文", "finalCta.bodyHtml", true, 4),
-  t("jsa-final-cta-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel"),
+  t("jsa-final-cta-cta-label", "最終CTA · ボタン", "finalCta.ctaLabel", false, 4, "finalCta.ctaHref"),
   t("jsa-final-cta-note", "最終CTA · 注記", "finalCta.note"),
   t("jsa-footer-copyright", "フッター · 著作権", "footer.copyright"),
 ]);

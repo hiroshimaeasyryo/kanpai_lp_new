@@ -105,6 +105,9 @@ type Props = {
   /** レイアウト用コンテナ向け（背景色のみ編集） */
   containerOnly?: boolean;
   showHref?: boolean;
+  /** fieldStyles 以外に保存されているリンク先の表示・編集用 */
+  href?: string;
+  onHrefChange?: (href: string) => void;
 };
 
 export function FieldStyleEditor({
@@ -112,11 +115,15 @@ export function FieldStyleEditor({
   onStyleChange,
   containerOnly = false,
   showHref = true,
+  href,
+  onHrefChange,
 }: Props) {
+  const hrefValue = href ?? style?.href ?? "";
+  const handleHrefChange = onHrefChange ?? ((value) => onStyleChange({ href: value }));
   return (
-    <div className="grid grid-cols-2 gap-3 max-w-lg">
+    <div className="w-full flex flex-col gap-3">
       {!containerOnly && (
-        <div className="col-span-2">
+        <div className="w-full">
           <Label className={labelCls}>テキストサイズ</Label>
           <TextSizeSlider
             fontSize={style?.fontSize}
@@ -125,26 +132,28 @@ export function FieldStyleEditor({
         </div>
       )}
 
-      {!containerOnly && (
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        {!containerOnly && (
+          <ColorField
+            label="テキストカラー"
+            value={style?.color}
+            placeholder="#3D281E"
+            defaultPickerColor="#3D281E"
+            onChange={(color) => onStyleChange({ color })}
+          />
+        )}
+
         <ColorField
-          label="テキストカラー"
-          value={style?.color}
-          placeholder="#3D281E"
+          label="背景色"
+          value={style?.backgroundColor}
+          placeholder="未設定（LP既定）"
           defaultPickerColor="#3D281E"
-          onChange={(color) => onStyleChange({ color })}
+          onChange={(backgroundColor) => onStyleChange({ backgroundColor })}
         />
-      )}
-
-      <ColorField
-        label="背景色"
-        value={style?.backgroundColor}
-        placeholder="未設定（LP既定）"
-        defaultPickerColor="#3D281E"
-        onChange={(backgroundColor) => onStyleChange({ backgroundColor })}
-      />
+      </div>
 
       {!containerOnly && (
-        <div>
+        <div className="w-full">
           <Label className={labelCls}>テキストフォント</Label>
           <Select
             value={style?.fontFamily ?? ""}
@@ -165,11 +174,11 @@ export function FieldStyleEditor({
       )}
 
       {!containerOnly && showHref && (
-        <div className="col-span-2">
+        <div className="w-full">
           <Label className={labelCls}>埋め込みURL</Label>
           <Input
-            value={style?.href ?? ""}
-            onChange={(e) => onStyleChange({ href: e.target.value })}
+            value={hrefValue}
+            onChange={(e) => handleHrefChange(e.target.value)}
             placeholder="https://..."
             className={fieldCls}
           />

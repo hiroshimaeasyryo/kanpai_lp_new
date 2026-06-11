@@ -1,7 +1,7 @@
 /** /self-stance 専用コンテンツ（ContentPayload.selfStance） */
 
 import seed from "../../public/content/self-stance.json";
-import { mergeFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
+import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const SELF_STANCE_ASSETS = {
   favicon: "/self_stance/favicon.png",
@@ -111,21 +111,9 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
   }
 }
 
-/**
- * fieldStyles は要素ID（ss-*）をキーにした動的マップ。
- * mergeDeep は `if (!(k in target)) continue` のため、デフォルトseedに無い
- * 新規キー（新たに装飾した要素）を破棄してしまう。そのためここで個別にマージし、
- * 動的キーを保持する（home-copy の mergeFieldStylesFromRaw と同方針）。
- */
 export function mergeSelfStanceContent(raw: unknown): SelfStanceContent {
   const d = cloneDefault();
   if (!raw || typeof raw !== "object") return d;
   mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
-  // mergeDeep が動的キーを落とすため、fieldStyles は専用ロジックで上書きマージする
-  const merged = mergeFieldStylesFromRaw(
-    (raw as Record<string, unknown>).fieldStyles,
-    d.fieldStyles,
-  );
-  if (merged) d.fieldStyles = merged;
   return d;
 }
