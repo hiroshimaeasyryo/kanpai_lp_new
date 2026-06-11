@@ -1,0 +1,157 @@
+/** /js_self_analysis 専用コンテンツ（ContentPayload.jsSelfAnalysis） */
+
+import seed from "../../public/content/js_self_analysis.json";
+import type { HomeCopyFieldStyles, TextFieldStyle } from "@/types/home-copy-style";
+
+export const JSA_ASSETS = {
+  favicon: "/js_self_analysis/favicon.png",
+  lineIcon: "/js_self_analysis/line-icon.png",
+} as const;
+
+export type LabelValueRow = { label: string; value: string };
+
+export type ScheduleStep = { label: string; title: string; desc: string };
+
+export type VoiceItem = { who: string; text: string };
+
+export type FaqItem = { q: string; a: string };
+
+export type JsSelfAnalysisContent = {
+  fieldStyles?: HomeCopyFieldStyles;
+  seo: { title: string; description: string };
+  header: { logoUrl: string; logoAlt: string };
+  floatingCta: { label: string; ctaHref: string };
+  hero: {
+    imageUrl: string;
+    imageAlt: string;
+    infoRows: LabelValueRow[];
+    ctaLabel: string;
+    ctaHref: string;
+    micro: string;
+  };
+  empathy: {
+    label: string;
+    titleHtml: string;
+    items: string[];
+    closeHtml: string;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  problem: {
+    label: string;
+    titleHtml: string;
+    bodyHtml: string;
+    closeHtml: string;
+  };
+  solution: {
+    label: string;
+    title: string;
+    bodyHtml: string;
+    outcomeTitle: string;
+    outcomes: string[];
+  };
+  schedule: {
+    label: string;
+    title: string;
+    steps: ScheduleStep[];
+    notes: string[];
+    ctaLabel: string;
+    ctaHref: string;
+    micro: string;
+  };
+  facilitator: {
+    label: string;
+    title: string;
+    imageUrl: string;
+    name: string;
+    role: string;
+    tag: string;
+    bio: string[];
+    quote: string;
+  };
+  voices: { label: string; title: string; items: VoiceItem[] };
+  eventInfo: {
+    label: string;
+    title: string;
+    rows: LabelValueRow[];
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  forWho: { label: string; title: string; items: string[] };
+  faq: { label: string; title: string; items: FaqItem[] };
+  finalCta: {
+    label: string;
+    title: string;
+    bodyHtml: string;
+    ctaLabel: string;
+    ctaHref: string;
+    note: string;
+  };
+  footer: { copyright: string };
+};
+
+export const DEFAULT_JSA_CONTENT: JsSelfAnalysisContent =
+  seed.jsSelfAnalysis as JsSelfAnalysisContent;
+
+function cloneDefault(): JsSelfAnalysisContent {
+  return JSON.parse(JSON.stringify(DEFAULT_JSA_CONTENT)) as JsSelfAnalysisContent;
+}
+
+function mergeDeep(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  for (const [k, v] of Object.entries(source)) {
+    if (!(k in target)) continue;
+    const t = target[k];
+    if (Array.isArray(v)) {
+      target[k] = v;
+    } else if (
+      v !== null &&
+      typeof v === "object" &&
+      !Array.isArray(v) &&
+      t !== null &&
+      typeof t === "object" &&
+      !Array.isArray(t)
+    ) {
+      mergeDeep(t as Record<string, unknown>, v as Record<string, unknown>);
+    } else if (v !== undefined) {
+      target[k] = v;
+    }
+  }
+}
+
+/**
+ * fieldStyles は要素ID（jsa-*）をキーにした動的マップ。
+ * mergeDeep は `if (!(k in target)) continue` のため、デフォルトseedに無い
+ * 新規キーを破棄してしまう。そのためここで個別にマージし動的キーを保持する
+ * （self-stance の mergeFieldStyles と同方針）。
+ */
+function mergeFieldStyles(
+  raw: unknown,
+  base?: HomeCopyFieldStyles,
+): HomeCopyFieldStyles | undefined {
+  if (!raw || typeof raw !== "object") return base;
+  const out: HomeCopyFieldStyles = { ...(base ?? {}) };
+  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (!val || typeof val !== "object") continue;
+    const o = val as Record<string, unknown>;
+    const prev: TextFieldStyle = out[id] ?? {};
+    out[id] = {
+      fontSize: typeof o.fontSize === "string" ? o.fontSize : prev.fontSize,
+      color: typeof o.color === "string" ? o.color : prev.color,
+      fontFamily: typeof o.fontFamily === "string" ? o.fontFamily : prev.fontFamily,
+      href: typeof o.href === "string" ? o.href : prev.href,
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+export function mergeJsSelfAnalysisContent(raw: unknown): JsSelfAnalysisContent {
+  const d = cloneDefault();
+  if (!raw || typeof raw !== "object") return d;
+  mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
+  const merged = mergeFieldStyles(
+    (raw as Record<string, unknown>).fieldStyles,
+    d.fieldStyles,
+  );
+  if (merged) d.fieldStyles = merged;
+  return d;
+}

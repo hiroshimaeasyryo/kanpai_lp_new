@@ -49,6 +49,12 @@ export interface ContentPayload {
    * ページ側で解釈する。
    */
   selfStance?: unknown;
+
+  /**
+   * /js_self_analysis 用コンテンツ。
+   * ページ側で解釈する。
+   */
+  jsSelfAnalysis?: unknown;
 }
 
 /** content.json のパス（配信時は /content.json） */

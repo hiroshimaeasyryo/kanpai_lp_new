@@ -8,13 +8,15 @@ export type LpKind =
   | "btob_seminar"
   | "self_reflection"
   | "starting_job_hunting"
-  | "self_stance";
+  | "self_stance"
+  | "js_self_analysis";
 
 const SPECIAL_SLUG_TO_KIND: Record<string, LpKind> = {
   btob_seminar: "btob_seminar",
   "self-reflection": "self_reflection",
   starting_job_hunting: "starting_job_hunting",
   "self-stance": "self_stance",
+  js_self_analysis: "js_self_analysis",
 };
 
 const SPECIAL_SLUG_TO_PATH: Record<string, string> = {
@@ -22,6 +24,7 @@ const SPECIAL_SLUG_TO_PATH: Record<string, string> = {
   "self-reflection": "/self-reflection",
   starting_job_hunting: "/starting_job_hunting",
   "self-stance": "/self-stance",
+  js_self_analysis: "/js_self_analysis",
 };
 
 export function getLpKind(slug: string): LpKind {

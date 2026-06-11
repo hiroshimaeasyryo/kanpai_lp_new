@@ -4,12 +4,14 @@ import { mergeBtobSeminarContent } from "@/types/btob-seminar";
 import type { ContentPayload } from "@/types/content-payload";
 import { mergeSelfStanceContent } from "@/types/self-stance";
 import { mergeStartingJobHuntingContent } from "@/types/starting-job-hunting";
+import { mergeJsSelfAnalysisContent } from "@/types/js-self-analysis";
 
 const STORAGE_KEYS: Partial<Record<string, string>> = {
   btob_seminar: "btob_seminar_content_v1",
   "self-reflection": "self_reflection_content_v1",
   starting_job_hunting: "starting_job_hunting_content_v1",
   "self-stance": "self_stance_content_v1",
+  js_self_analysis: "js_self_analysis_content_v1",
 };
 
 function safeSetItem(key: string, value: string): void {
@@ -47,6 +49,11 @@ export function applyDraftToPreviewStorage(slug: string, payload: ContentPayload
   }
   if (kind === "self_stance" && payload.selfStance) {
     const merged = mergeSelfStanceContent(payload.selfStance);
+    safeSetItem(key, JSON.stringify(merged));
+    return;
+  }
+  if (kind === "js_self_analysis" && payload.jsSelfAnalysis) {
+    const merged = mergeJsSelfAnalysisContent(payload.jsSelfAnalysis);
     safeSetItem(key, JSON.stringify(merged));
   }
 }

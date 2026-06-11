@@ -50,6 +50,10 @@ import {
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
 import { mergeSelfStanceContent, type SelfStanceContent } from "@/types/self-stance";
+import {
+  mergeJsSelfAnalysisContent,
+  type JsSelfAnalysisContent,
+} from "@/types/js-self-analysis";
 import type { KanpaiEvent } from "@/types/events";
 import { getStoredEvents, setStoredEvents } from "@/types/events";
 import {
@@ -103,6 +107,8 @@ export default function ContentsManager() {
   const [startingJobHuntingContent, setStartingJobHuntingContent] =
     useState<StartingJobHuntingContent | null>(null);
   const [selfStanceContent, setSelfStanceContent] = useState<SelfStanceContent | null>(null);
+  const [jsSelfAnalysisContent, setJsSelfAnalysisContent] =
+    useState<JsSelfAnalysisContent | null>(null);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() =>
     typeof window !== "undefined" ? getStoredHomeCopy() : DEFAULT_HOME_COPY,
   );
@@ -166,6 +172,9 @@ export default function ContentsManager() {
       if (selectedSlug === "self-stance") {
         setSelfStanceContent(mergeSelfStanceContent(payload?.selfStance));
       }
+      if (selectedSlug === "js_self_analysis") {
+        setJsSelfAnalysisContent(mergeJsSelfAnalysisContent(payload?.jsSelfAnalysis));
+      }
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
 
@@ -187,6 +196,11 @@ export default function ContentsManager() {
         selfStance: selfStanceContent ?? mergeSelfStanceContent(undefined),
       };
     }
+    if (selectedSlug === "js_self_analysis") {
+      return {
+        jsSelfAnalysis: jsSelfAnalysisContent ?? mergeJsSelfAnalysisContent(undefined),
+      };
+    }
     return {
       logo: logoUrl ?? null,
       hero: heroImageUrl ?? null,
@@ -206,6 +220,7 @@ export default function ContentsManager() {
     btobSeminarContent,
     startingJobHuntingContent,
     selfStanceContent,
+    jsSelfAnalysisContent,
     logoUrl,
     heroImageUrl,
     heroImageUrlMobile,
@@ -555,6 +570,8 @@ export default function ContentsManager() {
             onStartingJobHuntingChange={setStartingJobHuntingContent}
             selfStanceContent={selfStanceContent}
             onSelfStanceChange={setSelfStanceContent}
+            jsSelfAnalysisContent={jsSelfAnalysisContent}
+            onJsSelfAnalysisChange={setJsSelfAnalysisContent}
           />
         </section>
 
@@ -617,6 +634,8 @@ export default function ContentsManager() {
         onStartingJobHuntingChange={setStartingJobHuntingContent}
         selfStanceContent={selfStanceContent}
         onSelfStanceChange={setSelfStanceContent}
+        jsSelfAnalysisContent={jsSelfAnalysisContent}
+        onJsSelfAnalysisChange={setJsSelfAnalysisContent}
       />
     </div>
   );

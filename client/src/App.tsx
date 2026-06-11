@@ -16,6 +16,7 @@ import SelfReflection from "./pages/SelfReflection";
 import BtobSeminar from "./pages/BtobSeminar";
 import StartingJobHunting from "./pages/StartingJobHunting";
 import SelfStance from "./pages/SelfStance";
+import JsSelfAnalysis from "./pages/JsSelfAnalysis";
 import KdkMockup from "@/pages/mockup/clients-website/kdk/KdkMockup";
 
 function ImageManagerRedirect() {
@@ -46,6 +47,7 @@ function Router() {
       <Route path={"/btob_seminar"} component={BtobSeminar} />
       <Route path={"/starting_job_hunting"} component={StartingJobHunting} />
       <Route path={"/self-stance"} component={SelfStance} />
+      <Route path={"/js_self_analysis"} component={JsSelfAnalysis} />
       <Route path={"/contents-manager"} component={ContentsManager} />
       <Route path={"/image-manager"} component={ImageManagerRedirect} />
       <Route path={"/404"} component={NotFound} />

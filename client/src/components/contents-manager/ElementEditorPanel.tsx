@@ -6,6 +6,7 @@ import type { SelfReflectionContent } from "@/components/SelfReflectionEditor";
 import type { BtobSeminarContent } from "@/types/btob-seminar";
 import type { StartingJobHuntingContent } from "@/types/starting-job-hunting";
 import type { SelfStanceContent } from "@/types/self-stance";
+import type { JsSelfAnalysisContent } from "@/types/js-self-analysis";
 
 export interface ElementEditorPanelProps {
   selectedSlug: string;
@@ -19,6 +20,8 @@ export interface ElementEditorPanelProps {
   onStartingJobHuntingChange: Dispatch<SetStateAction<StartingJobHuntingContent | null>>;
   selfStanceContent: SelfStanceContent | null;
   onSelfStanceChange: Dispatch<SetStateAction<SelfStanceContent | null>>;
+  jsSelfAnalysisContent: JsSelfAnalysisContent | null;
+  onJsSelfAnalysisChange: Dispatch<SetStateAction<JsSelfAnalysisContent | null>>;
 }
 
 export function ElementEditorPanel({
@@ -33,6 +36,8 @@ export function ElementEditorPanel({
   onStartingJobHuntingChange,
   selfStanceContent,
   onSelfStanceChange,
+  jsSelfAnalysisContent,
+  onJsSelfAnalysisChange,
 }: ElementEditorPanelProps) {
   const kind = getLpKind(selectedSlug);
 
@@ -101,6 +106,23 @@ export function ElementEditorPanel({
         onChange={(next) =>
           onSelfStanceChange((prev) => {
             const base = prev ?? selfStanceContent;
+            return typeof next === "function" ? next(base) : next;
+          })
+        }
+      />
+    );
+  }
+
+  if (kind === "js_self_analysis" && jsSelfAnalysisContent) {
+    return (
+      <LpElementEditor
+        kind={kind}
+        slug={selectedSlug}
+        sectionId={editorSection}
+        content={jsSelfAnalysisContent}
+        onChange={(next) =>
+          onJsSelfAnalysisChange((prev) => {
+            const base = prev ?? jsSelfAnalysisContent;
             return typeof next === "function" ? next(base) : next;
           })
         }
