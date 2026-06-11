@@ -1,0 +1,829 @@
+/* /js_self_analysis 専用スタイル。元HTMLから移植し #js-self-analysis-page 配下にスコープ */
+#js-self-analysis-page {
+  --beige: #f5f5f0;
+  --beige-dark: #e8e6dc;
+  --brown: #5d4037;
+  --brown-light: #795548;
+  --brown-pale: #a1887f;
+  --crimson: #8e1624;
+  --crimson-light: #b71c2e;
+  --crimson-pale: #d32f42;
+  --white: #fafaf7;
+  --text-dark: #2c1f1a;
+  --text-mid: #4a3428;
+
+  font-family: "Noto Sans JP", sans-serif;
+  background-color: var(--beige);
+  color: var(--text-dark);
+  line-height: 1.8;
+}
+
+#js-self-analysis-page * {
+  box-sizing: border-box;
+}
+
+/* =========== FLOATING CTA =========== */
+#js-self-analysis-page .floating-cta {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+#js-self-analysis-page .floating-cta a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--crimson);
+  color: var(--white);
+  text-decoration: none;
+  padding: 9px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(142, 22, 36, 0.3);
+  transition: opacity 0.2s;
+}
+
+#js-self-analysis-page .floating-cta a:hover {
+  opacity: 0.88;
+}
+
+#js-self-analysis-page .line-icon-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+/* =========== HEADER =========== */
+#js-self-analysis-page header {
+  background: var(--crimson);
+  padding: 0 24px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* =========== HERO =========== */
+#js-self-analysis-page .hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--crimson);
+  color: var(--white);
+  text-decoration: none;
+  padding: 18px 40px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 24px rgba(142, 22, 36, 0.45);
+  transition: transform 0.2s;
+  margin-bottom: 16px;
+}
+
+#js-self-analysis-page .hero-cta:hover {
+  transform: translateY(-2px);
+}
+
+/* =========== SECTION BASE =========== */
+#js-self-analysis-page section {
+  padding: 80px 24px;
+}
+
+#js-self-analysis-page .container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+#js-self-analysis-page .section-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--crimson);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+#js-self-analysis-page .section-title {
+  font-family: "Noto Serif JP", serif;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 700;
+  color: var(--brown);
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+
+/* =========== EMPATHY =========== */
+#js-self-analysis-page .empathy {
+  background: var(--white);
+}
+
+#js-self-analysis-page .pain-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding: 0;
+}
+
+#js-self-analysis-page .pain-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 24px;
+  background: var(--beige);
+  border-radius: 12px;
+  border-left: 4px solid var(--crimson);
+}
+
+#js-self-analysis-page .pain-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  background: var(--crimson);
+  border-radius: 50%;
+  margin-top: 8px;
+}
+
+#js-self-analysis-page .pain-text {
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 1.8;
+}
+
+#js-self-analysis-page .empathy-close {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--crimson);
+  text-align: center;
+  padding: 24px;
+  background: var(--beige);
+  border-radius: 12px;
+  font-family: "Noto Serif JP", serif;
+}
+
+#js-self-analysis-page .empathy-cta-wrap {
+  text-align: center;
+  margin-top: 40px;
+}
+
+#js-self-analysis-page .btn-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--crimson);
+  color: var(--white);
+  text-decoration: none;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+}
+
+#js-self-analysis-page .btn-line:hover {
+  opacity: 0.9;
+}
+
+/* =========== PROBLEM =========== */
+#js-self-analysis-page .problem {
+  background: var(--beige-dark);
+}
+
+#js-self-analysis-page .problem-body {
+  font-size: 16px;
+  color: var(--text-dark);
+  line-height: 2;
+  margin-bottom: 32px;
+}
+
+#js-self-analysis-page .highlight {
+  font-weight: 700;
+  color: var(--crimson);
+}
+
+#js-self-analysis-page .problem-close {
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 2;
+  border-left: 3px solid var(--crimson);
+  padding-left: 20px;
+}
+
+/* =========== SOLUTION =========== */
+#js-self-analysis-page .solution {
+  background: var(--white);
+}
+
+#js-self-analysis-page .solution-body {
+  font-size: 16px;
+  color: var(--text-dark);
+  line-height: 2;
+  margin-bottom: 36px;
+}
+
+#js-self-analysis-page .solution-body strong {
+  color: var(--crimson);
+}
+
+#js-self-analysis-page .outcome-title {
+  font-family: "Noto Serif JP", serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 20px;
+}
+
+#js-self-analysis-page .outcome-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+}
+
+#js-self-analysis-page .outcome-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--beige);
+  border-radius: 10px;
+}
+
+#js-self-analysis-page .outcome-check {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  background: var(--crimson);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+#js-self-analysis-page .outcome-check::after {
+  content: "✓";
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#js-self-analysis-page .outcome-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-dark);
+}
+
+/* =========== SCHEDULE =========== */
+#js-self-analysis-page .schedule {
+  background: var(--beige-dark);
+}
+
+#js-self-analysis-page .timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+#js-self-analysis-page .timeline::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--brown-pale);
+}
+
+#js-self-analysis-page .timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+#js-self-analysis-page .timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+#js-self-analysis-page .timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--crimson);
+  border-radius: 50%;
+  border: 3px solid var(--beige-dark);
+}
+
+#js-self-analysis-page .timeline-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brown-pale);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+#js-self-analysis-page .timeline-title {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--brown);
+  margin-bottom: 8px;
+  font-family: "Noto Serif JP", serif;
+}
+
+#js-self-analysis-page .timeline-desc {
+  display: block;
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.8;
+}
+
+#js-self-analysis-page .schedule-notes {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#js-self-analysis-page .schedule-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-mid);
+  padding: 14px 20px;
+  background: var(--white);
+  border-radius: 8px;
+}
+
+#js-self-analysis-page .note-icon {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  background: var(--brown-pale);
+  border-radius: 50%;
+}
+
+#js-self-analysis-page .schedule-cta-wrap {
+  text-align: center;
+  margin-top: 48px;
+}
+
+#js-self-analysis-page .schedule-micro {
+  font-size: 12px;
+  color: var(--brown-pale);
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* =========== FACILITATOR =========== */
+#js-self-analysis-page .facilitator {
+  background: var(--white);
+}
+
+#js-self-analysis-page .faci-card {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+#js-self-analysis-page .faci-card > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+#js-self-analysis-page .faci-photo {
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--beige-dark);
+}
+
+#js-self-analysis-page .faci-name {
+  display: block;
+  font-family: "Noto Serif JP", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+#js-self-analysis-page .faci-role {
+  display: block;
+  font-size: 13px;
+  color: var(--brown-pale);
+}
+
+#js-self-analysis-page .faci-tag {
+  display: inline-block;
+  background: var(--beige);
+  color: var(--brown);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 50px;
+  border: 1px solid var(--beige-dark);
+}
+
+#js-self-analysis-page .faci-bio {
+  list-style: none;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+}
+
+#js-self-analysis-page .faci-bio li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-dark);
+  line-height: 1.7;
+}
+
+#js-self-analysis-page .bio-dot {
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
+  background: var(--crimson);
+  border-radius: 50%;
+  margin-top: 8px;
+}
+
+#js-self-analysis-page .faci-quote {
+  background: var(--beige);
+  border-left: 4px solid var(--crimson);
+  padding: 20px 24px;
+  border-radius: 0 10px 10px 0;
+  font-family: "Noto Serif JP", serif;
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 1.9;
+  font-style: italic;
+}
+
+/* =========== VOICES =========== */
+#js-self-analysis-page .voices {
+  background: var(--beige-dark);
+}
+
+#js-self-analysis-page .voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#js-self-analysis-page .voice-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 24px 28px;
+}
+
+#js-self-analysis-page .voice-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+#js-self-analysis-page .voice-mark {
+  font-family: "Noto Serif JP", serif;
+  font-size: 40px;
+  color: var(--crimson);
+  line-height: 0.8;
+  opacity: 0.6;
+}
+
+#js-self-analysis-page .voice-who {
+  font-size: 12px;
+  color: var(--brown-pale);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+#js-self-analysis-page .voice-text {
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 1.9;
+}
+
+/* =========== EVENT INFO =========== */
+#js-self-analysis-page .event-info {
+  background: var(--white);
+}
+
+#js-self-analysis-page .info-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  margin-bottom: 40px;
+}
+
+#js-self-analysis-page .info-table td {
+  padding: 16px 20px;
+  vertical-align: middle;
+}
+
+#js-self-analysis-page .info-table tr td:first-child {
+  background: var(--brown);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  width: 100px;
+  text-align: center;
+  border-radius: 8px 0 0 8px;
+}
+
+#js-self-analysis-page .info-table tr td:last-child {
+  background: var(--beige);
+  font-size: 15px;
+  color: var(--text-dark);
+  border-radius: 0 8px 8px 0;
+}
+
+#js-self-analysis-page .info-cta-wrap {
+  text-align: center;
+}
+
+#js-self-analysis-page .btn-line-lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--crimson);
+  color: var(--white);
+  text-decoration: none;
+  padding: 20px 48px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 24px rgba(142, 22, 36, 0.4);
+  transition: transform 0.2s;
+}
+
+#js-self-analysis-page .btn-line-lg:hover {
+  transform: translateY(-2px);
+}
+
+/* =========== FOR WHO =========== */
+#js-self-analysis-page .for-who {
+  background: var(--beige-dark);
+}
+
+#js-self-analysis-page .who-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+#js-self-analysis-page .who-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 22px;
+  background: var(--white);
+  border-radius: 10px;
+}
+
+#js-self-analysis-page .who-num {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--crimson);
+  border-radius: 50%;
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#js-self-analysis-page .who-text {
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 1.8;
+}
+
+/* =========== FAQ =========== */
+#js-self-analysis-page .faq {
+  background: var(--white);
+}
+
+#js-self-analysis-page .faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#js-self-analysis-page .faq-item {
+  border: 1.5px solid var(--beige-dark);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#js-self-analysis-page .faq-q {
+  padding: 20px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brown);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+#js-self-analysis-page .faq-q-icon {
+  color: var(--crimson);
+  font-weight: 700;
+  font-size: 18px;
+  min-width: 20px;
+}
+
+#js-self-analysis-page .faq-a {
+  display: block;
+  padding: 0 24px 20px 58px;
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.9;
+  line-break: strict;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* =========== FINAL CTA =========== */
+#js-self-analysis-page .final-cta {
+  background: var(--brown);
+  text-align: center;
+  padding: 100px 24px;
+}
+
+#js-self-analysis-page .final-cta .section-label {
+  color: var(--brown-pale);
+}
+
+#js-self-analysis-page .final-title {
+  font-family: "Noto Serif JP", serif;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#js-self-analysis-page .final-body {
+  font-size: 15px;
+  color: rgba(245, 245, 240, 0.72);
+  line-height: 2;
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+#js-self-analysis-page .btn-line-final {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--crimson);
+  color: var(--white);
+  text-decoration: none;
+  padding: 20px 52px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 0 4px 32px rgba(142, 22, 36, 0.55);
+  transition: transform 0.2s;
+  margin-bottom: 16px;
+}
+
+#js-self-analysis-page .btn-line-final:hover {
+  transform: translateY(-2px);
+}
+
+#js-self-analysis-page .final-note {
+  font-size: 12px;
+  color: rgba(245, 245, 240, 0.45);
+}
+
+/* =========== HERO INFO CARD =========== */
+#js-self-analysis-page .hero-shell {
+  padding: 0;
+  background: var(--brown);
+}
+
+#js-self-analysis-page .hero-img-wrap {
+  width: 100%;
+  line-height: 0;
+}
+
+#js-self-analysis-page .hero-img-wrap img {
+  width: 100%;
+  display: block;
+  height: auto;
+}
+
+#js-self-analysis-page .hero-body {
+  background: var(--beige-dark);
+  padding: 32px 24px 64px;
+}
+
+#js-self-analysis-page .hero-inner {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+#js-self-analysis-page .hero-info-card {
+  border: 1px solid rgba(93, 64, 55, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+
+#js-self-analysis-page .hero-info-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(93, 64, 55, 0.12);
+}
+
+#js-self-analysis-page .hero-info-row:last-child {
+  border-bottom: none;
+}
+
+#js-self-analysis-page .hero-info-row svg {
+  flex-shrink: 0;
+}
+
+#js-self-analysis-page .hero-info-label {
+  font-size: 11px;
+  color: var(--brown-pale);
+  letter-spacing: 0.12em;
+  margin-bottom: 3px;
+}
+
+#js-self-analysis-page .hero-info-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+#js-self-analysis-page .hero-cta-wrap {
+  text-align: center;
+}
+
+#js-self-analysis-page .hero-micro {
+  font-size: 13px;
+  color: var(--brown-pale);
+  margin-top: 12px;
+}
+
+/* =========== FOOTER =========== */
+#js-self-analysis-page footer {
+  background: var(--text-dark);
+  padding: 32px 24px;
+  text-align: center;
+}
+
+#js-self-analysis-page footer p {
+  font-size: 12px;
+  color: rgba(245, 245, 240, 0.4);
+  letter-spacing: 0.05em;
+}
+
+/* =========== RESPONSIVE =========== */
+@media (max-width: 560px) {
+  #js-self-analysis-page .faci-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  #js-self-analysis-page .faci-card > div {
+    align-items: center;
+  }
+  #js-self-analysis-page .faci-photo {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+  }
+}

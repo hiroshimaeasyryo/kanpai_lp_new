@@ -7,6 +7,7 @@ import { COLOR_PALETTES } from "@/lib/theme-palettes";
 import type { BtobSeminarContent } from "@/types/btob-seminar";
 import type { StartingJobHuntingContent } from "@/types/starting-job-hunting";
 import type { SelfStanceContent } from "@/types/self-stance";
+import type { JsSelfAnalysisContent } from "@/types/js-self-analysis";
 
 interface GlobalSettingsPanelProps {
   selectedSlug: string;
@@ -16,6 +17,8 @@ interface GlobalSettingsPanelProps {
   onStartingJobHuntingChange: (c: StartingJobHuntingContent) => void;
   selfStanceContent: SelfStanceContent | null;
   onSelfStanceChange: (c: SelfStanceContent) => void;
+  jsSelfAnalysisContent: JsSelfAnalysisContent | null;
+  onJsSelfAnalysisChange: (c: JsSelfAnalysisContent) => void;
 }
 
 export function GlobalSettingsPanel({
@@ -26,6 +29,8 @@ export function GlobalSettingsPanel({
   onStartingJobHuntingChange,
   selfStanceContent,
   onSelfStanceChange,
+  jsSelfAnalysisContent,
+  onJsSelfAnalysisChange,
 }: GlobalSettingsPanelProps) {
   const { paletteId, setPaletteId } = usePalette();
 
@@ -125,6 +130,27 @@ export function GlobalSettingsPanel({
           onSelfStanceChange({
             ...selfStanceContent,
             seo: { ...selfStanceContent.seo, description },
+          })
+        }
+      />
+    );
+  }
+
+  if (selectedSlug === "js_self_analysis" && jsSelfAnalysisContent) {
+    return (
+      <SeoFields
+        title={jsSelfAnalysisContent.seo.title}
+        description={jsSelfAnalysisContent.seo.description}
+        onTitleChange={(title) =>
+          onJsSelfAnalysisChange({
+            ...jsSelfAnalysisContent,
+            seo: { ...jsSelfAnalysisContent.seo, title },
+          })
+        }
+        onDescriptionChange={(description) =>
+          onJsSelfAnalysisChange({
+            ...jsSelfAnalysisContent,
+            seo: { ...jsSelfAnalysisContent.seo, description },
           })
         }
       />

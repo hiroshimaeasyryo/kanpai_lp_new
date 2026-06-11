@@ -19,6 +19,7 @@ const REGISTRY_BY_KIND: Record<LpKind, ElementDefinition[]> = {
   self_reflection: getLpFieldElements("self-reflection"),
   starting_job_hunting: getLpFieldElements("starting_job_hunting"),
   self_stance: getLpFieldElements("self-stance"),
+  js_self_analysis: getLpFieldElements("js_self_analysis"),
 };
 
 export function getElementRegistry(slug: string): ElementDefinition[] {

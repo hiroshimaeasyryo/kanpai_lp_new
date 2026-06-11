@@ -4,6 +4,7 @@ import { BTOB_LP_FIELDS } from "@/lib/content-manager/generated/btob-lp-fields";
 import { SJH_LP_FIELDS } from "@/lib/content-manager/generated/sjh-lp-fields";
 import { SR_LP_FIELDS } from "@/lib/content-manager/generated/sr-lp-fields";
 import { SS_LP_FIELDS } from "@/lib/content-manager/generated/ss-lp-fields";
+import { JSA_LP_FIELDS } from "@/lib/content-manager/generated/jsa-lp-fields";
 import { toElementDefinition, type LpFieldDef } from "@/lib/content-manager/lp-field-types";
 
 const FIELDS_BY_KIND: Record<Exclude<LpKind, "home">, LpFieldDef[]> = {
@@ -11,6 +12,7 @@ const FIELDS_BY_KIND: Record<Exclude<LpKind, "home">, LpFieldDef[]> = {
   self_reflection: SR_LP_FIELDS,
   starting_job_hunting: SJH_LP_FIELDS,
   self_stance: SS_LP_FIELDS,
+  js_self_analysis: JSA_LP_FIELDS,
 };
 
 const FIELD_MAP_BY_KIND = Object.fromEntries(
@@ -66,6 +68,19 @@ const DYNAMIC_FIELD_PATTERNS: Partial<
   self_stance: [
     {
       re: /^ss-faq-item-(\d+)-(q|a)$/,
+      build: (m) => ({
+        id: m[0],
+        label: `FAQ ${Number(m[1]) + 1} · ${m[2] === "q" ? "質問" : "回答"}`,
+        path: `faq.items[${m[1]}].${m[2]}`,
+        kind: "text",
+        multiline: m[2] === "a",
+        rows: m[2] === "a" ? 4 : undefined,
+      }),
+    },
+  ],
+  js_self_analysis: [
+    {
+      re: /^jsa-faq-item-(\d+)-(q|a)$/,
       build: (m) => ({
         id: m[0],
         label: `FAQ ${Number(m[1]) + 1} · ${m[2] === "q" ? "質問" : "回答"}`,
