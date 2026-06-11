@@ -1,12 +1,14 @@
 import type { CSSProperties } from "react";
 
-/** 要素ID（data-cm-id）ごとのテキスト装飾 */
+/** 要素ID（data-cm-id）ごとの装飾（テキスト・背景など） */
 export type TextFieldStyle = {
   fontSize?: string;
   color?: string;
   fontFamily?: string;
   /** リンク要素向け。空ならLP既定の遷移先を使用 */
   href?: string;
+  /** 背景色。空ならLP既定のCSSを使用 */
+  backgroundColor?: string;
 };
 
 export type HomeCopyFieldStyles = Record<string, TextFieldStyle>;
@@ -42,6 +44,7 @@ export function fieldStyleToCss(style?: TextFieldStyle): CSSProperties {
   if (style.fontSize?.trim()) out.fontSize = style.fontSize.trim();
   if (style.color?.trim()) out.color = style.color.trim();
   if (style.fontFamily?.trim()) out.fontFamily = style.fontFamily.trim();
+  if (style.backgroundColor?.trim()) out.backgroundColor = style.backgroundColor.trim();
   return out;
 }
 
