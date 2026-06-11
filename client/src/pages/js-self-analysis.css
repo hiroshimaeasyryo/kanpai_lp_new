@@ -325,6 +325,7 @@
 }
 
 #js-self-analysis-page .timeline-label {
+  display: block;
   font-size: 12px;
   font-weight: 700;
   color: var(--brown-pale);
@@ -334,6 +335,7 @@
 }
 
 #js-self-analysis-page .timeline-title {
+  display: block;
   font-size: 17px;
   font-weight: 700;
   color: var(--brown);
@@ -342,6 +344,7 @@
 }
 
 #js-self-analysis-page .timeline-desc {
+  display: block;
   font-size: 14px;
   color: var(--text-mid);
   line-height: 1.8;
@@ -397,6 +400,13 @@
   margin-bottom: 32px;
 }
 
+#js-self-analysis-page .faci-card > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
 #js-self-analysis-page .faci-photo {
   width: 100px;
   height: 100px;
@@ -407,17 +417,17 @@
 }
 
 #js-self-analysis-page .faci-name {
+  display: block;
   font-family: "Noto Serif JP", serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--brown);
-  margin-bottom: 4px;
 }
 
 #js-self-analysis-page .faci-role {
+  display: block;
   font-size: 13px;
   color: var(--brown-pale);
-  margin-bottom: 16px;
 }
 
 #js-self-analysis-page .faci-tag {
@@ -648,10 +658,14 @@
 }
 
 #js-self-analysis-page .faq-a {
+  display: block;
   padding: 0 24px 20px 58px;
   font-size: 14px;
   color: var(--text-mid);
   line-height: 1.9;
+  line-break: strict;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* =========== FINAL CTA =========== */
@@ -730,7 +744,7 @@
 
 #js-self-analysis-page .hero-body {
   background: var(--beige-dark);
-  padding: 0 24px 64px;
+  padding: 32px 24px 64px;
 }
 
 #js-self-analysis-page .hero-inner {
@@ -803,6 +817,9 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+  #js-self-analysis-page .faci-card > div {
+    align-items: center;
   }
   #js-self-analysis-page .faci-photo {
     width: 80px;
