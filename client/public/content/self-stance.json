@@ -1,7 +1,7 @@
 {
   "selfStance": {
     "seo": {
-      "title": "評価される自己PRを作るワークショップ",
+      "title": "勝てる自己PRを作るワークショップ",
       "description": "現役採用担当者と自然体で語り合い、盛らない自己PRで就活に勝つための自分らしさを言語化する150分のワークショップ。参加費無料・少人数制。"
     },
     "header": {
@@ -232,7 +232,8 @@
     },
     "fieldStyles": {
       "ss-header-cta-label": {
-        "color": ""
+        "color": "",
+        "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       },
       "ss-hero-eyebrow": {
         "fontSize": "10px",
@@ -240,14 +241,16 @@
       },
       "ss-hero-primary-cta-label": {
         "color": "",
-        "fontFamily": "'Zen Kaku Gothic New', sans-serif"
+        "fontFamily": "'Zen Kaku Gothic New', sans-serif",
+        "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       },
       "ss-event-info-row-0-value": {
         "color": "#5D4037",
         "fontFamily": "'Shippori Mincho', serif"
       },
       "ss-solution-cta-label": {
-        "color": ""
+        "color": "",
+        "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       },
       "ss-program-title": {
         "color": "#5D4037"
@@ -256,13 +259,17 @@
         "color": "#5D4037"
       },
       "ss-detail-cta-label": {
-        "color": ""
+        "color": "",
+        "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       },
       "ss-sticky-cta-label": {
         "color": ""
       },
       "ss-program-step-3-nameHtml": {
         "fontSize": "9px"
+      },
+      "ss-final-cta-label": {
+        "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       }
     }
   }
