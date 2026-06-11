@@ -1,0 +1,189 @@
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  FONT_FAMILY_OPTIONS,
+  formatFontSizePx,
+  parseFontSizePx,
+  TEXT_SIZE_MAX_PX,
+  TEXT_SIZE_MIN_PX,
+  TEXT_SIZE_SLIDER_DEFAULT_PX,
+  type TextFieldStyle,
+} from "@/types/home-copy-style";
+import * as SliderPrimitive from "@radix-ui/react-slider";
+
+const fieldCls = "mt-1 border-[#ffd7c3]";
+const labelCls = "text-[#3D281E]";
+
+function ColorField({
+  label,
+  value,
+  placeholder,
+  defaultPickerColor,
+  onChange,
+}: {
+  label: string;
+  value?: string;
+  placeholder: string;
+  defaultPickerColor: string;
+  onChange: (color: string) => void;
+}) {
+  return (
+    <div>
+      <Label className={labelCls}>{label}</Label>
+      <div className="flex gap-2 mt-1">
+        <Input
+          type="color"
+          value={value?.startsWith("#") ? value : defaultPickerColor}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 p-1 border-[#ffd7c3] cursor-pointer"
+        />
+        <Input
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={`${fieldCls} flex-1`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function TextSizeSlider({
+  fontSize,
+  onFontSizeChange,
+}: {
+  fontSize?: string;
+  onFontSizeChange: (px: number) => void;
+}) {
+  const savedPx = parseFontSizePx(fontSize);
+  const sliderPx = savedPx ?? TEXT_SIZE_SLIDER_DEFAULT_PX;
+  const thumbLabel = savedPx != null ? `${savedPx}px` : `${TEXT_SIZE_SLIDER_DEFAULT_PX}px`;
+
+  return (
+    <div className="mt-2 space-y-1">
+      <SliderPrimitive.Root
+        className="relative flex w-full touch-none items-center select-none py-2"
+        min={TEXT_SIZE_MIN_PX}
+        max={TEXT_SIZE_MAX_PX}
+        step={1}
+        value={[sliderPx]}
+        onValueChange={([v]) => onFontSizeChange(v)}
+        aria-label="テキストサイズ"
+      >
+        <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-[#f5e6cd]">
+          <SliderPrimitive.Range className="absolute h-full rounded-full bg-[#d4844b]" />
+        </SliderPrimitive.Track>
+        <SliderPrimitive.Thumb
+          className={cn(
+            "flex h-7 min-w-[3.25rem] shrink-0 items-center justify-center rounded-full border-2 border-[#d4844b] bg-white px-2",
+            "text-xs font-semibold tabular-nums text-[#3D281E] shadow-sm",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4844b]/40",
+          )}
+        >
+          {thumbLabel}
+        </SliderPrimitive.Thumb>
+      </SliderPrimitive.Root>
+      <div className="flex justify-between text-[10px] text-[#5C3E2A]">
+        <span>{TEXT_SIZE_MIN_PX}px</span>
+        <span>{TEXT_SIZE_MAX_PX}px</span>
+      </div>
+    </div>
+  );
+}
+
+type Props = {
+  style?: TextFieldStyle;
+  onStyleChange: (patch: Partial<TextFieldStyle>) => void;
+  /** レイアウト用コンテナ向け（背景色のみ編集） */
+  containerOnly?: boolean;
+  showHref?: boolean;
+  /** fieldStyles 以外に保存されているリンク先の表示・編集用 */
+  href?: string;
+  onHrefChange?: (href: string) => void;
+};
+
+export function FieldStyleEditor({
+  style,
+  onStyleChange,
+  containerOnly = false,
+  showHref = true,
+  href,
+  onHrefChange,
+}: Props) {
+  const hrefValue = href ?? style?.href ?? "";
+  const handleHrefChange = onHrefChange ?? ((value) => onStyleChange({ href: value }));
+  return (
+    <div className="w-full flex flex-col gap-3">
+      {!containerOnly && (
+        <div className="w-full">
+          <Label className={labelCls}>テキストサイズ</Label>
+          <TextSizeSlider
+            fontSize={style?.fontSize}
+            onFontSizeChange={(px) => onStyleChange({ fontSize: formatFontSizePx(px) })}
+          />
+        </div>
+      )}
+
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        {!containerOnly && (
+          <ColorField
+            label="テキストカラー"
+            value={style?.color}
+            placeholder="#3D281E"
+            defaultPickerColor="#3D281E"
+            onChange={(color) => onStyleChange({ color })}
+          />
+        )}
+
+        <ColorField
+          label="背景色"
+          value={style?.backgroundColor}
+          placeholder="未設定（LP既定）"
+          defaultPickerColor="#3D281E"
+          onChange={(backgroundColor) => onStyleChange({ backgroundColor })}
+        />
+      </div>
+
+      {!containerOnly && (
+        <div className="w-full">
+          <Label className={labelCls}>テキストフォント</Label>
+          <Select
+            value={style?.fontFamily ?? ""}
+            onValueChange={(v) => onStyleChange({ fontFamily: v === "__default__" ? "" : v })}
+          >
+            <SelectTrigger className={fieldCls}>
+              <SelectValue placeholder="デフォルト" />
+            </SelectTrigger>
+            <SelectContent>
+              {FONT_FAMILY_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value || "__default__"} value={opt.value || "__default__"}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {!containerOnly && showHref && (
+        <div className="w-full">
+          <Label className={labelCls}>埋め込みURL</Label>
+          <Input
+            value={hrefValue}
+            onChange={(e) => handleHrefChange(e.target.value)}
+            placeholder="https://..."
+            className={fieldCls}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

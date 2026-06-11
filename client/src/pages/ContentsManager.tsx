@@ -17,6 +17,7 @@ import {
   isContentsManagerUnlocked,
   setContentsManagerUnlocked,
 } from "@/const";
+import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
 import { usePalette } from "@/contexts/PaletteContext";
 import type { EventImage, FeatureItem } from "@/lib/content-settings";
 import {
@@ -365,6 +366,9 @@ export default function ContentsManager() {
     setSheetOpen(true);
   }, []);
 
+  const defaultLineHref =
+    selectedSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL;
+
   const homeElementEditorProps: HomeElementEditorProps | null = useMemo(
     () => ({
       sectionId: selectedElementId ?? "",
@@ -377,6 +381,7 @@ export default function ContentsManager() {
       events,
       campaign2603Notice,
       homeCopy,
+      defaultLineHref,
       onHomeCopyChange: (next) => {
         setHomeCopy((prev) => {
           const merged = typeof next === "function" ? next(prev) : next;
@@ -413,6 +418,7 @@ export default function ContentsManager() {
       events,
       campaign2603Notice,
       homeCopy,
+      defaultLineHref,
     ],
   );
 

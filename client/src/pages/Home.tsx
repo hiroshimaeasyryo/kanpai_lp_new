@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
+import { useHomeDynamicLinks } from "@/hooks/useHomeDynamicLinks";
 import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
   DEFAULT_EVENT_FLOW_LABELS,
@@ -39,6 +40,7 @@ import { usePalette } from "@/contexts/PaletteContext";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+import { HomeCm } from "@/components/contents-manager/HomeCm";
 import {
   createHomeCopyStyleHelpers,
   MINCHO_STYLE,
@@ -99,6 +101,7 @@ export default function Home({ lpSlug }: HomeProps) {
   const defaultLineHref =
     contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL;
   const { cms, cmh } = createHomeCopyStyleHelpers(homeCopy, defaultLineHref);
+  const homeRootRef = useRef<HTMLDivElement>(null);
 
   const applyPayloadToState = useCallback((payload: ContentPayload) => {
     try {
@@ -153,6 +156,8 @@ export default function Home({ lpSlug }: HomeProps) {
       }
     },
   });
+
+  useHomeDynamicLinks(homeRootRef, homeCopy, isCmPreview);
 
   // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
   useEffect(() => {
@@ -251,7 +256,7 @@ export default function Home({ lpSlug }: HomeProps) {
   }, [heroImageUrl]);
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
+    <div ref={homeRootRef} className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -368,20 +373,23 @@ export default function Home({ lpSlug }: HomeProps) {
                   fontSize: 'clamp(1.75rem, 8vw, 3.75rem)',
                 }}
               >
-                <span className="inline min-[400px]:block md:inline" data-cm-id="hero-title-line1" style={cms("hero-title-line1")}>{homeCopy.hero.titleLine1}</span>
-                <span data-cm-id="hero-title-line2" style={cms("hero-title-line2")}>{homeCopy.hero.titleLine2}</span>
+                <HomeCm id="hero-title-line1" as="span" copy={homeCopy} cms={cms} className="inline min-[400px]:block md:inline">{homeCopy.hero.titleLine1}</HomeCm>
+                <HomeCm id="hero-title-line2" as="span" copy={homeCopy} cms={cms}>{homeCopy.hero.titleLine2}</HomeCm>
               </h1>
-              <p
-                data-cm-id="hero-subcopy"
+              <HomeCm
+                id="hero-subcopy"
+                as="p"
+                copy={homeCopy}
+                cms={cms}
                 className="text-sm md:text-lg leading-relaxed md:leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] whitespace-pre-line [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
-                style={cms("hero-subcopy", {
+                style={{
                   animationDelay: '0.4s',
                   animationFillMode: 'forwards',
                   ...MINCHO_STYLE,
-                })}
+                }}
               >
                 {homeCopy.hero.subcopy}
-              </p>
+              </HomeCm>
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
                 <a
                   href={cmh("hero-cta")}
@@ -412,10 +420,10 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="text-center mb-10 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
-            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="next-event-eyebrow" style={cms("next-event-eyebrow")}>{homeCopy.nextEvent.eyebrow}</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={cms("next-event-heading", MINCHO_STYLE)} data-cm-id="next-event-heading">
+            <HomeCm id="next-event-eyebrow" as="p" copy={homeCopy} cms={cms} className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2">{homeCopy.nextEvent.eyebrow}</HomeCm>
+            <HomeCm id="next-event-heading" as="h2" copy={homeCopy} cms={cms} className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight" style={MINCHO_STYLE}>
               {homeCopy.nextEvent.heading}
-            </h2>
+            </HomeCm>
           </div>
           {/* 直近3イベントの手動カルーセル（ボタン・ドット・横スワイプ対応）※モバイルはカード幅優先でボタンは重ねて表示 */}
           <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>
