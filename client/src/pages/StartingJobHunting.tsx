@@ -2,6 +2,7 @@ import { useEffect, useState, type ElementType } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
+import { mergeLpFieldStylesFromRaw } from "@/types/home-copy-style";
 import type { ContentPayload } from "@/types/content-payload";
 import {
   DEFAULT_STARTING_JOB_HUNTING_CONTENT,
@@ -92,11 +93,13 @@ export default function StartingJobHunting() {
     slug: "starting_job_hunting",
     onDraft: (payload) => {
       const remote = (payload as ContentPayload | null)?.startingJobHunting;
-      if (remote) {
-        const merged = mergeStartingJobHuntingContent(remote);
-        setContent(merged);
-        safeStore(merged);
+      if (!remote) return;
+      const merged = mergeStartingJobHuntingContent(remote);
+      if (remote.fieldStyles) {
+        merged.fieldStyles = mergeLpFieldStylesFromRaw(remote.fieldStyles, merged.fieldStyles);
       }
+      setContent(merged);
+      safeStore(merged);
     },
   });
 
@@ -175,7 +178,7 @@ export default function StartingJobHunting() {
   const c = content;
 
   return (
-    <FieldStylesProvider value={c.fieldStyles}>
+    <FieldStylesProvider value={c.fieldStyles} scopeSelector="#starting-job-hunting-page">
     <div id="starting-job-hunting-page">
       <header>
         <img

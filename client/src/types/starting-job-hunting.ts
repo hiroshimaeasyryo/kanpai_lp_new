@@ -1,7 +1,7 @@
 /** /starting_job_hunting 専用コンテンツ（ContentPayload.startingJobHunting） */
 
 import seed from "../../public/content/starting_job_hunting.json";
-import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
+import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const STARTING_JOB_HUNTING_ASSETS = {
   favicon: "/starting_job_hunting/favicon.png",
@@ -123,6 +123,9 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
 export function mergeStartingJobHuntingContent(raw: unknown): StartingJobHuntingContent {
   const d = cloneDefault();
   if (!raw || typeof raw !== "object") return d;
-  mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
+  const rawObj = raw as Record<string, unknown>;
+  mergeDeep(d as unknown as Record<string, unknown>, rawObj);
+  const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
+  if (mergedStyles) d.fieldStyles = mergedStyles;
   return d;
 }

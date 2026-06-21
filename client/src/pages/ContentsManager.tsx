@@ -35,6 +35,7 @@ import {
 } from "@/lib/content-settings";
 import { applyContentToLocalStorage, fetchContentBySlug, fetchContentManifest } from "@/lib/content-loader";
 import { applyDraftToPreviewStorage } from "@/lib/content-manager/preview-storage";
+import { broadcastCmDraft } from "@/lib/content-manager/cm-preview-sync";
 import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
 import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
 import type { ContentPayload } from "@/types/content-payload";
@@ -238,6 +239,7 @@ export default function ContentsManager() {
   useEffect(() => {
     if (!unlocked) return;
     applyDraftToPreviewStorage(selectedSlug, previewPayload);
+    broadcastCmDraft(selectedSlug, previewPayload);
   }, [unlocked, selectedSlug, previewPayload]);
 
   const handleAccessSubmit = (e: React.FormEvent) => {

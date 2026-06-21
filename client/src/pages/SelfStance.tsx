@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
+import { mergeLpFieldStylesFromRaw } from "@/types/home-copy-style";
 import type { ContentPayload } from "@/types/content-payload";
 import {
   DEFAULT_SELF_STANCE_CONTENT,
@@ -10,7 +11,7 @@ import {
   type SelfStanceContent,
 } from "@/types/self-stance";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml } from "@/components/contents-manager/CmId";
+import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./self-stance.css";
 
 const STORAGE_KEY = "self_stance_content_v1";
@@ -86,11 +87,13 @@ export default function SelfStance() {
     slug: "self-stance",
     onDraft: (payload) => {
       const remote = (payload as ContentPayload | null)?.selfStance;
-      if (remote) {
-        const merged = mergeSelfStanceContent(remote);
-        setContent(merged);
-        safeStore(merged);
+      if (!remote) return;
+      const merged = mergeSelfStanceContent(remote);
+      if (remote.fieldStyles) {
+        merged.fieldStyles = mergeLpFieldStylesFromRaw(remote.fieldStyles, merged.fieldStyles);
       }
+      setContent(merged);
+      safeStore(merged);
     },
   });
 
@@ -169,8 +172,9 @@ export default function SelfStance() {
   const c = content;
 
   return (
+    <FieldStylesProvider value={c.fieldStyles} scopeSelector="#self-stance-page">
     <div id="self-stance-page">
-      <div className="sticky">
+      <CmId id="ss-sticky-cta-bar" as="div" className="sticky">
         <a
           href={c.stickyCta.ctaHref}
           target="_blank"
@@ -180,7 +184,7 @@ export default function SelfStance() {
           <LineIcon />
           <CmId id="ss-sticky-cta-label">{c.stickyCta.label}</CmId>
         </a>
-      </div>
+      </CmId>
 
       <header className="site-header">
         <div className="header-inner">
@@ -535,5 +539,6 @@ export default function SelfStance() {
         <CmId id="ss-footer-copyright">{c.footer.copyright}</CmId>
       </footer>
     </div>
+    </FieldStylesProvider>
   );
 }

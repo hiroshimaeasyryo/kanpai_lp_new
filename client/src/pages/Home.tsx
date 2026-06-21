@@ -33,6 +33,7 @@ import {
   mergeHomeCopy,
   type HomeCopy,
 } from "@/types/home-copy";
+import { buildFieldStylesStylesheet } from "@/types/home-copy-style";
 import { applyContentToLocalStorage, fetchContent, fetchContentBySlug, getContentFromLocalStorage } from "@/lib/content-loader";
 import { TOP_SLUG } from "@/lib/lp-slug";
 import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
@@ -52,8 +53,7 @@ const DEFAULT_CAMPAIGN2603_NOTICE =
   "※地方学生限定キャンペーン実施中です※\n\nKANPAI就活は27卒向けラスト2回。\n「行きたいけど遠い」という方へ、今回限り交通費サポートを用意しました。\n先着5名・上限あり。\n詳細はご予約後に運営よりご案内します。";
 
 /** キャンペーン文言を1行目（タイトル）と本文に分けて表示用に返す */
-function getCampaign2603NoticeParts(): { title: string; body: string } {
-  const raw = getStoredCampaign2603Notice() ?? DEFAULT_CAMPAIGN2603_NOTICE;
+function splitCampaign2603Notice(raw: string): { title: string; body: string } {
   const trimmed = raw.trim();
   if (!trimmed) return { title: "", body: "" };
   const firstNewline = trimmed.indexOf("\n");
@@ -93,6 +93,10 @@ export default function Home({ lpSlug }: HomeProps) {
   /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() => getStoredHomeCopy());
+  const [campaign2603Notice, setCampaign2603Notice] = useState<string>(() => {
+    if (typeof window === "undefined") return DEFAULT_CAMPAIGN2603_NOTICE;
+    return getStoredCampaign2603Notice() ?? DEFAULT_CAMPAIGN2603_NOTICE;
+  });
   /** コンテンツ管理プレビュー: FAQ の開閉状態 */
   const [previewOpenFaq, setPreviewOpenFaq] = useState<Set<number>>(() => new Set());
 
@@ -134,6 +138,9 @@ export default function Home({ lpSlug }: HomeProps) {
     setFeatureImageErrors(new Set());
     if (payload.paletteId) setPaletteId(payload.paletteId);
     setHomeCopy(mergeHomeCopy(payload.copy));
+    if (payload.campaign2603Notice !== undefined) {
+      setCampaign2603Notice(payload.campaign2603Notice ?? DEFAULT_CAMPAIGN2603_NOTICE);
+    }
   }, [setPaletteId]);
 
   const togglePreviewFaq = useCallback((index: number) => {
@@ -257,6 +264,12 @@ export default function Home({ lpSlug }: HomeProps) {
 
   return (
     <div ref={homeRootRef} className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
+      {homeCopy.fieldStyles && Object.keys(homeCopy.fieldStyles).length > 0 ? (
+        <style
+          data-cm-field-styles=""
+          dangerouslySetInnerHTML={{ __html: buildFieldStylesStylesheet(homeCopy.fieldStyles) }}
+        />
+      ) : null}
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -482,7 +495,7 @@ export default function Home({ lpSlug }: HomeProps) {
                           </div>
                         </div>
                         {contentSlug === "campaign2603" && (() => {
-                          const { title, body } = getCampaign2603NoticeParts();
+                          const { title, body } = splitCampaign2603Notice(campaign2603Notice);
                           if (!title && !body) return null;
                           return (
                             <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2">
@@ -1089,7 +1102,7 @@ export default function Home({ lpSlug }: HomeProps) {
                     </div>
                   </div>
                   {contentSlug === "campaign2603" && (() => {
-                    const { title, body } = getCampaign2603NoticeParts();
+                    const { title, body } = splitCampaign2603Notice(campaign2603Notice);
                     if (!title && !body) return null;
                     return (
                       <div className="rounded-xl bg-lp-primary/10 border border-lp-primary/30 p-4 text-sm text-lp-text-body leading-relaxed space-y-2" data-cm-id="campaign2603-notice">
