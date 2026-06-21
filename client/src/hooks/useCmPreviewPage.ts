@@ -5,6 +5,11 @@ import {
   postToCmParent,
   type CmPreviewMessage,
 } from "@/lib/content-manager/cm-preview";
+import { subscribeCmDraft } from "@/lib/content-manager/cm-preview-sync";
+import {
+  readDraftFromPreviewStorage,
+  subscribePreviewStorage,
+} from "@/lib/content-manager/preview-storage";
 import {
   CM_PREVIEW_SELECTABLE_SELECTOR,
   getSelectableId,
@@ -32,6 +37,11 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
 
   useEffect(() => {
     if (!isPreview) return;
+
+    const applyDraft = (incomingSlug: string, payload: ContentPayload) => {
+      if (incomingSlug !== slug) return;
+      onDraftRef.current?.(payload);
+    };
 
     const style = document.createElement("style");
     style.setAttribute("data-cm-preview", "1");
@@ -78,7 +88,7 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
       if (!isCmPreviewMessage(event.data)) return;
       const msg = event.data as CmPreviewMessage;
       if (msg.type === "cm-draft" && msg.slug === slug) {
-        onDraftRef.current?.(msg.payload);
+        applyDraft(msg.slug, msg.payload);
       }
       if (msg.type === "cm-scroll-to") {
         onScrollToIdRef.current?.(msg.id);
@@ -90,14 +100,24 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
       }
     };
 
+    const syncFromStorage = () => {
+      const draft = readDraftFromPreviewStorage(slug);
+      if (draft) applyDraft(slug, draft);
+    };
+
     document.addEventListener("click", handleClick, true);
     window.addEventListener("message", handleMessage);
+    const unsubscribeDraft = subscribeCmDraft(applyDraft);
+    const unsubscribeStorage = subscribePreviewStorage(slug, syncFromStorage);
+    syncFromStorage();
     postToCmParent({ type: "cm-ready" });
 
     return () => {
       style.remove();
       document.removeEventListener("click", handleClick, true);
       window.removeEventListener("message", handleMessage);
+      unsubscribeDraft();
+      unsubscribeStorage();
     };
   }, [isPreview, slug]);
 

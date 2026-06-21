@@ -1,12 +1,17 @@
 import {
   createContext,
   useContext,
+  useLayoutEffect,
   type ComponentPropsWithoutRef,
   type CSSProperties,
   type ElementType,
   type ReactNode,
 } from "react";
-import { fieldStyleToCss, type HomeCopyFieldStyles } from "@/types/home-copy-style";
+import {
+  buildFieldStylesStylesheet,
+  fieldStyleToCss,
+  type HomeCopyFieldStyles,
+} from "@/types/home-copy-style";
 
 /**
  * data-cm-id ごとの装飾（fieldStyles）をページ全体に供給するコンテキスト。
@@ -18,11 +23,32 @@ const FieldStylesContext = createContext<HomeCopyFieldStyles | undefined>(undefi
 
 export function FieldStylesProvider({
   value,
+  scopeSelector,
   children,
 }: {
   value?: HomeCopyFieldStyles;
+  /** LP ルート ID（例: #self-stance-page）で CSS 詳細度を上げる */
+  scopeSelector?: string;
   children: ReactNode;
 }) {
+  useLayoutEffect(() => {
+    const sheet = buildFieldStylesStylesheet(value, scopeSelector);
+    let el = document.head.querySelector<HTMLStyleElement>("style[data-cm-field-styles]");
+    if (!sheet) {
+      el?.remove();
+      return;
+    }
+    if (!el) {
+      el = document.createElement("style");
+      el.setAttribute("data-cm-field-styles", "");
+      document.head.appendChild(el);
+    }
+    el.textContent = sheet;
+    return () => {
+      el?.remove();
+    };
+  }, [value, scopeSelector]);
+
   return <FieldStylesContext.Provider value={value}>{children}</FieldStylesContext.Provider>;
 }
 
@@ -30,12 +56,12 @@ function useFieldStyles(): HomeCopyFieldStyles | undefined {
   return useContext(FieldStylesContext);
 }
 
-/** コンテキストの fieldStyles と明示 style をマージ（明示 style を優先） */
+/** レイアウト用 style をベースに、編集パレット由来の装飾で上書き */
 function useCmStyle(id: string, style?: CSSProperties): CSSProperties | undefined {
   const fieldStyles = useFieldStyles();
   const fromField = fieldStyleToCss(fieldStyles?.[id]);
   if (Object.keys(fromField).length === 0) return style;
-  return { ...fromField, ...style };
+  return { ...style, ...fromField };
 }
 
 /** fieldStyles の href または props の href を解決（props 優先） */

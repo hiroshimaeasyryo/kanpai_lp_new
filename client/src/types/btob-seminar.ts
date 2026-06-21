@@ -20,7 +20,7 @@ export type BtobDetailRow = { th: string; tdHtml: string };
 
 export type BtobFaqItem = { q: string; a: string };
 
-import type { HomeCopyFieldStyles } from "@/types/home-copy-style";
+import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export type BtobSeminarContent = {
   fieldStyles?: HomeCopyFieldStyles;
@@ -348,6 +348,9 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
 export function mergeBtobSeminarContent(raw: unknown): BtobSeminarContent {
   const d = cloneDefault();
   if (!raw || typeof raw !== "object") return d;
-  mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
+  const rawObj = raw as Record<string, unknown>;
+  mergeDeep(d as unknown as Record<string, unknown>, rawObj);
+  const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
+  if (mergedStyles) d.fieldStyles = mergedStyles;
   return d;
 }

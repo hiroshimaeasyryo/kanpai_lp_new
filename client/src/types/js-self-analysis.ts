@@ -1,7 +1,7 @@
 /** /js_self_analysis 専用コンテンツ（ContentPayload.jsSelfAnalysis） */
 
 import seed from "../../public/content/js_self_analysis.json";
-import type { HomeCopyFieldStyles, TextFieldStyle } from "@/types/home-copy-style";
+import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const JSA_ASSETS = {
   favicon: "/js_self_analysis/favicon.png",
@@ -118,40 +118,12 @@ function mergeDeep(target: Record<string, unknown>, source: Record<string, unkno
   }
 }
 
-/**
- * fieldStyles は要素ID（jsa-*）をキーにした動的マップ。
- * mergeDeep は `if (!(k in target)) continue` のため、デフォルトseedに無い
- * 新規キーを破棄してしまう。そのためここで個別にマージし動的キーを保持する
- * （self-stance の mergeFieldStyles と同方針）。
- */
-function mergeFieldStyles(
-  raw: unknown,
-  base?: HomeCopyFieldStyles,
-): HomeCopyFieldStyles | undefined {
-  if (!raw || typeof raw !== "object") return base;
-  const out: HomeCopyFieldStyles = { ...(base ?? {}) };
-  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
-    if (!val || typeof val !== "object") continue;
-    const o = val as Record<string, unknown>;
-    const prev: TextFieldStyle = out[id] ?? {};
-    out[id] = {
-      fontSize: typeof o.fontSize === "string" ? o.fontSize : prev.fontSize,
-      color: typeof o.color === "string" ? o.color : prev.color,
-      fontFamily: typeof o.fontFamily === "string" ? o.fontFamily : prev.fontFamily,
-      href: typeof o.href === "string" ? o.href : prev.href,
-    };
-  }
-  return Object.keys(out).length > 0 ? out : undefined;
-}
-
 export function mergeJsSelfAnalysisContent(raw: unknown): JsSelfAnalysisContent {
   const d = cloneDefault();
   if (!raw || typeof raw !== "object") return d;
-  mergeDeep(d as unknown as Record<string, unknown>, raw as Record<string, unknown>);
-  const merged = mergeFieldStyles(
-    (raw as Record<string, unknown>).fieldStyles,
-    d.fieldStyles,
-  );
-  if (merged) d.fieldStyles = merged;
+  const rawObj = raw as Record<string, unknown>;
+  mergeDeep(d as unknown as Record<string, unknown>, rawObj);
+  const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
+  if (mergedStyles) d.fieldStyles = mergedStyles;
   return d;
 }

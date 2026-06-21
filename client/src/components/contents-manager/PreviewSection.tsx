@@ -20,6 +20,8 @@ interface PreviewSectionProps {
 
 export function PreviewSection({ selectedSlug, payload, onElementSelect }: PreviewSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const payloadRef = useRef(payload);
+  payloadRef.current = payload;
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [iframeKey, setIframeKey] = useState(0);
   const previewPath = getPreviewPath(selectedSlug);
@@ -28,12 +30,15 @@ export function PreviewSection({ selectedSlug, payload, onElementSelect }: Previ
   const sendDraft = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
-    win.postMessage({ type: "cm-draft", slug: selectedSlug, payload }, window.location.origin);
-  }, [selectedSlug, payload]);
+    win.postMessage(
+      { type: "cm-draft", slug: selectedSlug, payload: payloadRef.current },
+      window.location.origin,
+    );
+  }, [selectedSlug]);
 
   useEffect(() => {
     sendDraft();
-  }, [sendDraft, iframeKey]);
+  }, [payload, sendDraft, iframeKey]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -107,6 +112,7 @@ export function PreviewSection({ selectedSlug, payload, onElementSelect }: Previ
           ref={iframeRef}
           src={previewUrl}
           title="LPプレビュー"
+          onLoad={sendDraft}
           className="bg-white border border-[#e8ddd4] rounded-lg shadow-sm transition-all duration-200"
           style={{
             width: VIEWPORT_WIDTH[viewport],
