@@ -263,7 +263,8 @@
         "href": "https://xp48w7qk.autosns.app/addfriend/s/RYl3Zx8aGP/@779ahmbk?free1=sns_js"
       },
       "ss-sticky-cta-label": {
-        "color": ""
+        "color": "",
+        "backgroundColor": "#08f7e7"
       },
       "ss-program-step-3-nameHtml": {
         "fontSize": "9px"
