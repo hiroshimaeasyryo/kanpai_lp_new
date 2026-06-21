@@ -15,7 +15,7 @@ const VIEWPORT_WIDTH: Record<Viewport, string> = {
 interface PreviewSectionProps {
   selectedSlug: string;
   payload: ContentPayload;
-  onElementSelect: (id: string, label?: string) => void;
+  onElementSelect: (id: string, label?: string, selectKind?: "field" | "array" | "auto") => void;
 }
 
 export function PreviewSection({ selectedSlug, payload, onElementSelect }: PreviewSectionProps) {
@@ -48,7 +48,7 @@ export function PreviewSection({ selectedSlug, payload, onElementSelect }: Previ
         sendDraft();
       }
       if (event.data.type === "cm-select") {
-        onElementSelect(event.data.id, event.data.label);
+        onElementSelect(event.data.id, event.data.label, event.data.selectKind);
       }
     };
     window.addEventListener("message", handleMessage);
@@ -122,7 +122,7 @@ export function PreviewSection({ selectedSlug, payload, onElementSelect }: Previ
         />
       </div>
       <p className="px-4 py-3 text-xs text-[#5C3E2A] border-t border-[#ffd7c3]">
-        プレビュー上の要素をクリックすると、下から編集パレットが開きます。
+        テキスト部分をクリックすると文言の編集パレットが開きます。項目の余白（点線枠）をクリックすると、追加・削除パレットが開きます。
       </p>
     </div>
   );

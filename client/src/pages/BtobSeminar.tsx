@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
-import { CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmArrayItem, CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { scrollToAnchor } from "@/lib/smooth-scroll";
@@ -168,13 +168,6 @@ export default function BtobSeminar() {
     return () => io.disconnect();
   }, [content]);
 
-  const h = content.hero;
-  const heroInfo = (() => {
-    const padded = [...h.info];
-    while (padded.length < 4) padded.push({ label: "", value: "" });
-    return padded.slice(0, 4);
-  })();
-
   return (
     <FieldStylesProvider value={content.fieldStyles}>
     <div id="btob-seminar-page" ref={rootRef}>
@@ -222,15 +215,15 @@ export default function BtobSeminar() {
           </p>
 
           <div className="hero-info">
-            {heroInfo.map((item, i) => (
-              <div key={i} className="hero-info-item">
+            {content.hero.info.map((item, i) => (
+              <CmArrayItem key={i} id={`btob-hero-info-${i}`} className="hero-info-item">
                 <CmId id={`btob-hero-info-${i}-label`} as="span" className="hero-info-label">
                   {item.label}
                 </CmId>
                 <CmId id={`btob-hero-info-${i}-value`} as="span" className="hero-info-value">
                   {item.value}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
 
@@ -270,9 +263,11 @@ export default function BtobSeminar() {
 
             <ul className="empathy-checklist">
               {content.empathy.checklist.map((t, i) => (
-                <CmId key={i} id={`btob-empathy-checklist-${i}`} as="li">
-                  {t}
-                </CmId>
+                <CmArrayItem key={i} id={`btob-empathy-checklist-${i}`} style={{ display: "contents" }}>
+                  <CmId id={`btob-empathy-checklist-${i}`} as="li">
+                    {t}
+                  </CmId>
+                </CmArrayItem>
               ))}
             </ul>
           </div>
@@ -295,7 +290,7 @@ export default function BtobSeminar() {
 
           <div className="loop-diagram reveal">
             {content.structure.steps.map((s, i) => (
-              <div key={s.num} className="loop-step">
+              <CmArrayItem key={s.num} id={`btob-structure-step-${i}`} className="loop-step">
                 <CmId id={`btob-structure-step-${i}-num`} as="span" className="loop-step-num">
                   {s.num}
                 </CmId>
@@ -305,7 +300,7 @@ export default function BtobSeminar() {
                 <CmId id={`btob-structure-step-${i}-desc`} as="div" className="loop-step-desc">
                   {s.desc}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
 
@@ -379,7 +374,7 @@ export default function BtobSeminar() {
 
           <div className="experience-grid reveal">
             {content.experience.items.map((ex, i) => (
-              <div key={ex.num} className="experience-card">
+              <CmArrayItem key={ex.num} id={`btob-experience-item-${i}`} className="experience-card">
                 <CmId id={`btob-experience-item-${i}-num`} as="span" className="experience-num">
                   {ex.num}
                 </CmId>
@@ -389,7 +384,7 @@ export default function BtobSeminar() {
                 <div className="experience-desc">
                   <CmHtml id={`btob-experience-item-${i}-descHtml`} html={ex.descHtml} as="span" />
                 </div>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -411,7 +406,7 @@ export default function BtobSeminar() {
 
           <div className="takeaway-list reveal">
             {content.takeaway.cards.map((c, i) => (
-              <div key={i} className="takeaway-card">
+              <CmArrayItem key={i} id={`btob-takeaway-card-${i}`} className="takeaway-card">
                 <CmId id={`btob-takeaway-card-${i}-icon`} as="div" className="takeaway-icon">
                   {c.icon}
                 </CmId>
@@ -421,7 +416,7 @@ export default function BtobSeminar() {
                 <CmId id={`btob-takeaway-card-${i}-desc`} as="div" className="takeaway-desc">
                   {c.desc}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -460,9 +455,11 @@ export default function BtobSeminar() {
           <div className="audience-grid reveal">
             <ul className="audience-list">
               {content.audience.items.map((t, i) => (
-                <CmId key={i} id={`btob-audience-item-${i}`} as="li">
-                  {t}
-                </CmId>
+                <CmArrayItem key={i} id={`btob-audience-item-${i}`} style={{ display: "contents" }}>
+                  <CmId id={`btob-audience-item-${i}`} as="li">
+                    {t}
+                  </CmId>
+                </CmArrayItem>
               ))}
             </ul>
 
@@ -494,7 +491,7 @@ export default function BtobSeminar() {
 
           <div className="hosts-grid reveal">
             {content.hosts.cards.map((host, i) => (
-              <div key={i} className={`host-card ${i === 0 ? "primary" : "secondary"}`}>
+              <CmArrayItem key={i} id={`btob-hosts-card-${i}`} className={`host-card ${i === 0 ? "primary" : "secondary"}`}>
                 <CmId id={`btob-hosts-card-${i}-role`} as="div" className="host-role">
                   {host.role}
                 </CmId>
@@ -507,7 +504,7 @@ export default function BtobSeminar() {
                 <CmId id={`btob-hosts-card-${i}-desc`} as="div" className="host-desc">
                   {host.desc}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -528,12 +525,14 @@ export default function BtobSeminar() {
             <tbody>
               {content.details.rows.map((row, i) => (
                 <tr key={i}>
-                  <CmId id={`btob-details-row-${i}-th`} as="th">
-                    {row.th}
-                  </CmId>
-                  <td>
-                    <CmHtml id={`btob-details-row-${i}-tdHtml`} html={row.tdHtml} as="span" />
-                  </td>
+                  <CmArrayItem id={`btob-details-row-${i}`} style={{ display: "contents" }}>
+                    <CmId id={`btob-details-row-${i}-th`} as="th">
+                      {row.th}
+                    </CmId>
+                    <td>
+                      <CmHtml id={`btob-details-row-${i}-tdHtml`} html={row.tdHtml} as="span" />
+                    </td>
+                  </CmArrayItem>
                 </tr>
               ))}
             </tbody>
@@ -554,7 +553,7 @@ export default function BtobSeminar() {
 
           <div className="faq-list reveal">
             {content.faq.items.map((item, i) => (
-              <div key={i} className="faq-item">
+              <CmArrayItem key={i} id={`btob-faq-item-${i}`} className="faq-item">
                 <span className="faq-marker">Q.</span>
                 <div>
                   <CmId id={`btob-faq-item-${i}-q`} as="div" className="faq-q">
@@ -564,7 +563,7 @@ export default function BtobSeminar() {
                     {item.a}
                   </CmId>
                 </div>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>

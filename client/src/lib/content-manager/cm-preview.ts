@@ -56,7 +56,7 @@ export function isCmPreviewMode(search?: string): boolean {
 
 export type CmPreviewMessage =
   | { type: "cm-ready" }
-  | { type: "cm-select"; id: string; label?: string }
+  | { type: "cm-select"; id: string; label?: string; selectKind?: "field" | "array" | "auto" }
   | { type: "cm-draft"; slug: string; payload: ContentPayload }
   | { type: "cm-scroll-to"; id: string };
 

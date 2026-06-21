@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
+import { CmArrayItem } from "@/components/contents-manager/CmId";
 import { useHomeDynamicLinks } from "@/hooks/useHomeDynamicLinks";
 import {
   DEFAULT_EVENT_FLOW_IMAGE_PATHS,
@@ -133,7 +134,7 @@ export default function Home({ lpSlug }: HomeProps) {
     setHeroImageMobileUrl(payload.heroMobile || null);
     setHeroImageLoadError(false);
     setFeatures(
-      payload.features && payload.features.length >= 3 ? payload.features.slice(0, 3) : getStoredFeatures(),
+      payload.features && payload.features.length > 0 ? payload.features : getStoredFeatures(),
     );
     setFeatureImageErrors(new Set());
     if (payload.paletteId) setPaletteId(payload.paletteId);
@@ -213,7 +214,7 @@ export default function Home({ lpSlug }: HomeProps) {
       setHeroImageUrl(local.hero ?? DEFAULT_HERO_IMAGE_PATH);
       setHeroImageMobileUrl(local.heroMobile || null);
       setHeroImageLoadError(false);
-      setFeatures(local.features && local.features.length >= 3 ? local.features.slice(0, 3) : getStoredFeatures());
+      setFeatures(local.features && local.features.length > 0 ? local.features : getStoredFeatures());
       setFeatureImageErrors(new Set());
       setHomeCopy(getStoredHomeCopy());
     })();
@@ -653,7 +654,12 @@ export default function Home({ lpSlug }: HomeProps) {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {homeCopy.values.items.map((item, i) => (
-              <div key={i} className="bg-white border border-lp-border rounded-3xl p-10 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+              <CmArrayItem
+                key={i}
+                id={`values-card-${i}`}
+                className="bg-white border border-lp-border rounded-3xl p-10 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp"
+                style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}
+              >
                 <div className="flex flex-wrap gap-6">
                   <div className="text-4xl font-bold text-[#ffd7c3] shrink-0" style={{ fontFamily: "'Shippori Mincho', serif" }}>{String(i + 1).padStart(2, "0")}</div>
                   <div className="flex-1 min-w-0">
@@ -675,7 +681,7 @@ export default function Home({ lpSlug }: HomeProps) {
                     </div>
                   ) : null}
                 </div>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -694,7 +700,12 @@ export default function Home({ lpSlug }: HomeProps) {
           <div className="relative">
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-lp-primary to-lp-accent-light"></div>
             {homeCopy.eventFlow.steps.map((item, i) => (
-              <div key={i} className="flex gap-6 mb-8 opacity-0 animate-fadeUp" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards' }}>
+              <CmArrayItem
+                key={i}
+                id={`event-flow-step-${i}`}
+                className="flex gap-6 mb-8 opacity-0 animate-fadeUp"
+                style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards' }}
+              >
                 <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white border-2 border-lp-primary flex items-center justify-center font-bold text-lp-text-heading relative z-10" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   {String(i + 1).padStart(2, "0")}
                 </div>
@@ -703,7 +714,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   <p className="text-xs text-lp-primary font-medium mb-1" data-cm-id={`event-flow-step-${i}-time`} style={cms(`event-flow-step-${i}-time`)}>{item.time}</p>
                   <p className="text-sm text-lp-text-body leading-relaxed" data-cm-id={`event-flow-step-${i}-description`} style={cms(`event-flow-step-${i}-description`)}>{item.description}</p>
                 </div>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
 
@@ -774,10 +785,10 @@ export default function Home({ lpSlug }: HomeProps) {
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {features.length === 0 ? null : features.slice(0, 3).map((item, i) => {
+            {features.length === 0 ? null : features.map((item, i) => {
               const hasImage = item.imageUrl != null && item.imageUrl.trim() !== "" && !featureImageErrors.has(i);
               return (
-              <div key={i} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp overflow-hidden" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+              <CmArrayItem key={i} id={`feature-${i}`} className="bg-white border border-lp-border rounded-3xl p-8 hover:shadow-lg hover:-translate-y-0.5 transition-all opacity-0 animate-fadeUp overflow-hidden" style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 {hasImage && (
                   <div className="-mx-8 -mt-8 mb-6 h-[180px] overflow-hidden bg-lp-bg-warm shadow-lg ring-1 ring-black/5 relative" data-cm-id={`feature-${i}-image`}>
                     <picture className="absolute inset-0 block w-full h-full">
@@ -806,7 +817,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 </div>
                 <h3 className="text-lg font-bold text-lp-text-heading leading-tight mb-3" style={cms(`feature-${i}-title`, MINCHO_STYLE)} data-cm-id={`feature-${i}-title`}>{item.title}</h3>
                 <p className="text-sm text-lp-text-heading leading-relaxed whitespace-pre-line" data-cm-id={`feature-${i}-body`} style={cms(`feature-${i}-body`)}>{item.body}</p>
-              </div>
+              </CmArrayItem>
             );})}
           </div>
         </div>
@@ -823,12 +834,12 @@ export default function Home({ lpSlug }: HomeProps) {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {homeCopy.voices.items.map((item, i) => (
-              <div key={i} className="bg-white border border-lp-border rounded-2xl p-6 opacity-0 animate-fadeUp" style={{ animationDelay: `${(i % 3) * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+              <CmArrayItem key={i} id={`voices-card-${i}`} className="bg-white border border-lp-border rounded-2xl p-6 opacity-0 animate-fadeUp" style={{ animationDelay: `${(i % 3) * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 <p className="text-sm text-lp-text-muted leading-relaxed mb-4 border-l-3 border-lp-primary pl-4" style={cms(`voices-card-${i}-quote`, MINCHO_STYLE)} data-cm-id={`voices-card-${i}-quote`}>{item.quote}</p>
                 <p className="text-xs text-lp-text-body font-medium" data-cm-id={`voices-card-${i}-attribution`} style={cms(`voices-card-${i}-attribution`)}>
                   {item.attribution}
                 </p>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
           <div className="mt-10 w-full max-w-sm mx-auto hidden md:block">
@@ -863,14 +874,14 @@ export default function Home({ lpSlug }: HomeProps) {
             </div>
             <div className="space-y-3 mb-9">
             {homeCopy.screening.criteria.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.12 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+              <CmArrayItem key={i} id={`screening-criterion-${i}`} className="flex items-start gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.12 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                 <div className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center text-lp-primary mt-0.5">
                   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M13 4L6 11L3 8"/>
                   </svg>
                 </div>
                 <p className="text-sm text-lp-text-heading pt-0.5" data-cm-id={`screening-criterion-${i}`} style={cms(`screening-criterion-${i}`)}>{item}</p>
-              </div>
+              </CmArrayItem>
             ))}
             </div>
             <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }} data-cm-id="screening-trust">
@@ -890,7 +901,7 @@ export default function Home({ lpSlug }: HomeProps) {
             <p className="text-xs text-lp-primary text-center mb-5" data-cm-id="safety-subheading" style={cms("safety-subheading")}>{homeCopy.safety.subheading}</p>
             <div className="space-y-3">
               {homeCopy.safety.items.map((item, i) => (
-                <div key={i} className="flex gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.6 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+                <CmArrayItem key={i} id={`safety-item-${i}`} className="flex gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.6 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
                   <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-lp-bg-warm flex items-center justify-center text-lp-primary">
                     {i === 0 && (
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -913,7 +924,7 @@ export default function Home({ lpSlug }: HomeProps) {
                     <p className="text-sm font-medium text-lp-text-heading mb-0.5" data-cm-id={`safety-item-${i}-title`} style={cms(`safety-item-${i}-title`)}>{item.title}</p>
                     <p className="text-xs text-lp-text-body leading-relaxed" data-cm-id={`safety-item-${i}-description`} style={cms(`safety-item-${i}-description`)}>{item.description}</p>
                   </div>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
           </div>
@@ -960,7 +971,7 @@ export default function Home({ lpSlug }: HomeProps) {
 
               if (isCmPreview) {
                 return (
-                  <div key={i} className="border-b border-lp-border">
+                  <CmArrayItem key={i} id={`faq-item-${i}`} className="border-b border-lp-border">
                     <div className="flex items-center justify-between gap-3 py-5">
                       <span
                         className="flex-1 min-w-0 text-left text-lp-text-heading font-medium text-sm"
@@ -980,12 +991,13 @@ export default function Home({ lpSlug }: HomeProps) {
                         {item.answer}
                       </div>
                     )}
-                  </div>
+                  </CmArrayItem>
                 );
               }
 
               return (
-              <details key={i} className="border-b border-lp-border group">
+              <CmArrayItem key={i} id={`faq-item-${i}`} className="border-b border-lp-border">
+              <details className="group">
                 <summary className="py-5 cursor-pointer flex items-center justify-between gap-3 text-lp-text-heading font-medium text-sm hover:text-lp-primary transition-colors list-none [&::-webkit-details-marker]:hidden">
                   {item.question}
                   <span className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center group-open:bg-lp-border transition-colors pointer-events-none">
@@ -1010,6 +1022,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   {item.answer}
                 </div>
               </details>
+              </CmArrayItem>
             );
             })}
           </div>

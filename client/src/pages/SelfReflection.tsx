@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmArrayItem, CmHtml, CmId, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import type { ContentPayload } from "@/types/content-payload";
@@ -660,9 +660,11 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </div>
           <div className="s01b-tags">
             {content.eventInfo.tags.map((t, i) => (
-              <CmId key={`${t}-${i}`} id={`sr-event-info-tag-${i}`} as="span" className="s01b-tag">
-                {t}
-              </CmId>
+              <CmArrayItem key={`${t}-${i}`} id={`sr-event-info-tag-${i}`} style={{ display: "contents" }}>
+                <CmId id={`sr-event-info-tag-${i}`} as="span" className="s01b-tag">
+                  {t}
+                </CmId>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -675,10 +677,10 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </CmId>
           <ul className="issue-list">
             {content.issue.items.map((txt, i) => (
-              <li key={i} className="issue-item">
+              <CmArrayItem key={i} id={`sr-issue-item-${i}`} className="issue-item">
                 <span className="issue-dot" />
                 <CmId id={`sr-issue-item-${i}`}>{txt}</CmId>
-              </li>
+              </CmArrayItem>
             ))}
           </ul>
         </div>
@@ -709,7 +711,9 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           <CmHtml id="sr-concept-copy" html={content.concept.copyHtml} as="p" className="concept-copy" />
           <div className="tag-grid">
             {content.concept.tagsHtml.map((html, i) => (
-              <CmHtml key={i} id={`sr-concept-tag-${i}`} html={html} as="span" className="concept-tag" />
+              <CmArrayItem key={i} id={`sr-concept-tag-${i}`} style={{ display: "contents" }}>
+                <CmHtml id={`sr-concept-tag-${i}`} html={html} as="span" className="concept-tag" />
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -722,7 +726,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </CmId>
           <ul className="step-list">
             {content.steps.items.map((s, i) => (
-              <li key={i} className="step-item">
+              <CmArrayItem key={i} id={`sr-steps-item-${i}`} className="step-item">
                 <div className="step-num-block">
                   <span className="step-label">STEP</span>
                   <CmId id={`sr-steps-item-${i}-num`} as="span" className="step-num">
@@ -745,7 +749,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
                     </CmId>
                   ) : null}
                 </div>
-              </li>
+              </CmArrayItem>
             ))}
           </ul>
           <div className="step-img-row">
@@ -785,14 +789,14 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </CmId>
           <div className="voice-grid">
             {content.voices.cards.map((v, i) => (
-              <div key={i} className="voice-card">
+              <CmArrayItem key={i} id={`sr-voices-card-${i}`} className="voice-card">
                 <CmId id={`sr-voices-card-${i}-change`} as="div" className="voice-change">
                   {v.change}
                 </CmId>
                 <CmId id={`sr-voices-card-${i}-quote`} as="div" className="voice-quote">
                   {v.quote}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -805,14 +809,14 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
           </CmId>
           <div className="safety-grid">
             {content.safety.items.map((it, i) => (
-              <div key={i} className="safety-item">
+              <CmArrayItem key={i} id={`sr-safety-item-${i}`} className="safety-item">
                 <CmId id={`sr-safety-item-${i}-label`} as="div" className="safety-label">
                   {it.label}
                 </CmId>
                 <CmId id={`sr-safety-item-${i}-desc`} as="div" className="safety-desc">
                   {it.desc}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -842,19 +846,16 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
             </div>
           </div>
           <div className="advisor-text">
-            {content.advisor.bio.slice(0, 3).map((p, i) => (
-              <CmId key={i} id={`sr-advisor-bio-${i}`} as="p" className="advisor-bio">
-                {p}
-              </CmId>
+            {content.advisor.bio.map((p, i) => (
+              <CmArrayItem key={i} id={`sr-advisor-bio-${i}`}>
+                <CmId id={`sr-advisor-bio-${i}`} as="p" className="advisor-bio">
+                  {p}
+                </CmId>
+              </CmArrayItem>
             ))}
             <CmId id="sr-advisor-highlight" as="div" className="advisor-highlight">
               {content.advisor.highlight}
             </CmId>
-            {content.advisor.bio.slice(3).map((p, i) => (
-              <CmId key={`tail-${i}`} id={`sr-advisor-bio-${i + 3}`} as="p" className="advisor-bio">
-                {p}
-              </CmId>
-            ))}
           </div>
         </div>
       </section>
@@ -868,7 +869,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
             {faqItems.map((it, i) => {
               const open = openFaqIndex === i;
               return (
-                <li key={i} className={`faq-item ${open ? "open" : ""}`}>
+                <CmArrayItem key={i} id={`sr-faq-item-${i}`} className={`faq-item ${open ? "open" : ""}`}>
                   {isCmPreview ? (
                     <div className="faq-q">
                       <span className="faq-q-label">Q</span>
@@ -905,7 +906,7 @@ footer { background:var(--brown-dark); color:rgba(255,255,255,0.6); padding:40px
                   <CmId id={`sr-faq-item-${i}-a`} as="div" className="faq-a">
                     {it.a}
                   </CmId>
-                </li>
+                </CmArrayItem>
               );
             })}
           </ul>

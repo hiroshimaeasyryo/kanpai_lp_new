@@ -344,6 +344,17 @@ function mergeItems<T>(
   return fallback.map((fb, i) => mergeOne(value[i], fb));
 }
 
+/** 保存データの件数を尊重し、デフォルトより多い場合も保持 */
+function mergeDynamicItems<T>(
+  value: unknown,
+  fallback: T[],
+  mergeOne: (item: unknown, fb: T) => T,
+  emptyFactory: () => T,
+): T[] {
+  if (!Array.isArray(value) || value.length === 0) return fallback;
+  return value.map((item, i) => mergeOne(item, fallback[i] ?? emptyFactory()));
+}
+
 export function mergeHomeCopy(raw: unknown): HomeCopy {
   const base = DEFAULT_HOME_COPY;
   if (!raw || typeof raw !== "object") return base;
@@ -396,7 +407,10 @@ export function mergeHomeCopy(raw: unknown): HomeCopy {
     values: {
       eyebrow: mergeString(values.eyebrow, base.values.eyebrow),
       heading: mergeString(values.heading, base.values.heading),
-      items: mergeItems(values.items, base.values.items, (item, fb) => {
+      items: mergeDynamicItems(
+        values.items,
+        base.values.items,
+        (item, fb) => {
         const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
         return {
           label: mergeString(o.label, fb.label),
@@ -404,64 +418,86 @@ export function mergeHomeCopy(raw: unknown): HomeCopy {
           body: mergeString(o.body, fb.body),
           note: o.note === undefined ? fb.note : mergeString(o.note, fb.note ?? ""),
         };
-      }),
+      },
+        () => ({ label: "", title: "", body: "", note: "" }),
+      ),
     },
     eventFlow: {
       eyebrow: mergeString(eventFlow.eyebrow, base.eventFlow.eyebrow),
       heading: mergeString(eventFlow.heading, base.eventFlow.heading),
-      steps: mergeItems(eventFlow.steps, base.eventFlow.steps, (item, fb) => {
+      steps: mergeDynamicItems(
+        eventFlow.steps,
+        base.eventFlow.steps,
+        (item, fb) => {
         const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
         return {
           title: mergeString(o.title, fb.title),
           time: mergeString(o.time, fb.time),
           description: mergeString(o.description, fb.description),
         };
-      }),
+      },
+        () => ({ title: "", time: "", description: "" }),
+      ),
     },
     voices: {
       eyebrow: mergeString(voices.eyebrow, base.voices.eyebrow),
       heading: mergeString(voices.heading, base.voices.heading),
-      items: mergeItems(voices.items, base.voices.items, (item, fb) => {
+      items: mergeDynamicItems(
+        voices.items,
+        base.voices.items,
+        (item, fb) => {
         const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
         return {
           quote: mergeString(o.quote, fb.quote),
           attribution: mergeString(o.attribution, fb.attribution),
         };
-      }),
+      },
+        () => ({ quote: "", attribution: "" }),
+      ),
     },
     screening: {
       eyebrow: mergeString(screening.eyebrow, base.screening.eyebrow),
       heading: mergeString(screening.heading, base.screening.heading),
       intro: mergeString(screening.intro, base.screening.intro),
-      criteria: mergeItems(screening.criteria, base.screening.criteria, (item, fb) =>
-        mergeString(item, fb),
+      criteria: mergeDynamicItems(
+        screening.criteria,
+        base.screening.criteria,
+        (item, fb) => mergeString(item, fb),
+        () => "",
       ),
       trustNote: mergeString(screening.trustNote, base.screening.trustNote),
     },
     safety: {
       heading: mergeString(safety.heading, base.safety.heading),
       subheading: mergeString(safety.subheading, base.safety.subheading),
-      items: mergeItems(safety.items, base.safety.items, (item, fb) => {
+      items: mergeDynamicItems(
+        safety.items,
+        base.safety.items,
+        (item, fb) => {
         const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
         return {
           title: mergeString(o.title, fb.title),
           description: mergeString(o.description, fb.description),
         };
-      }),
+      },
+        () => ({ title: "", description: "" }),
+      ),
     },
     faq: {
       eyebrow: mergeString(faq.eyebrow, base.faq.eyebrow),
       heading: mergeString(faq.heading, base.faq.heading),
-      items: Array.isArray(faq.items) && faq.items.length > 0
-        ? faq.items.map((item, i) => {
-            const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
-            const fb = base.faq.items[i] ?? { question: "", answer: "" };
-            return {
-              question: mergeString(o.question, fb.question),
-              answer: mergeString(o.answer, fb.answer),
-            };
-          })
-        : base.faq.items,
+      items: mergeDynamicItems(
+        faq.items,
+        base.faq.items,
+        (item, fb) => {
+          const o = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+          return {
+            question: mergeString(o.question, fb.question),
+            answer: mergeString(o.answer, fb.answer),
+          };
+        },
+        () => ({ question: "", answer: "" }),
+      ),
     },
     finalCta: {
       headingLine1: mergeString(finalCta.headingLine1, base.finalCta.headingLine1),

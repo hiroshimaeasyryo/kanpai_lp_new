@@ -11,7 +11,7 @@ import {
   type SelfStanceContent,
 } from "@/types/self-stance";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmArrayItem, CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./self-stance.css";
 
 const STORAGE_KEY = "self_stance_content_v1";
@@ -249,7 +249,7 @@ export default function SelfStance() {
         </CmId>
         <div className="info-grid">
           {c.eventInfo.rows.map((row, i) => (
-            <div key={i} className="info-row">
+            <CmArrayItem key={i} id={`ss-event-info-row-${i}`} className="info-row">
               <div className="info-icon">
                 <EventInfoIcon label={row.label} />
               </div>
@@ -261,7 +261,7 @@ export default function SelfStance() {
                   {row.value}
                 </CmId>
               </div>
-            </div>
+            </CmArrayItem>
           ))}
         </div>
       </div>
@@ -277,7 +277,9 @@ export default function SelfStance() {
           <ul className="emp-list">
             {c.empathy.items.map((item, i) => (
               <li key={i}>
-                <CmId id={`ss-problem-item-${i}`}>{item}</CmId>
+                <CmArrayItem id={`ss-problem-item-${i}`}>
+                  <CmId id={`ss-problem-item-${i}`}>{item}</CmId>
+                </CmArrayItem>
               </li>
             ))}
           </ul>
@@ -306,7 +308,9 @@ export default function SelfStance() {
           <ul className="benefit-list">
             {c.solution.benefits.map((b, i) => (
               <li key={i}>
-                <CmId id={`ss-solution-benefit-${i}`}>{b}</CmId>
+                <CmArrayItem id={`ss-solution-benefit-${i}`}>
+                  <CmId id={`ss-solution-benefit-${i}`}>{b}</CmId>
+                </CmArrayItem>
               </li>
             ))}
           </ul>
@@ -330,7 +334,7 @@ export default function SelfStance() {
           </h2>
           <div className="flow-steps">
             {c.program.steps.map((step, i) => (
-              <div key={i} className="flow-step">
+              <CmArrayItem key={i} id={`ss-program-step-${i}`} className="flow-step">
                 <div className="flow-step-left">
                   <CmId id={`ss-program-step-${i}-num`} as="span" className="flow-step-num">
                     {step.num}
@@ -346,7 +350,7 @@ export default function SelfStance() {
                 <CmId id={`ss-program-step-${i}-description`} className="flow-step-right">
                   {step.description}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
           <div className="flow-points">
@@ -356,7 +360,9 @@ export default function SelfStance() {
             <ul>
               {c.program.points.map((p, i) => (
                 <li key={i}>
-                  <CmId id={`ss-program-point-${i}`}>{p}</CmId>
+                  <CmArrayItem id={`ss-program-point-${i}`}>
+                    <CmId id={`ss-program-point-${i}`}>{p}</CmId>
+                  </CmArrayItem>
                 </li>
               ))}
             </ul>
@@ -390,7 +396,9 @@ export default function SelfStance() {
               <ul className="faci-list">
                 {c.facilitator.bio.map((line, i) => (
                   <li key={i}>
-                    <CmId id={`ss-facilitator-bio-${i}`}>{line}</CmId>
+                    <CmArrayItem id={`ss-facilitator-bio-${i}`}>
+                      <CmId id={`ss-facilitator-bio-${i}`}>{line}</CmId>
+                    </CmArrayItem>
                   </li>
                 ))}
               </ul>
@@ -412,14 +420,14 @@ export default function SelfStance() {
           </CmId>
           <div className="voice-grid">
             {c.voices.items.map((v, i) => (
-              <div key={i} className="voice-card">
+              <CmArrayItem key={i} id={`ss-voices-item-${i}`} className="voice-card">
                 <CmId id={`ss-voices-item-${i}-who`} className="voice-who">
                   {v.who}
                 </CmId>
                 <CmId id={`ss-voices-item-${i}-text`} className="voice-text">
                   {v.text}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
           {c.voices.note ? <p className="voice-note">{c.voices.note}</p> : null}
@@ -438,12 +446,14 @@ export default function SelfStance() {
             <tbody>
               {c.detail.scheduleRows.map((row, i) => (
                 <tr key={i}>
-                  <td>
-                    <CmId id={`ss-detail-row-${i}-label`}>{row.label}</CmId>
-                  </td>
-                  <td>
-                    <CmId id={`ss-detail-row-${i}-value`}>{row.value}</CmId>
-                  </td>
+                  <CmArrayItem id={`ss-detail-row-${i}`} style={{ display: "contents" }}>
+                    <td>
+                      <CmId id={`ss-detail-row-${i}-label`}>{row.label}</CmId>
+                    </td>
+                    <td>
+                      <CmId id={`ss-detail-row-${i}-value`}>{row.value}</CmId>
+                    </td>
+                  </CmArrayItem>
                 </tr>
               ))}
             </tbody>
@@ -478,7 +488,9 @@ export default function SelfStance() {
           <ul className="target-list">
             {c.target.items.map((item, i) => (
               <li key={i}>
-                <CmId id={`ss-target-item-${i}`}>{item}</CmId>
+                <CmArrayItem id={`ss-target-item-${i}`}>
+                  <CmId id={`ss-target-item-${i}`}>{item}</CmId>
+                </CmArrayItem>
               </li>
             ))}
           </ul>
@@ -495,14 +507,14 @@ export default function SelfStance() {
           </CmId>
           <div className="faq-list">
             {c.faq.items.map((item, i) => (
-              <div key={i} className="faq-item">
+              <CmArrayItem key={i} id={`ss-faq-item-${i}`} className="faq-item">
                 <CmId id={`ss-faq-item-${i}-q`} className="faq-q">
                   {item.q}
                 </CmId>
                 <CmId id={`ss-faq-item-${i}-a`} className="faq-a">
                   {item.a}
                 </CmId>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -514,9 +526,11 @@ export default function SelfStance() {
         </h2>
         <div className="final-body">
           {c.finalCta.paragraphs.map((p, i) => (
-            <CmId key={i} id={`ss-final-cta-paragraph-${i}`} as="p">
-              {p}
-            </CmId>
+            <CmArrayItem key={i} id={`ss-final-cta-paragraph-${i}`}>
+              <CmId id={`ss-final-cta-paragraph-${i}`} as="p">
+                {p}
+              </CmId>
+            </CmArrayItem>
           ))}
         </div>
         <CtaButton
@@ -532,9 +546,9 @@ export default function SelfStance() {
 
       <footer className="page-footer">
         {c.footer.lines.map((line, i) => (
-          <CmId key={i} id={`ss-footer-line-${i}`}>
-            {line}
-          </CmId>
+          <CmArrayItem key={i} id={`ss-footer-line-${i}`}>
+            <CmId id={`ss-footer-line-${i}`}>{line}</CmId>
+          </CmArrayItem>
         ))}
         <CmId id="ss-footer-copyright">{c.footer.copyright}</CmId>
       </footer>
