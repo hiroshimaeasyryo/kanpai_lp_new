@@ -9,7 +9,7 @@ import {
   mergeJsSelfAnalysisContent,
   type JsSelfAnalysisContent,
 } from "@/types/js-self-analysis";
-import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmArrayItem, CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./js-self-analysis.css";
 
 const STORAGE_KEY = "js_self_analysis_content_v1";
@@ -229,7 +229,7 @@ export default function JsSelfAnalysis() {
             <div className="hero-inner">
               <div className="hero-info-card">
                 {c.hero.infoRows.map((row, i) => (
-                  <div key={i} className="hero-info-row">
+                  <CmArrayItem key={i} id={`jsa-hero-info-row-${i}`} className="hero-info-row">
                     {HERO_ICONS[i] ?? HERO_ICONS[0]}
                     <div>
                       <CmId id={`jsa-hero-info-row-${i}-label`} className="hero-info-label">
@@ -239,7 +239,7 @@ export default function JsSelfAnalysis() {
                         {row.value}
                       </CmId>
                     </div>
-                  </div>
+                  </CmArrayItem>
                 ))}
               </div>
               <div className="hero-cta-wrap">
@@ -267,12 +267,12 @@ export default function JsSelfAnalysis() {
             </h2>
             <ul className="pain-list">
               {c.empathy.items.map((item, i) => (
-                <li key={i} className="pain-item">
+                <CmArrayItem key={i} id={`jsa-empathy-item-${i}`} className="pain-item">
                   <div className="pain-dot" />
                   <CmId id={`jsa-empathy-item-${i}`} as="p" className="pain-text">
                     {item}
                   </CmId>
-                </li>
+                </CmArrayItem>
               ))}
             </ul>
             <CmHtml id="jsa-empathy-close" className="empathy-close" html={c.empathy.closeHtml} as="p" />
@@ -313,12 +313,12 @@ export default function JsSelfAnalysis() {
             </CmId>
             <ul className="outcome-list">
               {c.solution.outcomes.map((o, i) => (
-                <li key={i} className="outcome-item">
+                <CmArrayItem key={i} id={`jsa-solution-outcome-${i}`} className="outcome-item">
                   <div className="outcome-check" />
                   <CmId id={`jsa-solution-outcome-${i}`} as="span" className="outcome-text">
                     {o}
                   </CmId>
-                </li>
+                </CmArrayItem>
               ))}
             </ul>
           </div>
@@ -334,7 +334,7 @@ export default function JsSelfAnalysis() {
             </CmId>
             <div className="timeline">
               {c.schedule.steps.map((step, i) => (
-                <div key={i} className="timeline-item">
+                <CmArrayItem key={i} id={`jsa-schedule-step-${i}`} className="timeline-item">
                   <div className="timeline-dot" />
                   <CmId id={`jsa-schedule-step-${i}-label`} className="timeline-label">
                     {step.label}
@@ -345,17 +345,17 @@ export default function JsSelfAnalysis() {
                   <CmId id={`jsa-schedule-step-${i}-desc`} className="timeline-desc">
                     {step.desc}
                   </CmId>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
             <div className="schedule-notes">
               {c.schedule.notes.map((note, i) => (
-                <div key={i} className="schedule-note">
+                <CmArrayItem key={i} id={`jsa-schedule-note-${i}`} className="schedule-note">
                   <div className="note-icon" />
                   <CmId id={`jsa-schedule-note-${i}`} as="span">
                     {note}
                   </CmId>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
             <div className="schedule-cta-wrap">
@@ -401,10 +401,12 @@ export default function JsSelfAnalysis() {
             <ul className="faci-bio">
               {c.facilitator.bio.map((line, i) => (
                 <li key={i}>
-                  <span className="bio-dot" />
-                  <CmId id={`jsa-facilitator-bio-${i}`} as="span">
-                    {line}
-                  </CmId>
+                  <CmArrayItem id={`jsa-facilitator-bio-${i}`} style={{ display: "contents" }}>
+                    <span className="bio-dot" />
+                    <CmId id={`jsa-facilitator-bio-${i}`} as="span">
+                      {line}
+                    </CmId>
+                  </CmArrayItem>
                 </li>
               ))}
             </ul>
@@ -424,7 +426,7 @@ export default function JsSelfAnalysis() {
             </CmId>
             <div className="voice-list">
               {c.voices.items.map((v, i) => (
-                <div key={i} className="voice-card">
+                <CmArrayItem key={i} id={`jsa-voices-item-${i}`} className="voice-card">
                   <div className="voice-head">
                     <div className="voice-mark">&ldquo;</div>
                     <CmId id={`jsa-voices-item-${i}-who`} as="span" className="voice-who">
@@ -434,7 +436,7 @@ export default function JsSelfAnalysis() {
                   <CmId id={`jsa-voices-item-${i}-text`} as="p" className="voice-text">
                     {v.text}
                   </CmId>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
           </div>
@@ -452,16 +454,18 @@ export default function JsSelfAnalysis() {
               <tbody>
                 {c.eventInfo.rows.map((row, i) => (
                   <tr key={i}>
-                    <td>
-                      <CmId id={`jsa-event-info-row-${i}-label`} as="span">
-                        {row.label}
-                      </CmId>
-                    </td>
-                    <td>
-                      <CmId id={`jsa-event-info-row-${i}-value`} as="span">
-                        {row.value}
-                      </CmId>
-                    </td>
+                    <CmArrayItem id={`jsa-event-info-row-${i}`} style={{ display: "contents" }}>
+                      <td>
+                        <CmId id={`jsa-event-info-row-${i}-label`} as="span">
+                          {row.label}
+                        </CmId>
+                      </td>
+                      <td>
+                        <CmId id={`jsa-event-info-row-${i}-value`} as="span">
+                          {row.value}
+                        </CmId>
+                      </td>
+                    </CmArrayItem>
                   </tr>
                 ))}
               </tbody>
@@ -487,12 +491,12 @@ export default function JsSelfAnalysis() {
             </CmId>
             <div className="who-list">
               {c.forWho.items.map((item, i) => (
-                <div key={i} className="who-item">
+                <CmArrayItem key={i} id={`jsa-forwho-item-${i}`} className="who-item">
                   <div className="who-num">{i + 1}</div>
                   <CmId id={`jsa-forwho-item-${i}`} as="span" className="who-text">
                     {item}
                   </CmId>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
           </div>
@@ -508,7 +512,7 @@ export default function JsSelfAnalysis() {
             </CmId>
             <div className="faq-list">
               {c.faq.items.map((item, i) => (
-                <div key={i} className="faq-item">
+                <CmArrayItem key={i} id={`jsa-faq-item-${i}`} className="faq-item">
                   <div className="faq-q">
                     <span className="faq-q-icon">Q</span>
                     <CmId id={`jsa-faq-item-${i}-q`} as="span">
@@ -518,7 +522,7 @@ export default function JsSelfAnalysis() {
                   <CmId id={`jsa-faq-item-${i}-a`} className="faq-a">
                     {item.a}
                   </CmId>
-                </div>
+                </CmArrayItem>
               ))}
             </div>
           </div>

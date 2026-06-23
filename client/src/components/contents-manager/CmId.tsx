@@ -7,6 +7,7 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
+import { cn } from "@/lib/utils";
 import {
   buildFieldStylesStylesheet,
   fieldStyleToCss,
@@ -140,5 +141,30 @@ export function CmHtml({
       {...(linkHref ? { href: linkHref, ...CM_LINK_PROPS } : {})}
       dangerouslySetInnerHTML={{ __html: html }}
     />
+  );
+}
+
+type CmArrayItemProps = {
+  /** 配列項目 ID（例: values-card-0）。個別フィールドの data-cm-id とは別 */
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+  children?: ReactNode;
+};
+
+/**
+ * 配列1件分のクリック領域。
+ * 余白部分をクリックすると追加・削除パレットが開き、
+ * 内部の data-cm-id をクリックすると従来どおり文言編集パレットが開く。
+ */
+export function CmArrayItem({ id, className, style, children }: CmArrayItemProps) {
+  return (
+    <div
+      data-cm-array-id={id}
+      className={cn("cm-array-item", className)}
+      style={style}
+    >
+      {children}
+    </div>
   );
 }

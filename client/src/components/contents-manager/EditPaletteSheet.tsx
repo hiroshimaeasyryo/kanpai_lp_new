@@ -1,4 +1,5 @@
 import { ElementEditorPanel } from "@/components/contents-manager/ElementEditorPanel";
+import { ArrayItemEditorPanel } from "@/components/contents-manager/ArrayItemEditorPanel";
 import { ReadOnlyElementPanel } from "@/components/contents-manager/ReadOnlyElementPanel";
 import {
   Sheet,
@@ -7,6 +8,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { findElementDefinition } from "@/lib/content-manager/content-element-registry";
+import {
+  parseArrayItemId,
+  parseCompactArrayItemFromFieldId,
+} from "@/lib/content-manager/array-item-registry";
+import {
+  applyArrayMutation,
+  getArrayLength,
+  type ArrayMutationContext,
+} from "@/lib/content-manager/array-item-ops";
 import { isAutoSelectableId } from "@/lib/content-manager/cm-preview-select";
 import type { HomeElementEditorProps } from "@/components/contents-manager/HomeElementEditor";
 import type { Dispatch, SetStateAction } from "react";
@@ -22,7 +32,9 @@ export interface EditPaletteSheetProps {
   selectedSlug: string;
   elementId: string | null;
   elementLabel?: string | null;
+  selectKind?: "field" | "array" | "auto";
   homeProps: HomeElementEditorProps | null;
+  arrayMutationContext: ArrayMutationContext | null;
   btobSeminarContent: BtobSeminarContent | null;
   onBtobSeminarChange: Dispatch<SetStateAction<BtobSeminarContent | null>>;
   selfReflectionContent: SelfReflectionContent | null;
@@ -41,7 +53,9 @@ export function EditPaletteSheet({
   selectedSlug,
   elementId,
   elementLabel,
+  selectKind,
   homeProps,
+  arrayMutationContext,
   btobSeminarContent,
   onBtobSeminarChange,
   selfReflectionContent,
@@ -53,10 +67,25 @@ export function EditPaletteSheet({
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
 }: EditPaletteSheetProps) {
-  const def = elementId ? findElementDefinition(selectedSlug, elementId) : undefined;
+  const arraySelection =
+    elementId && selectKind === "array" && arrayMutationContext
+      ? parseArrayItemId(elementId, selectedSlug)
+      : null;
+  const compactFieldArray =
+    elementId && selectKind === "field" && arrayMutationContext
+      ? parseCompactArrayItemFromFieldId(elementId, selectedSlug)
+      : null;
+  const def =
+    elementId && !arraySelection ? findElementDefinition(selectedSlug, elementId) : undefined;
   const tall = def?.tall ?? false;
-  const title = def?.label ?? elementLabel ?? "要素を編集";
-  const isReadOnly = Boolean(elementId && !def && isAutoSelectableId(elementId));
+  const title =
+    def?.label ??
+    (arraySelection
+      ? `${arraySelection.def.label} ${arraySelection.index + 1}`
+      : null) ??
+    elementLabel ??
+    "要素を編集";
+  const isReadOnly = Boolean(elementId && !def && !arraySelection && isAutoSelectableId(elementId));
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -74,22 +103,47 @@ export function EditPaletteSheet({
             {title}
           </SheetTitle>
         </SheetHeader>
-        {elementId && def && !isReadOnly && (
-          <ElementEditorPanel
-            selectedSlug={selectedSlug}
-            editorSection={def.editorSection}
-            homeProps={homeProps}
-            btobSeminarContent={btobSeminarContent}
-            onBtobSeminarChange={onBtobSeminarChange}
-            selfReflectionContent={selfReflectionContent}
-            onSelfReflectionChange={onSelfReflectionChange}
-            startingJobHuntingContent={startingJobHuntingContent}
-            onStartingJobHuntingChange={onStartingJobHuntingChange}
-            selfStanceContent={selfStanceContent}
-            onSelfStanceChange={onSelfStanceChange}
-            jsSelfAnalysisContent={jsSelfAnalysisContent}
-            onJsSelfAnalysisChange={onJsSelfAnalysisChange}
+        {arraySelection && arrayMutationContext && (
+          <ArrayItemEditorPanel
+            parsed={arraySelection}
+            canRemove={getArrayLength(arrayMutationContext, arraySelection) > (arraySelection.def.minItems ?? 1)}
+            onMutate={(op) => applyArrayMutation(arrayMutationContext, arraySelection, op)}
           />
+        )}
+        {elementId && def && !isReadOnly && !arraySelection && (
+          <div className="space-y-6">
+            <ElementEditorPanel
+              selectedSlug={selectedSlug}
+              editorSection={def.editorSection}
+              homeProps={homeProps}
+              btobSeminarContent={btobSeminarContent}
+              onBtobSeminarChange={onBtobSeminarChange}
+              selfReflectionContent={selfReflectionContent}
+              onSelfReflectionChange={onSelfReflectionChange}
+              startingJobHuntingContent={startingJobHuntingContent}
+              onStartingJobHuntingChange={onStartingJobHuntingChange}
+              selfStanceContent={selfStanceContent}
+              onSelfStanceChange={onSelfStanceChange}
+              jsSelfAnalysisContent={jsSelfAnalysisContent}
+              onJsSelfAnalysisChange={onJsSelfAnalysisChange}
+            />
+            {compactFieldArray && arrayMutationContext && (
+              <>
+                <div className="border-t border-[#ffd7c3]" />
+                <ArrayItemEditorPanel
+                  variant="inline"
+                  parsed={compactFieldArray}
+                  canRemove={
+                    getArrayLength(arrayMutationContext, compactFieldArray) >
+                    (compactFieldArray.def.minItems ?? 1)
+                  }
+                  onMutate={(op) =>
+                    applyArrayMutation(arrayMutationContext, compactFieldArray, op)
+                  }
+                />
+              </>
+            )}
+          </div>
         )}
         {elementId && isReadOnly && <ReadOnlyElementPanel label={title} />}
         </div>

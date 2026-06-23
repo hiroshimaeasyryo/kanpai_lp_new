@@ -90,16 +90,23 @@ export function resolveClickTarget(raw: EventTarget | null): HTMLElement | null 
   let start: Element | null = raw;
   if (start instanceof SVGElement || start.closest(SKIP_ANCESTOR_SELECTOR) === start) {
     start =
-      start.closest("button, a[href], [data-cm-id], summary, label") ??
+      start.closest("button, a[href], [data-cm-id], [data-cm-array-id], summary, label") ??
       start.parentElement;
   }
 
   if (!(start instanceof HTMLElement)) return null;
 
-  // 登録済み [data-cm-id] を最優先（セクション単位の編集パレットを開く）
+  // 文言フィールド（data-cm-id）を最優先
   let el: HTMLElement | null = start;
   while (el && el !== document.documentElement) {
     if (el.hasAttribute("data-cm-id")) return el;
+    el = el.parentElement;
+  }
+
+  // 配列項目全体（data-cm-array-id）
+  el = start;
+  while (el && el !== document.documentElement) {
+    if (el.hasAttribute("data-cm-array-id")) return el;
     el = el.parentElement;
   }
 
@@ -113,13 +120,25 @@ export function resolveClickTarget(raw: EventTarget | null): HTMLElement | null 
   return null;
 }
 
+export function getSelectableKind(el: HTMLElement): "field" | "array" | "auto" {
+  if (el.hasAttribute("data-cm-array-id")) return "array";
+  if (el.hasAttribute("data-cm-id")) return "field";
+  return "auto";
+}
+
 export function getSelectableId(el: HTMLElement): string {
+  if (el.hasAttribute("data-cm-array-id")) {
+    return el.getAttribute("data-cm-array-id")!;
+  }
   const cmId = el.getAttribute("data-cm-id");
   if (cmId) return cmId;
   return `auto:${buildElementPath(el)}`;
 }
 
 export function getSelectableLabel(el: HTMLElement): string {
+  const arrayLabel = el.getAttribute("data-cm-array-label");
+  if (arrayLabel?.trim()) return arrayLabel.trim();
+
   const explicit = el.getAttribute("data-cm-label");
   if (explicit?.trim()) return explicit.trim();
 

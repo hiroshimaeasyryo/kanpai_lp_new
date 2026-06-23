@@ -11,7 +11,7 @@ import {
   type StartingJobHuntingContent,
 } from "@/types/starting-job-hunting";
 import { EventInfoIcon } from "@/components/EventInfoIcon";
-import { CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
+import { CmArrayItem, CmId, CmHtml, FieldStylesProvider } from "@/components/contents-manager/CmId";
 import "./starting-job-hunting.css";
 
 const STORAGE_KEY = "starting_job_hunting_content_v1";
@@ -230,7 +230,7 @@ export default function StartingJobHunting() {
           </CmId>
           <div className="event-info-rows">
             {c.eventInfo.rows.map((row, i) => (
-              <div key={i} className="event-info-row">
+              <CmArrayItem key={i} id={`sjh-event-info-row-${i}`} className="event-info-row">
                 <div className="event-info-icon">
                   <EventInfoIcon label={row.label} />
                 </div>
@@ -247,7 +247,7 @@ export default function StartingJobHunting() {
                     </CmId>
                   ) : null}
                 </div>
-              </div>
+              </CmArrayItem>
             ))}
           </div>
         </div>
@@ -263,7 +263,9 @@ export default function StartingJobHunting() {
         <ul className="problem-list">
           {c.problem.items.map((item, i) => (
             <li key={i}>
-              <CmId id={`sjh-problem-item-${i}`}>{item}</CmId>
+              <CmArrayItem id={`sjh-problem-item-${i}`}>
+                <CmId id={`sjh-problem-item-${i}`}>{item}</CmId>
+              </CmArrayItem>
             </li>
           ))}
         </ul>
@@ -283,9 +285,13 @@ export default function StartingJobHunting() {
         </h2>
         <div className="bridge-box">
           {c.insight.paragraphs.map((p, i) => (
-            <p key={i} style={{ marginBottom: i < c.insight.paragraphs.length - 1 ? "1em" : 0 }}>
+            <CmArrayItem
+              key={i}
+              id={`sjh-insight-paragraph-${i}`}
+              style={{ marginBottom: i < c.insight.paragraphs.length - 1 ? "1em" : 0 }}
+            >
               <CmId id={`sjh-insight-paragraph-${i}`}>{p}</CmId>
-            </p>
+            </CmArrayItem>
           ))}
           <p style={{ marginTop: "1.25em" }}>
             <CmId id="sjh-insight-key-line" className="key">
@@ -310,12 +316,12 @@ export default function StartingJobHunting() {
         </CmId>
         <div className="deliverables">
           {c.solution.deliverables.map((d, i) => (
-            <div key={d.num} className="deliverable-item">
+            <CmArrayItem key={d.num} id={`sjh-solution-deliverable-${i}`} className="deliverable-item">
               <CmId id={`sjh-solution-deliverable-${i}-num`} className="num">
                 {d.num}
               </CmId>
               <CmId id={`sjh-solution-deliverable-${i}-text`}>{d.text}</CmId>
-            </div>
+            </CmArrayItem>
           ))}
         </div>
       </section>
@@ -340,12 +346,14 @@ export default function StartingJobHunting() {
             <tbody>
               {c.program.rows.map((row, i) => (
                 <tr key={i}>
-                  <td>
-                    <CmId id={`sjh-program-row-${i}-step`}>{row.step}</CmId>
-                  </td>
-                  <td>
-                    <CmId id={`sjh-program-row-${i}-content`}>{row.content}</CmId>
-                  </td>
+                  <CmArrayItem id={`sjh-program-row-${i}`} style={{ display: "contents" }}>
+                    <td>
+                      <CmId id={`sjh-program-row-${i}-step`}>{row.step}</CmId>
+                    </td>
+                    <td>
+                      <CmId id={`sjh-program-row-${i}-content`}>{row.content}</CmId>
+                    </td>
+                  </CmArrayItem>
                 </tr>
               ))}
             </tbody>
@@ -353,9 +361,9 @@ export default function StartingJobHunting() {
         </div>
         <div className="flow-points">
           {c.program.points.map((p, i) => (
-            <div key={i} className="flow-point">
+            <CmArrayItem key={i} id={`sjh-program-point-${i}`} className="flow-point">
               <CmId id={`sjh-program-point-${i}`}>{p}</CmId>
-            </div>
+            </CmArrayItem>
           ))}
         </div>
       </section>
@@ -377,7 +385,9 @@ export default function StartingJobHunting() {
             <ul className="facilitator-bio">
               {c.facilitator.bio.map((line, i) => (
                 <li key={i}>
-                  <CmId id={`sjh-facilitator-bio-${i}`}>{line}</CmId>
+                  <CmArrayItem id={`sjh-facilitator-bio-${i}`}>
+                    <CmId id={`sjh-facilitator-bio-${i}`}>{line}</CmId>
+                  </CmArrayItem>
                 </li>
               ))}
             </ul>
@@ -395,14 +405,14 @@ export default function StartingJobHunting() {
         </h2>
         <div className="voices">
           {c.voices.items.map((v, i) => (
-            <div key={i} className="voice-card">
+            <CmArrayItem key={i} id={`sjh-voices-item-${i}`} className="voice-card">
               <CmId id={`sjh-voices-item-${i}-school`} className="school">
                 {v.school}
               </CmId>
               <CmId id={`sjh-voices-item-${i}-comment`} className="comment">
                 {v.comment}
               </CmId>
-            </div>
+            </CmArrayItem>
           ))}
         </div>
       </section>
@@ -414,12 +424,14 @@ export default function StartingJobHunting() {
           <tbody>
             {c.info.scheduleRows.map((row, i) => (
               <tr key={i}>
-                <td>
-                  <CmId id={`sjh-info-row-${i}-label`}>{row.label}</CmId>
-                </td>
-                <td>
-                  <CmId id={`sjh-info-row-${i}-value`}>{row.value}</CmId>
-                </td>
+                <CmArrayItem id={`sjh-info-row-${i}`} style={{ display: "contents" }}>
+                  <td>
+                    <CmId id={`sjh-info-row-${i}-label`}>{row.label}</CmId>
+                  </td>
+                  <td>
+                    <CmId id={`sjh-info-row-${i}-value`}>{row.value}</CmId>
+                  </td>
+                </CmArrayItem>
               </tr>
             ))}
           </tbody>
@@ -448,7 +460,9 @@ export default function StartingJobHunting() {
         <ul className="recommend-list">
           {c.recommend.items.map((item, i) => (
             <li key={i}>
-              <CmId id={`sjh-recommend-item-${i}`}>{item}</CmId>
+              <CmArrayItem id={`sjh-recommend-item-${i}`}>
+                <CmId id={`sjh-recommend-item-${i}`}>{item}</CmId>
+              </CmArrayItem>
             </li>
           ))}
         </ul>
@@ -461,14 +475,14 @@ export default function StartingJobHunting() {
         </h2>
         <div className="faq">
           {c.faq.items.map((item, i) => (
-            <div key={i} className="faq-item">
+            <CmArrayItem key={i} id={`sjh-faq-item-${i}`} className="faq-item">
               <CmId id={`sjh-faq-item-${i}-q`} className="faq-q">
                 {item.q}
               </CmId>
               <CmId id={`sjh-faq-item-${i}-a`} className="faq-a">
                 {item.a}
               </CmId>
-            </div>
+            </CmArrayItem>
           ))}
         </div>
       </section>
@@ -482,9 +496,9 @@ export default function StartingJobHunting() {
         </div>
         <div className="meta">
           {c.finalCta.metaItems.map((m, i) => (
-            <CmId key={i} id={`sjh-final-cta-meta-${i}`}>
-              {m}
-            </CmId>
+            <CmArrayItem key={i} id={`sjh-final-cta-meta-${i}`}>
+              <CmId id={`sjh-final-cta-meta-${i}`}>{m}</CmId>
+            </CmArrayItem>
           ))}
         </div>
         <CtaButton
@@ -500,9 +514,9 @@ export default function StartingJobHunting() {
 
       <footer>
         {c.footer.lines.map((line, i) => (
-          <CmId key={i} id={`sjh-footer-line-${i}`}>
-            {line}
-          </CmId>
+          <CmArrayItem key={i} id={`sjh-footer-line-${i}`}>
+            <CmId id={`sjh-footer-line-${i}`}>{line}</CmId>
+          </CmArrayItem>
         ))}
         <CmId id="sjh-footer-copyright">{c.footer.copyright}</CmId>
       </footer>

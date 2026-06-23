@@ -13,6 +13,7 @@ import {
 import {
   CM_PREVIEW_SELECTABLE_SELECTOR,
   getSelectableId,
+  getSelectableKind,
   getSelectableLabel,
   isAccordionToggleTarget,
   openAccordionHostForElement,
@@ -59,6 +60,22 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
         outline-color: #d4844b !important;
         outline-width: 2px !important;
       }
+      [data-cm-array-id] {
+        cursor: pointer !important;
+        outline: 2px dashed transparent;
+        outline-offset: 4px;
+        transition: outline-color 0.15s ease;
+        padding: 6px;
+        margin: 2px 0;
+        box-sizing: border-box;
+      }
+      [data-cm-array-id]:hover {
+        outline-color: rgba(212, 132, 75, 0.45) !important;
+      }
+      [data-cm-array-id][data-cm-active="1"] {
+        outline-color: #d4844b !important;
+        outline-style: dashed !important;
+      }
       [data-faq-toggle], [data-cm-no-select] {
         cursor: pointer !important;
         outline: none !important;
@@ -76,11 +93,12 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
       e.stopPropagation();
       const id = getSelectableId(target);
       const label = getSelectableLabel(target);
+      const selectKind = getSelectableKind(target);
       document.querySelectorAll("[data-cm-active]").forEach((el) => {
         el.removeAttribute("data-cm-active");
       });
       target.setAttribute("data-cm-active", "1");
-      postToCmParent({ type: "cm-select", id, label });
+      postToCmParent({ type: "cm-select", id, label, selectKind });
     };
 
     const handleMessage = (event: MessageEvent) => {
@@ -92,7 +110,9 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
       }
       if (msg.type === "cm-scroll-to") {
         onScrollToIdRef.current?.(msg.id);
-        const el = document.querySelector(`[data-cm-id="${msg.id}"]`);
+        const el =
+          document.querySelector(`[data-cm-id="${msg.id}"]`) ??
+          document.querySelector(`[data-cm-array-id="${msg.id}"]`);
         if (el) {
           openAccordionHostForElement(el);
           el.scrollIntoView({ behavior: "smooth", block: "center" });

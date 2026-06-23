@@ -36,6 +36,7 @@ import {
 import { applyContentToLocalStorage, fetchContentBySlug, fetchContentManifest } from "@/lib/content-loader";
 import { applyDraftToPreviewStorage } from "@/lib/content-manager/preview-storage";
 import { broadcastCmDraft } from "@/lib/content-manager/cm-preview-sync";
+import type { ArrayMutationContext } from "@/lib/content-manager/array-item-ops";
 import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
 import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
 import type { ContentPayload } from "@/types/content-payload";
@@ -116,6 +117,7 @@ export default function ContentsManager() {
   );
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [selectedElementLabel, setSelectedElementLabel] = useState<string | null>(null);
+  const [selectedSelectKind, setSelectedSelectKind] = useState<"field" | "array" | "auto">("field");
   const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
@@ -139,6 +141,7 @@ export default function ContentsManager() {
     if (!unlocked || !selectedSlug) return;
     setSelectedElementId(null);
     setSelectedElementLabel(null);
+    setSelectedSelectKind("field");
     setSheetOpen(false);
     (async () => {
       const payload = await fetchContentBySlug(selectedSlug);
@@ -147,8 +150,8 @@ export default function ContentsManager() {
         setHeroImageUrl(payload.hero ?? null);
         setHeroImageUrlMobile(payload.heroMobile ?? null);
         setFeatures(
-          payload.features && payload.features.length >= 3
-            ? payload.features.slice(0, 3)
+          payload.features && payload.features.length > 0
+            ? payload.features
             : [...DEFAULT_FEATURES],
         );
         setEventImages(payload.eventImages && payload.eventImages.length > 0 ? payload.eventImages : []);
@@ -209,7 +212,7 @@ export default function ContentsManager() {
       heroMobile: heroImageUrlMobile ?? null,
       eventImages: eventImages.length > 0 ? eventImages : undefined,
       events: events.length > 0 ? events : undefined,
-      features: features.slice(0, 3),
+      features: features.length > 0 ? features : undefined,
       paletteId: paletteId ?? null,
       copy: homeCopy,
       ...(selectedSlug === "campaign2603"
@@ -324,7 +327,7 @@ export default function ContentsManager() {
   };
 
   const handleFeatureUpdate = (index: number, patch: Partial<FeatureItem>) => {
-    persistFeatures(features.slice(0, 3).map((f, i) => (i === index ? { ...f, ...patch } : f)));
+    persistFeatures(features.map((f, i) => (i === index ? { ...f, ...patch } : f)));
   };
 
   const handleDownloadJson = () => {
@@ -377,14 +380,48 @@ export default function ContentsManager() {
     }
   };
 
-  const handleElementSelect = useCallback((id: string, label?: string) => {
-    setSelectedElementId(id);
-    setSelectedElementLabel(label ?? null);
-    setSheetOpen(true);
-  }, []);
+  const handleElementSelect = useCallback(
+    (id: string, label?: string, selectKind: "field" | "array" | "auto" = "field") => {
+      setSelectedElementId(id);
+      setSelectedElementLabel(label ?? null);
+      setSelectedSelectKind(selectKind);
+      setSheetOpen(true);
+    },
+    [],
+  );
 
   const defaultLineHref =
     selectedSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL;
+
+  const arrayMutationContext = useMemo<ArrayMutationContext | null>(() => {
+    return {
+      homeCopy,
+      onHomeCopyChange: (next) => {
+        setHomeCopy(next);
+        setStoredHomeCopy(next);
+      },
+      features,
+      onFeaturesChange: persistFeatures,
+      btobSeminarContent,
+      onBtobSeminarChange: (next) => setBtobSeminarContent(next),
+      selfReflectionContent,
+      onSelfReflectionChange: (next) => setSelfReflectionContent(next),
+      startingJobHuntingContent,
+      onStartingJobHuntingChange: (next) => setStartingJobHuntingContent(next),
+      selfStanceContent,
+      onSelfStanceChange: (next) => setSelfStanceContent(next),
+      jsSelfAnalysisContent,
+      onJsSelfAnalysisChange: (next) => setJsSelfAnalysisContent(next),
+    };
+  }, [
+    homeCopy,
+    features,
+    btobSeminarContent,
+    selfReflectionContent,
+    startingJobHuntingContent,
+    selfStanceContent,
+    jsSelfAnalysisContent,
+  ]);
 
   const homeElementEditorProps: HomeElementEditorProps | null = useMemo(
     () => ({
@@ -609,7 +646,7 @@ export default function ContentsManager() {
           <ul className="space-y-2 text-sm text-[#5C3E2A]">
             <li>
               <span className="text-[#d4844b] font-bold">1.</span>{" "}
-              プレビュー上の要素をクリックすると、下から編集パレットが開きます。
+              テキスト部分をクリックすると文言の編集パレット、項目の余白（点線枠）をクリックすると追加・削除パレットが開きます。
             </li>
             <li>
               <span className="text-[#d4844b] font-bold">2.</span>{" "}
@@ -633,7 +670,9 @@ export default function ContentsManager() {
         selectedSlug={selectedSlug}
         elementId={selectedElementId}
         elementLabel={selectedElementLabel}
+        selectKind={selectedSelectKind}
         homeProps={homeElementEditorProps}
+        arrayMutationContext={arrayMutationContext}
         btobSeminarContent={btobSeminarContent}
         onBtobSeminarChange={setBtobSeminarContent}
         selfReflectionContent={selfReflectionContent}

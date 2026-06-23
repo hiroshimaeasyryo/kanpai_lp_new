@@ -49,7 +49,6 @@ function indexedSimple(prefix: string, labelPrefix: string, count: number): Elem
 
 
 /** Home LP の文言・画像要素（プレビュー個別選択用） */
-
 export const HOME_COPY_ELEMENTS: ElementDefinition[] = [
 
   def("brand-logo", "ブランドロゴ"),
@@ -217,6 +216,8 @@ const HOME_COPY_FIELD_PATTERNS: RegExp[] = [
   /^values-card-\d+-(label|title|body|note)$/,
 
   /^event-flow-step-\d+-(title|time|description)$/,
+
+  /^feature-\d+-(title|body|image)$/,
 
   /^voices-card-\d+-(quote|attribution)$/,
 

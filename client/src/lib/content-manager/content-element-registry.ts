@@ -1,6 +1,10 @@
 import { getLpKind, type LpKind } from "@/lib/content-manager/cm-preview";
+import {
+  buildHomeDynamicElementDef,
+  parseArrayItemId,
+} from "@/lib/content-manager/array-item-registry";
 import { HOME_COPY_ELEMENTS } from "@/lib/content-manager/home-copy-elements";
-import { getLpFieldElements, findLpField } from "@/lib/content-manager/lp-field-registry";
+import { getLpFieldElements, findLpField, findArrayItemElementDefinition } from "@/lib/content-manager/lp-field-registry";
 
 export type ElementDefinition = {
   id: string;
@@ -32,8 +36,18 @@ export function getElementRegistry(slug: string): ElementDefinition[] {
 }
 
 export function findElementDefinition(slug: string, id: string): ElementDefinition | undefined {
+  const arrayDef = findArrayItemElementDefinition(slug, id);
+  if (arrayDef) return arrayDef;
+
   const exact = getElementRegistry(slug).find((el) => el.id === id);
   if (exact) return exact;
+
+  if (getLpKind(slug) === "home") {
+    const homeDynamic = buildHomeDynamicElementDef(id);
+    if (homeDynamic) return homeDynamic;
+    return undefined;
+  }
+
   const lpField = findLpField(slug, id);
   if (lpField) {
     return { id: lpField.id, label: lpField.label, editorSection: lpField.id };
