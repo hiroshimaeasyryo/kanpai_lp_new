@@ -17,7 +17,7 @@ const STORAGE_KEY = "btob_seminar_content_v1";
 const ANCHOR_SCROLL_DURATION_MS = 650;
 const ANCHOR_SCROLL_OFFSET_PX = 20;
 const FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap";
+  "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap";
 
 function trackBtobCtaClick() {
   if (typeof window !== "undefined" && typeof (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq === "function") {

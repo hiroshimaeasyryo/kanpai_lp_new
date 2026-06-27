@@ -13,9 +13,13 @@ export type TextFieldStyle = {
 
 export type HomeCopyFieldStyles = Record<string, TextFieldStyle>;
 
+export const NOTO_SERIF_JP_FONT_VALUE = "'Noto Serif JP', serif";
+export const NOTO_SERIF_JP_FONT_LABEL = "Noto Serif JP";
+
 export const FONT_FAMILY_OPTIONS = [
   { value: "", label: "デフォルト（LP設定）" },
   { value: "'Shippori Mincho', serif", label: "しっぽり明朝" },
+  { value: NOTO_SERIF_JP_FONT_VALUE, label: NOTO_SERIF_JP_FONT_LABEL },
   { value: "'Zen Kaku Gothic New', sans-serif", label: "ゼン角ゴシック New" },
 ] as const;
 

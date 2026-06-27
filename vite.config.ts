@@ -248,6 +248,11 @@ export default defineConfig({
   },
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
+  test: {
+    environment: "happy-dom",
+    setupFiles: [path.resolve(import.meta.dirname, "client", "src", "test", "setup.ts")],
+    include: ["src/**/*.test.{ts,tsx}"],
+  },
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,

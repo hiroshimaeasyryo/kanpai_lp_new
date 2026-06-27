@@ -17,7 +17,7 @@ import "./starting-job-hunting.css";
 const STORAGE_KEY = "starting_job_hunting_content_v1";
 const FAVICON_HREF = STARTING_JOB_HUNTING_ASSETS.favicon;
 const FONTS_HREF =
-  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@400;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700&family=Shippori+Mincho:wght@400;700&display=swap";
 
 function safeParseStored(): StartingJobHuntingContent | null {
   try {
