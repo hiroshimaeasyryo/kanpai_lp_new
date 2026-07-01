@@ -24,7 +24,6 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "content",
   "api",
   "assets",
-  "wp_redirect",
   "kdk", // クライアントモック（/kdk/ 静的ゲート）
   "root", // トップ用に使用するため予約
 ]);

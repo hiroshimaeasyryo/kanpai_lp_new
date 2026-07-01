@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import PoprockRedirect from "@/pages/PoprockRedirect";
 import ThanksKs from "@/pages/ThanksKs";
-import WpRedirect from "@/pages/WpRedirect";
 import { usePreserveQueryNavigate } from "@/hooks/usePreserveQueryNavigate";
 import { Route, Switch, useRoute } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -44,7 +43,6 @@ function Router() {
       <Route path={"/kdk"} component={KdkMockup} />
       <Route path={"/thanks_ks"} component={ThanksKs} />
       <Route path={"/poprock_redirect"} component={PoprockRedirect} />
-      <Route path={"/wp_redirect"} component={WpRedirect} />
       <Route path={"/self-reflection"} component={SelfReflection} />
       <Route path={"/btob_seminar"} component={BtobSeminar} />
       <Route path={"/starting_job_hunting"} component={StartingJobHunting} />
