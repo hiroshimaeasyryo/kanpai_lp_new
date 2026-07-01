@@ -8,3 +8,7 @@ export const LINE_KS_SIGNUP_URL =
 /** /campaign2603 用のLINE追加URL */
 export const LINE_CAMPAIGN2603_SIGNUP_URL =
   "https://xp48w7qk.autosns.app/addfriend/s/Td6U2pRCSK/@779ahmbk";
+
+/** /wp_redirect 用のLINE追加URL */
+export const LINE_WP_SIGNUP_URL =
+  "https://xp48w7qk.autosns.app/addfriend/s/U2gUDIzwJh/@779ahmbk?free1=sns_wp";
