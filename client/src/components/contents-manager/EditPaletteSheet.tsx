@@ -45,6 +45,7 @@ export interface EditPaletteSheetProps {
   onSelfStanceChange: Dispatch<SetStateAction<SelfStanceContent | null>>;
   jsSelfAnalysisContent: JsSelfAnalysisContent | null;
   onJsSelfAnalysisChange: Dispatch<SetStateAction<JsSelfAnalysisContent | null>>;
+  onSharedCtaUrlChange?: (url: string) => void;
 }
 
 export function EditPaletteSheet({
@@ -66,6 +67,7 @@ export function EditPaletteSheet({
   onSelfStanceChange,
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
+  onSharedCtaUrlChange,
 }: EditPaletteSheetProps) {
   const arraySelection =
     elementId && selectKind === "array" && arrayMutationContext
@@ -126,6 +128,7 @@ export function EditPaletteSheet({
               onSelfStanceChange={onSelfStanceChange}
               jsSelfAnalysisContent={jsSelfAnalysisContent}
               onJsSelfAnalysisChange={onJsSelfAnalysisChange}
+              onSharedCtaUrlChange={onSharedCtaUrlChange}
             />
             {compactFieldArray && arrayMutationContext && (
               <>

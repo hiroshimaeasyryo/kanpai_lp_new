@@ -1,4 +1,5 @@
 import { useEffect, useState, type ElementType } from "react";
+import { resolveCtaUrl } from "@/lib/content-manager/shared-lp-cta";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
@@ -176,6 +177,7 @@ export default function StartingJobHunting() {
   }, [isCmPreview]);
 
   const c = content;
+  const ctaUrl = resolveCtaUrl(c);
 
   return (
     <FieldStylesProvider value={c.fieldStyles} scopeSelector="#starting-job-hunting-page">
@@ -188,7 +190,7 @@ export default function StartingJobHunting() {
           data-cm-id="sjh-header-logo"
         />
         <a
-          href={c.header.ctaHref}
+          href={ctaUrl}
           className="header-cta"
           target="_blank"
           rel="noopener noreferrer"
@@ -213,7 +215,7 @@ export default function StartingJobHunting() {
         </div>
         <div className="fv-cta-bar">
           <CtaButton
-            href={c.hero.primaryCtaHref}
+            href={ctaUrl}
             label={c.hero.primaryCtaLabel}
             labelCmId="sjh-hero-primary-cta-label"
           />
@@ -327,7 +329,7 @@ export default function StartingJobHunting() {
       </section>
 
       <div className="cta-block">
-        <CtaButton href={c.midCta.ctaHref} label={c.midCta.label} labelCmId="sjh-mid-cta-label" />
+        <CtaButton href={ctaUrl} label={c.midCta.label} labelCmId="sjh-mid-cta-label" />
       </div>
 
       <section>
@@ -448,7 +450,7 @@ export default function StartingJobHunting() {
           </div>
         ) : null}
         <div className="cta-block" style={{ borderTop: "none", paddingTop: 32 }}>
-          <CtaButton href={c.info.ctaHref} label={c.info.ctaLabel} labelCmId="sjh-info-cta-label" />
+          <CtaButton href={ctaUrl} label={c.info.ctaLabel} labelCmId="sjh-info-cta-label" />
         </div>
       </section>
 
@@ -502,7 +504,7 @@ export default function StartingJobHunting() {
           ))}
         </div>
         <CtaButton
-          href={c.finalCta.ctaHref}
+          href={ctaUrl}
           label={c.finalCta.ctaLabel}
           labelCmId="sjh-final-cta-label"
           dark
@@ -522,7 +524,7 @@ export default function StartingJobHunting() {
       </footer>
 
       <div className="sticky-cta">
-        <CtaButton href={c.stickyCta.ctaHref} label={c.stickyCta.label} labelCmId="sjh-sticky-cta-label" />
+        <CtaButton href={ctaUrl} label={c.stickyCta.label} labelCmId="sjh-sticky-cta-label" />
       </div>
     </div>
     </FieldStylesProvider>

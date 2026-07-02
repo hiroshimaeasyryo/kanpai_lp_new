@@ -36,6 +36,16 @@ import {
 import { applyContentToLocalStorage, fetchContentBySlug, fetchContentManifest } from "@/lib/content-loader";
 import { applyDraftToPreviewStorage } from "@/lib/content-manager/preview-storage";
 import { broadcastCmDraft } from "@/lib/content-manager/cm-preview-sync";
+import {
+  applyCtaUrlToJsa,
+  applyCtaUrlToSelfReflection,
+  applyCtaUrlToSelfStance,
+  applyCtaUrlToStartingJobHunting,
+  applySharedCtaUrlToAllContents,
+  isSharedCtaSlug,
+  pickSharedCtaUrl,
+  SHARED_CTA_SLUGS,
+} from "@/lib/content-manager/shared-lp-cta";
 import type { ArrayMutationContext } from "@/lib/content-manager/array-item-ops";
 import { fetchRepoConfig, saveContentToGitHub, saveContentViaApi, type RepoConfig } from "@/lib/github-content-api";
 import { getContentRepoPathForSlug, TOP_SLUG } from "@/lib/lp-slug";
@@ -112,6 +122,8 @@ export default function ContentsManager() {
   const [selfStanceContent, setSelfStanceContent] = useState<SelfStanceContent | null>(null);
   const [jsSelfAnalysisContent, setJsSelfAnalysisContent] =
     useState<JsSelfAnalysisContent | null>(null);
+  /** 4 LP 共通 CTA URL（編集・保存の正とする値） */
+  const [sharedCtaUrl, setSharedCtaUrl] = useState<string | null>(null);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() =>
     typeof window !== "undefined" ? getStoredHomeCopy() : DEFAULT_HOME_COPY,
   );
@@ -183,59 +195,125 @@ export default function ContentsManager() {
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
 
-  const buildPayload = useCallback((): ContentPayload => {
-    if (selectedSlug === "self-reflection") {
-      return { selfReflection: selfReflectionContent ?? {} };
-    }
-    if (selectedSlug === "btob_seminar") {
-      return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
-    }
-    if (selectedSlug === "starting_job_hunting") {
-      return {
-        startingJobHunting:
-          startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined),
+  useEffect(() => {
+    if (!unlocked) return;
+    (async () => {
+      const [jsa, ss, sjh, sr] = await Promise.all([
+        fetchContentBySlug("js_self_analysis"),
+        fetchContentBySlug("self-stance"),
+        fetchContentBySlug("starting_job_hunting"),
+        fetchContentBySlug("self-reflection"),
+      ]);
+      if (jsa?.jsSelfAnalysis) {
+        setJsSelfAnalysisContent(mergeJsSelfAnalysisContent(jsa.jsSelfAnalysis));
+      }
+      if (ss?.selfStance) {
+        setSelfStanceContent(mergeSelfStanceContent(ss.selfStance));
+      }
+      if (sjh?.startingJobHunting) {
+        setStartingJobHuntingContent(mergeStartingJobHuntingContent(sjh.startingJobHunting));
+      }
+      if (sr?.selfReflection) {
+        setSelfReflectionContent(sr.selfReflection as SelfReflectionContent);
+      }
+      const loaded = {
+        jsSelfAnalysis: jsa?.jsSelfAnalysis
+          ? mergeJsSelfAnalysisContent(jsa.jsSelfAnalysis)
+          : null,
+        selfStance: ss?.selfStance ? mergeSelfStanceContent(ss.selfStance) : null,
+        startingJobHunting: sjh?.startingJobHunting
+          ? mergeStartingJobHuntingContent(sjh.startingJobHunting)
+          : null,
+        selfReflection: (sr?.selfReflection as SelfReflectionContent | undefined) ?? null,
       };
-    }
-    if (selectedSlug === "self-stance") {
+      const picked = pickSharedCtaUrl(loaded);
+      if (picked) setSharedCtaUrl((prev) => prev?.trim() || picked);
+    })();
+  }, [unlocked]);
+
+  const withSharedCtaUrl = useCallback(
+    <T extends JsSelfAnalysisContent | SelfStanceContent | StartingJobHuntingContent | SelfReflectionContent>(
+      slug: string,
+      content: T,
+    ): T => {
+      const url = sharedCtaUrl?.trim();
+      if (!url || !isSharedCtaSlug(slug)) return content;
+      if (slug === "js_self_analysis") {
+        return applyCtaUrlToJsa(content as JsSelfAnalysisContent, url) as T;
+      }
+      if (slug === "self-stance") {
+        return applyCtaUrlToSelfStance(content as SelfStanceContent, url) as T;
+      }
+      if (slug === "starting_job_hunting") {
+        return applyCtaUrlToStartingJobHunting(content as StartingJobHuntingContent, url) as T;
+      }
+      if (slug === "self-reflection") {
+        return applyCtaUrlToSelfReflection(content as SelfReflectionContent, url) as T;
+      }
+      return content;
+    },
+    [sharedCtaUrl],
+  );
+
+  const buildPayloadForSlug = useCallback(
+    (slug: string): ContentPayload => {
+      if (slug === "self-reflection") {
+        const base = (selfReflectionContent ?? {}) as SelfReflectionContent;
+        return { selfReflection: withSharedCtaUrl(slug, base) };
+      }
+      if (slug === "btob_seminar") {
+        return { btobSeminar: btobSeminarContent ?? mergeBtobSeminarContent(undefined) };
+      }
+      if (slug === "starting_job_hunting") {
+        const base =
+          startingJobHuntingContent ?? mergeStartingJobHuntingContent(undefined);
+        return { startingJobHunting: withSharedCtaUrl(slug, base) };
+      }
+      if (slug === "self-stance") {
+        const base = selfStanceContent ?? mergeSelfStanceContent(undefined);
+        return { selfStance: withSharedCtaUrl(slug, base) };
+      }
+      if (slug === "js_self_analysis") {
+        const base = jsSelfAnalysisContent ?? mergeJsSelfAnalysisContent(undefined);
+        return { jsSelfAnalysis: withSharedCtaUrl(slug, base) };
+      }
       return {
-        selfStance: selfStanceContent ?? mergeSelfStanceContent(undefined),
+        logo: logoUrl ?? null,
+        hero: heroImageUrl ?? null,
+        heroMobile: heroImageUrlMobile ?? null,
+        eventImages: eventImages.length > 0 ? eventImages : undefined,
+        events: events.length > 0 ? events : undefined,
+        features: features.length > 0 ? features : undefined,
+        paletteId: paletteId ?? null,
+        copy: homeCopy,
+        ...(slug === "campaign2603"
+          ? { campaign2603Notice: campaign2603Notice.trim() || null }
+          : {}),
       };
-    }
-    if (selectedSlug === "js_self_analysis") {
-      return {
-        jsSelfAnalysis: jsSelfAnalysisContent ?? mergeJsSelfAnalysisContent(undefined),
-      };
-    }
-    return {
-      logo: logoUrl ?? null,
-      hero: heroImageUrl ?? null,
-      heroMobile: heroImageUrlMobile ?? null,
-      eventImages: eventImages.length > 0 ? eventImages : undefined,
-      events: events.length > 0 ? events : undefined,
-      features: features.length > 0 ? features : undefined,
-      paletteId: paletteId ?? null,
-      copy: homeCopy,
-      ...(selectedSlug === "campaign2603"
-        ? { campaign2603Notice: campaign2603Notice.trim() || null }
-        : {}),
-    };
-  }, [
-    selectedSlug,
-    selfReflectionContent,
-    btobSeminarContent,
-    startingJobHuntingContent,
-    selfStanceContent,
-    jsSelfAnalysisContent,
-    logoUrl,
-    heroImageUrl,
-    heroImageUrlMobile,
-    eventImages,
-    events,
-    features,
-    paletteId,
-    campaign2603Notice,
-    homeCopy,
-  ]);
+    },
+    [
+      selfReflectionContent,
+      btobSeminarContent,
+      startingJobHuntingContent,
+      selfStanceContent,
+      jsSelfAnalysisContent,
+      logoUrl,
+      heroImageUrl,
+      heroImageUrlMobile,
+      eventImages,
+      events,
+      features,
+      paletteId,
+      campaign2603Notice,
+      homeCopy,
+      withSharedCtaUrl,
+    ],
+  );
+
+  const buildPayload = useCallback(
+    (): ContentPayload => buildPayloadForSlug(selectedSlug),
+    [buildPayloadForSlug, selectedSlug],
+  );
 
   const previewPayload = useMemo(() => buildPayload(), [buildPayload]);
 
@@ -244,6 +322,65 @@ export default function ContentsManager() {
     applyDraftToPreviewStorage(selectedSlug, previewPayload);
     broadcastCmDraft(selectedSlug, previewPayload);
   }, [unlocked, selectedSlug, previewPayload]);
+
+  const syncSharedLpPreviews = useCallback(
+    (contents: {
+      jsSelfAnalysis: JsSelfAnalysisContent | null;
+      selfStance: SelfStanceContent | null;
+      startingJobHunting: StartingJobHuntingContent | null;
+      selfReflection: SelfReflectionContent | null;
+    }) => {
+      for (const slug of SHARED_CTA_SLUGS) {
+        const payload = (() => {
+          if (slug === "js_self_analysis" && contents.jsSelfAnalysis) {
+            return { jsSelfAnalysis: contents.jsSelfAnalysis };
+          }
+          if (slug === "self-stance" && contents.selfStance) {
+            return { selfStance: contents.selfStance };
+          }
+          if (slug === "starting_job_hunting" && contents.startingJobHunting) {
+            return { startingJobHunting: contents.startingJobHunting };
+          }
+          if (slug === "self-reflection" && contents.selfReflection) {
+            return { selfReflection: contents.selfReflection };
+          }
+          return null;
+        })();
+        if (payload) {
+          applyDraftToPreviewStorage(slug, payload);
+          broadcastCmDraft(slug, payload);
+        }
+      }
+    },
+    [],
+  );
+
+  const handleSharedCtaUrlChange = useCallback(
+    (url: string) => {
+      setSharedCtaUrl(url);
+      const updated = applySharedCtaUrlToAllContents(
+        {
+          jsSelfAnalysis: jsSelfAnalysisContent,
+          selfStance: selfStanceContent,
+          startingJobHunting: startingJobHuntingContent,
+          selfReflection: selfReflectionContent,
+        },
+        url,
+      );
+      if (updated.jsSelfAnalysis) setJsSelfAnalysisContent(updated.jsSelfAnalysis);
+      if (updated.selfStance) setSelfStanceContent(updated.selfStance);
+      if (updated.startingJobHunting) setStartingJobHuntingContent(updated.startingJobHunting);
+      if (updated.selfReflection) setSelfReflectionContent(updated.selfReflection);
+      syncSharedLpPreviews(updated);
+    },
+    [
+      jsSelfAnalysisContent,
+      selfStanceContent,
+      startingJobHuntingContent,
+      selfReflectionContent,
+      syncSharedLpPreviews,
+    ],
+  );
 
   const handleAccessSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -359,20 +496,28 @@ export default function ContentsManager() {
     }
     setSaveError("");
     setSaveMessage("保存中…");
-    const repoPath = getContentRepoPathForSlug(selectedSlug);
+    const slugsToSave = isSharedCtaSlug(selectedSlug) ? [...SHARED_CTA_SLUGS] : [selectedSlug];
     try {
-      if (useSaveApi) {
-        await saveContentViaApi(buildPayload(), repoConfig, repoPath);
-      } else {
-        const token = githubToken.trim();
-        if (!token) {
-          setSaveError("GitHub トークンを入力してください。");
-          setSaveMessage("");
-          return;
+      for (const slug of slugsToSave) {
+        const repoPath = getContentRepoPathForSlug(slug);
+        const payload = buildPayloadForSlug(slug);
+        if (useSaveApi) {
+          await saveContentViaApi(payload, repoConfig, repoPath);
+        } else {
+          const token = githubToken.trim();
+          if (!token) {
+            setSaveError("GitHub トークンを入力してください。");
+            setSaveMessage("");
+            return;
+          }
+          await saveContentToGitHub(payload, token, repoConfig, repoPath);
         }
-        await saveContentToGitHub(buildPayload(), token, repoConfig, repoPath);
       }
-      setSaveMessage("保存しました。push により数分以内にサイトに反映されます。");
+      setSaveMessage(
+        slugsToSave.length > 1
+          ? `4つのLPのCTA URLを含むコンテンツを保存しました。push により数分以内にサイトに反映されます。`
+          : "保存しました。push により数分以内にサイトに反映されます。",
+      );
       setTimeout(() => setSaveMessage(""), 6000);
     } catch (e) {
       setSaveMessage("");
@@ -683,6 +828,7 @@ export default function ContentsManager() {
         onSelfStanceChange={setSelfStanceContent}
         jsSelfAnalysisContent={jsSelfAnalysisContent}
         onJsSelfAnalysisChange={setJsSelfAnalysisContent}
+        onSharedCtaUrlChange={handleSharedCtaUrlChange}
       />
     </div>
   );

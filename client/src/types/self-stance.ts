@@ -1,6 +1,7 @@
 /** /self-stance 専用コンテンツ（ContentPayload.selfStance） */
 
 import seed from "../../public/content/self-stance.json";
+import { normalizeCtaUrlInSelfStance } from "@/lib/content-manager/shared-lp-cta";
 import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const SELF_STANCE_ASSETS = {
@@ -18,6 +19,8 @@ export type FaqItem = { q: string; a: string };
 
 export type SelfStanceContent = {
   fieldStyles?: HomeCopyFieldStyles;
+  /** 全 CTA ボタン共通の遷移先 URL（4 LP 間でも共有） */
+  ctaUrl?: string;
   seo: { title: string; description: string };
   header: {
     logoUrl: string;
@@ -118,5 +121,5 @@ export function mergeSelfStanceContent(raw: unknown): SelfStanceContent {
   mergeDeep(d as unknown as Record<string, unknown>, rawObj);
   const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
   if (mergedStyles) d.fieldStyles = mergedStyles;
-  return d;
+  return normalizeCtaUrlInSelfStance(d);
 }
