@@ -28,8 +28,12 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "root", // トップ用に使用するため予約
 ]);
 
+const RESERVED_PREFIXES = ["sns_wp_"] as const;
+
 export function isReservedSlug(slug: string): boolean {
-  return RESERVED_SLUGS.has(slug.toLowerCase());
+  const lower = slug.toLowerCase();
+  if (RESERVED_SLUGS.has(lower)) return true;
+  return RESERVED_PREFIXES.some((p) => lower.startsWith(p));
 }
 
 /** 配信時のコンテンツディレクトリ（先頭の / は付けない。base と結合する想定） */
