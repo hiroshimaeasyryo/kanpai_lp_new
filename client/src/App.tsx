@@ -18,6 +18,7 @@ import StartingJobHunting from "./pages/StartingJobHunting";
 import SelfStance from "./pages/SelfStance";
 import JsSelfAnalysis from "./pages/JsSelfAnalysis";
 import KdkMockup from "@/pages/mockup/clients-website/kdk/KdkMockup";
+import SnsWpRedirect from "@/pages/SnsWpRedirect";
 
 function ImageManagerRedirect() {
   const navigate = usePreserveQueryNavigate();
@@ -30,9 +31,9 @@ function ImageManagerRedirect() {
 /** /:lpSlug 用。予約パスでなければ Home をスラグ付きで表示 */
 function LpBySlugPage() {
   const [match, params] = useRoute("/:lpSlug");
-  if (!match || !params?.lpSlug || isReservedSlug(params.lpSlug)) {
-    return <NotFound />;
-  }
+  if (!match || !params?.lpSlug) return <NotFound />;
+  if (params.lpSlug.startsWith("sns_wp_")) return <SnsWpRedirect />;
+  if (isReservedSlug(params.lpSlug)) return <NotFound />;
   return <Home lpSlug={params.lpSlug} />;
 }
 
