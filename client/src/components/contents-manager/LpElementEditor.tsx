@@ -12,6 +12,7 @@ type Props<T extends WithLpFieldStyles> = {
   sectionId: string;
   content: T;
   onChange: (next: T | ((prev: T) => T)) => void;
+  onSharedCtaUrlChange?: (url: string) => void;
 };
 
 export function LpElementEditor<T extends WithLpFieldStyles>({
@@ -20,6 +21,7 @@ export function LpElementEditor<T extends WithLpFieldStyles>({
   sectionId,
   content,
   onChange,
+  onSharedCtaUrlChange,
 }: Props<T>) {
   if (kind === "home") return null;
 
@@ -72,6 +74,7 @@ export function LpElementEditor<T extends WithLpFieldStyles>({
       onChange={onChange}
       sectionId={sectionId}
       field={field}
+      onSharedCtaUrlChange={onSharedCtaUrlChange}
     />
   );
 }

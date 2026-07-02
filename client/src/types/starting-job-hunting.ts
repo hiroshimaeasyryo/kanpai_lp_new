@@ -1,6 +1,7 @@
 /** /starting_job_hunting 専用コンテンツ（ContentPayload.startingJobHunting） */
 
 import seed from "../../public/content/starting_job_hunting.json";
+import { normalizeCtaUrlInStartingJobHunting } from "@/lib/content-manager/shared-lp-cta";
 import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const STARTING_JOB_HUNTING_ASSETS = {
@@ -20,6 +21,8 @@ export type FaqItem = { q: string; a: string };
 
 export type StartingJobHuntingContent = {
   fieldStyles?: HomeCopyFieldStyles;
+  /** 全 CTA ボタン共通の遷移先 URL（4 LP 間でも共有） */
+  ctaUrl?: string;
   seo: { title: string; description: string };
   header: {
     logoUrl: string;
@@ -127,5 +130,5 @@ export function mergeStartingJobHuntingContent(raw: unknown): StartingJobHunting
   mergeDeep(d as unknown as Record<string, unknown>, rawObj);
   const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
   if (mergedStyles) d.fieldStyles = mergedStyles;
-  return d;
+  return normalizeCtaUrlInStartingJobHunting(d);
 }

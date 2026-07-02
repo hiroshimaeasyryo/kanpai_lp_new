@@ -22,6 +22,7 @@ export interface ElementEditorPanelProps {
   onSelfStanceChange: Dispatch<SetStateAction<SelfStanceContent | null>>;
   jsSelfAnalysisContent: JsSelfAnalysisContent | null;
   onJsSelfAnalysisChange: Dispatch<SetStateAction<JsSelfAnalysisContent | null>>;
+  onSharedCtaUrlChange?: (url: string) => void;
 }
 
 export function ElementEditorPanel({
@@ -38,6 +39,7 @@ export function ElementEditorPanel({
   onSelfStanceChange,
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
+  onSharedCtaUrlChange,
 }: ElementEditorPanelProps) {
   const kind = getLpKind(selectedSlug);
 
@@ -75,6 +77,7 @@ export function ElementEditorPanel({
             return typeof next === "function" ? next(base) : next;
           })
         }
+        onSharedCtaUrlChange={onSharedCtaUrlChange}
       />
     );
   }
@@ -92,6 +95,7 @@ export function ElementEditorPanel({
             return typeof next === "function" ? next(base) : next;
           })
         }
+        onSharedCtaUrlChange={onSharedCtaUrlChange}
       />
     );
   }
@@ -109,6 +113,7 @@ export function ElementEditorPanel({
             return typeof next === "function" ? next(base) : next;
           })
         }
+        onSharedCtaUrlChange={onSharedCtaUrlChange}
       />
     );
   }
@@ -126,6 +131,7 @@ export function ElementEditorPanel({
             return typeof next === "function" ? next(base) : next;
           })
         }
+        onSharedCtaUrlChange={onSharedCtaUrlChange}
       />
     );
   }

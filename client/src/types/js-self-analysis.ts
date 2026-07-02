@@ -1,6 +1,7 @@
 /** /js_self_analysis 専用コンテンツ（ContentPayload.jsSelfAnalysis） */
 
 import seed from "../../public/content/js_self_analysis.json";
+import { normalizeCtaUrlInJsa } from "@/lib/content-manager/shared-lp-cta";
 import { mergeLpFieldStylesFromRaw, type HomeCopyFieldStyles } from "@/types/home-copy-style";
 
 export const JSA_ASSETS = {
@@ -18,6 +19,8 @@ export type FaqItem = { q: string; a: string };
 
 export type JsSelfAnalysisContent = {
   fieldStyles?: HomeCopyFieldStyles;
+  /** 全 CTA ボタン共通の遷移先 URL（4 LP 間でも共有） */
+  ctaUrl?: string;
   seo: { title: string; description: string };
   header: { logoUrl: string; logoAlt: string };
   floatingCta: { label: string; ctaHref: string };
@@ -125,5 +128,5 @@ export function mergeJsSelfAnalysisContent(raw: unknown): JsSelfAnalysisContent 
   mergeDeep(d as unknown as Record<string, unknown>, rawObj);
   const mergedStyles = mergeLpFieldStylesFromRaw(rawObj.fieldStyles, d.fieldStyles);
   if (mergedStyles) d.fieldStyles = mergedStyles;
-  return d;
+  return normalizeCtaUrlInJsa(d);
 }

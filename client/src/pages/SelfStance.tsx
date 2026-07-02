@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { resolveCtaUrl } from "@/lib/content-manager/shared-lp-cta";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
@@ -170,13 +171,14 @@ export default function SelfStance() {
   }, [isCmPreview]);
 
   const c = content;
+  const ctaUrl = resolveCtaUrl(c);
 
   return (
     <FieldStylesProvider value={c.fieldStyles} scopeSelector="#self-stance-page">
     <div id="self-stance-page">
       <CmId id="ss-sticky-cta-bar" as="div" className="sticky">
         <a
-          href={c.stickyCta.ctaHref}
+          href={ctaUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={trackMetaPixelLead}
@@ -198,7 +200,7 @@ export default function SelfStance() {
             {c.header.logoAlt}
           </CmId>
           <a
-            href={c.header.ctaHref}
+            href={ctaUrl}
             className="header-btn"
             target="_blank"
             rel="noopener noreferrer"
@@ -230,7 +232,7 @@ export default function SelfStance() {
         <div className="fv-img-cta">
           <div className="inner">
             <CtaButton
-              href={c.hero.primaryCtaHref}
+              href={ctaUrl}
               label={c.hero.primaryCtaLabel}
               labelCmId="ss-hero-primary-cta-label"
             />
@@ -318,7 +320,7 @@ export default function SelfStance() {
       </section>
       <div className="cta-sol inner">
         <CtaButton
-          href={c.solution.ctaHref}
+          href={ctaUrl}
           label={c.solution.ctaLabel}
           labelCmId="ss-solution-cta-label"
         />
@@ -470,7 +472,7 @@ export default function SelfStance() {
             </div>
           ) : null}
           <CtaButton
-            href={c.detail.ctaHref}
+            href={ctaUrl}
             label={c.detail.ctaLabel}
             labelCmId="ss-detail-cta-label"
           />
@@ -534,7 +536,7 @@ export default function SelfStance() {
           ))}
         </div>
         <CtaButton
-          href={c.finalCta.ctaHref}
+          href={ctaUrl}
           label={c.finalCta.ctaLabel}
           labelCmId="ss-final-cta-label"
           showLineIcon={false}

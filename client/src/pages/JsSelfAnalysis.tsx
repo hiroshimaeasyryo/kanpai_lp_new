@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { resolveCtaUrl } from "@/lib/content-manager/shared-lp-cta";
 import { fetchContentBySlug } from "@/lib/content-loader";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
@@ -188,13 +189,14 @@ export default function JsSelfAnalysis() {
   }, [isCmPreview]);
 
   const c = content;
+  const ctaUrl = resolveCtaUrl(c);
 
   return (
     <FieldStylesProvider value={c.fieldStyles}>
       <div id="js-self-analysis-page">
         <div className="floating-cta">
           <a
-            href={c.floatingCta.ctaHref}
+            href={ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={trackMetaPixelLead}
@@ -244,7 +246,7 @@ export default function JsSelfAnalysis() {
               </div>
               <div className="hero-cta-wrap">
                 <CtaButton
-                  href={c.hero.ctaHref}
+                  href={ctaUrl}
                   label={c.hero.ctaLabel}
                   labelCmId="jsa-hero-cta-label"
                   className="hero-cta"
@@ -278,7 +280,7 @@ export default function JsSelfAnalysis() {
             <CmHtml id="jsa-empathy-close" className="empathy-close" html={c.empathy.closeHtml} as="p" />
             <div className="empathy-cta-wrap">
               <CtaButton
-                href={c.empathy.ctaHref}
+                href={ctaUrl}
                 label={c.empathy.ctaLabel}
                 labelCmId="jsa-empathy-cta-label"
               />
@@ -360,7 +362,7 @@ export default function JsSelfAnalysis() {
             </div>
             <div className="schedule-cta-wrap">
               <CtaButton
-                href={c.schedule.ctaHref}
+                href={ctaUrl}
                 label={c.schedule.ctaLabel}
                 labelCmId="jsa-schedule-cta-label"
               />
@@ -472,7 +474,7 @@ export default function JsSelfAnalysis() {
             </table>
             <div className="info-cta-wrap">
               <CtaButton
-                href={c.eventInfo.ctaHref}
+                href={ctaUrl}
                 label={c.eventInfo.ctaLabel}
                 labelCmId="jsa-event-info-cta-label"
                 className="btn-line-lg"
@@ -539,7 +541,7 @@ export default function JsSelfAnalysis() {
             <CmHtml id="jsa-final-cta-body" className="final-body" html={c.finalCta.bodyHtml} as="p" />
             <div>
               <CtaButton
-                href={c.finalCta.ctaHref}
+                href={ctaUrl}
                 label={c.finalCta.ctaLabel}
                 labelCmId="jsa-final-cta-cta-label"
                 className="btn-line-final"
