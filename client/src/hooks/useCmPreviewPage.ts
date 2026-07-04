@@ -11,11 +11,14 @@ import {
   subscribePreviewStorage,
 } from "@/lib/content-manager/preview-storage";
 import {
+  CM_CTA_BUTTON_ANCHOR_SELECTOR,
+  CM_CTA_BUTTON_LABEL_SELECTOR,
   CM_PREVIEW_SELECTABLE_SELECTOR,
   getSelectableId,
   getSelectableKind,
   getSelectableLabel,
   isAccordionToggleTarget,
+  normalizeClickStart,
   openAccordionHostForElement,
   resolveClickTarget,
 } from "@/lib/content-manager/cm-preview-select";
@@ -80,6 +83,19 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
         cursor: pointer !important;
         outline: none !important;
       }
+      ${CM_CTA_BUTTON_ANCHOR_SELECTOR} ${CM_CTA_BUTTON_LABEL_SELECTOR} {
+        cursor: inherit !important;
+        outline: none !important;
+      }
+      ${CM_CTA_BUTTON_ANCHOR_SELECTOR} {
+        cursor: pointer !important;
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        transition: outline-color 0.15s ease;
+      }
+      ${CM_CTA_BUTTON_ANCHOR_SELECTOR}:hover {
+        outline-color: rgba(212, 132, 75, 0.55) !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -87,13 +103,14 @@ export function useCmPreviewPage({ slug, onDraft, onScrollToId }: Options): bool
       // FAQ 開閉ボタンなど UI 操作は選択処理を通さない（React onClick を妨げない）
       if (isAccordionToggleTarget(e.target)) return;
 
+      const clickStart = normalizeClickStart(e.target);
       const target = resolveClickTarget(e.target);
       if (!target) return;
       e.preventDefault();
       e.stopPropagation();
-      const id = getSelectableId(target);
+      const id = getSelectableId(target, clickStart);
       const label = getSelectableLabel(target);
-      const selectKind = getSelectableKind(target);
+      const selectKind = getSelectableKind(target, clickStart);
       document.querySelectorAll("[data-cm-active]").forEach((el) => {
         el.removeAttribute("data-cm-active");
       });

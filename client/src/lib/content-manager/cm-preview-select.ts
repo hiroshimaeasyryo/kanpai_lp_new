@@ -66,8 +66,67 @@ function buildElementPath(el: HTMLElement): string {
   return parts.join("/");
 }
 
+/** CTAボタン内ラベル（親 a と一体で編集する span） */
+export const CM_CTA_BUTTON_LABEL_SELECTOR =
+  '[data-cm-id$="-cta-label"], [data-cm-id$="-cta-label-mobile"]';
+
+/** 内側ラベルを持つ CTA ボタン（編集プレビューで親 a を選択単位とする） */
+export const CM_CTA_BUTTON_ANCHOR_SELECTOR = `a[href]:has(${CM_CTA_BUTTON_LABEL_SELECTOR})`;
+
 /** プレビューで要素選択の対象外（UI 操作用） */
 export const CM_PREVIEW_IGNORE_SELECT_SELECTOR = "[data-faq-toggle], [data-cm-no-select]";
+
+function isCtaButtonLabelId(id: string): boolean {
+  return /-cta-label(?:-mobile)?$/.test(id);
+}
+
+function isCtaButtonLabelElement(el: Element): el is HTMLElement {
+  if (!(el instanceof HTMLElement)) return false;
+  const id = el.getAttribute("data-cm-id");
+  return id != null && isCtaButtonLabelId(id);
+}
+
+function getCtaButtonLabelElements(anchor: HTMLAnchorElement): HTMLElement[] {
+  return [...anchor.querySelectorAll("[data-cm-id]")].filter(isCtaButtonLabelElement);
+}
+
+function resolveCtaButtonAnchor(start: HTMLElement): HTMLAnchorElement | null {
+  const anchor = start.closest("a[href]");
+  if (!(anchor instanceof HTMLAnchorElement)) return null;
+  if (!anchor.contains(start)) return null;
+  return getCtaButtonLabelElements(anchor).length > 0 ? anchor : null;
+}
+
+function resolveCtaButtonFieldId(anchor: HTMLAnchorElement, start: HTMLElement): string {
+  const labels = getCtaButtonLabelElements(anchor);
+  for (const label of labels) {
+    if (label === start || label.contains(start)) {
+      return label.getAttribute("data-cm-id")!;
+    }
+  }
+  if (labels.length === 1) {
+    return labels[0].getAttribute("data-cm-id")!;
+  }
+  const visible = labels.find((el) => {
+    const style = window.getComputedStyle(el);
+    return style.display !== "none" && style.visibility !== "hidden";
+  });
+  return (visible ?? labels[0]).getAttribute("data-cm-id")!;
+}
+
+export function normalizeClickStart(raw: EventTarget | null): HTMLElement | null {
+  if (!(raw instanceof Element)) return null;
+  if (raw.closest(CM_PREVIEW_IGNORE_SELECT_SELECTOR)) return null;
+
+  let start: Element | null = raw;
+  if (start instanceof SVGElement || start.closest(SKIP_ANCESTOR_SELECTOR) === start) {
+    start =
+      start.closest("button, a[href], [data-cm-id], [data-cm-array-id], summary, label") ??
+      start.parentElement;
+  }
+
+  return start instanceof HTMLElement ? start : null;
+}
 
 /** プレビューで開閉トグルとして扱う（選択ハンドラを通さない） */
 export function isAccordionToggleTarget(raw: EventTarget | null): boolean {
@@ -84,17 +143,12 @@ export function openAccordionHostForElement(el: Element): void {
 }
 
 export function resolveClickTarget(raw: EventTarget | null): HTMLElement | null {
-  if (!(raw instanceof Element)) return null;
-  if (raw.closest(CM_PREVIEW_IGNORE_SELECT_SELECTOR)) return null;
+  const start = normalizeClickStart(raw);
+  if (!start) return null;
 
-  let start: Element | null = raw;
-  if (start instanceof SVGElement || start.closest(SKIP_ANCESTOR_SELECTOR) === start) {
-    start =
-      start.closest("button, a[href], [data-cm-id], [data-cm-array-id], summary, label") ??
-      start.parentElement;
-  }
-
-  if (!(start instanceof HTMLElement)) return null;
+  // CTAボタン: 内側 span ではなく親 a を編集単位とする
+  const ctaAnchor = resolveCtaButtonAnchor(start);
+  if (ctaAnchor) return ctaAnchor;
 
   // 文言フィールド（data-cm-id）を最優先
   let el: HTMLElement | null = start;
@@ -120,15 +174,27 @@ export function resolveClickTarget(raw: EventTarget | null): HTMLElement | null 
   return null;
 }
 
-export function getSelectableKind(el: HTMLElement): "field" | "array" | "auto" {
+export function getSelectableKind(
+  el: HTMLElement,
+  clickStart?: HTMLElement | null,
+): "field" | "array" | "auto" {
   if (el.hasAttribute("data-cm-array-id")) return "array";
   if (el.hasAttribute("data-cm-id")) return "field";
+  if (el instanceof HTMLAnchorElement && clickStart && getCtaButtonLabelElements(el).length > 0) {
+    return "field";
+  }
   return "auto";
 }
 
-export function getSelectableId(el: HTMLElement): string {
+export function getSelectableId(el: HTMLElement, clickStart?: HTMLElement | null): string {
   if (el.hasAttribute("data-cm-array-id")) {
     return el.getAttribute("data-cm-array-id")!;
+  }
+  if (el instanceof HTMLAnchorElement && clickStart) {
+    const labels = getCtaButtonLabelElements(el);
+    if (labels.length > 0) {
+      return resolveCtaButtonFieldId(el, clickStart);
+    }
   }
   const cmId = el.getAttribute("data-cm-id");
   if (cmId) return cmId;
