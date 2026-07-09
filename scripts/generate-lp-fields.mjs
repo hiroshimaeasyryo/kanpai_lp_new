@@ -423,4 +423,105 @@ emitFile("jsa-lp-fields.ts", "JSA_LP_FIELDS", [
   t("jsa-footer-copyright", "フッター · 著作権", "footer.copyright"),
 ]);
 
+// ─── Works Recruiting ───
+emitFile("wr-lp-fields.ts", "WR_LP_FIELDS", [
+  img("wr-hero-image", "FV · 画像", "hero.imageUrl", "/works_recruiting/hero.jpg"),
+  t("wr-hero-image-alt", "FV · 画像alt", "hero.imageAlt"),
+
+  t("wr-empathy-eyebrow", "共感 · ラベル", "empathy.eyebrow"),
+  t("wr-empathy-title", "共感 · 見出し", "empathy.title", true, 3),
+  idxSimple("wr-empathy-item", "共感", 3, "empathy.items"),
+  t("wr-empathy-close", "共感 · 締め", "empathy.closeHtml", true, 3),
+
+  t("wr-reason-eyebrow", "理由 · ラベル", "reason.eyebrow"),
+  t("wr-reason-title", "理由 · 見出し", "reason.title", true, 3),
+  t("wr-reason-lead", "理由 · リード", "reason.lead"),
+  idxFields("wr-reason-item", "理由", 6, "reason.items", [
+    { suffix: "text", label: "テキスト" },
+    { suffix: "note", label: "注記" },
+  ]),
+
+  t("wr-midcta-label", "中間CTA · 文言", "midCta.label"),
+
+  img("wr-photoband1-image", "写真1 · 画像", "photoBand1.imageUrl", "/works_recruiting/photo-band-1.jpg"),
+  t("wr-photoband1-image-alt", "写真1 · 画像alt", "photoBand1.imageAlt"),
+
+  t("wr-partner-text", "パートナー · 文言", "partner.text", true, 2),
+  img("wr-partner-logo-left", "パートナー · 左ロゴ", "partner.logoLeftUrl", "/works_recruiting/logo-worksaslife.png"),
+  t("wr-partner-logo-left-alt", "パートナー · 左ロゴalt", "partner.logoLeftAlt"),
+  img("wr-partner-logo-right", "パートナー · 右ロゴ", "partner.logoRightUrl", "/works_recruiting/logo-criacao.jpg"),
+  t("wr-partner-logo-right-alt", "パートナー · 右ロゴalt", "partner.logoRightAlt"),
+
+  t("wr-steps-eyebrow", "STEP · ラベル", "steps.eyebrow"),
+  t("wr-steps-title", "STEP · 見出し", "steps.title"),
+  ...Array.from({ length: 3 }, (_, i) => [
+    t(`wr-steps-item-${i}-num`, `STEP${i + 1} · 番号`, `steps.items[${i}].num`),
+    t(`wr-steps-item-${i}-label`, `STEP${i + 1} · ラベル`, `steps.items[${i}].label`),
+    t(`wr-steps-item-${i}-title`, `STEP${i + 1} · タイトル`, `steps.items[${i}].title`),
+    img(`wr-steps-item-${i}-image`, `STEP${i + 1} · 画像`, `steps.items[${i}].imageUrl`, `/works_recruiting/step-0${i + 1}.jpg`),
+    t(`wr-steps-item-${i}-image-alt`, `STEP${i + 1} · 画像alt`, `steps.items[${i}].imageAlt`),
+    t(`wr-steps-item-${i}-text`, `STEP${i + 1} · 説明`, `steps.items[${i}].text`, true, 3),
+  ]).flat(),
+  t("wr-steps-detail-title", "STEP補足 · 見出し", "steps.detail.title"),
+  ...Array.from({ length: 2 }, (_, i) => [
+    t(`wr-steps-detail-compare-${i}-label`, `STEP補足 比較${i + 1} · ラベル`, `steps.detail.compareRows[${i}].label`),
+    t(`wr-steps-detail-compare-${i}-num`, `STEP補足 比較${i + 1} · 数値`, `steps.detail.compareRows[${i}].num`),
+  ]).flat(),
+  t("wr-steps-detail-caption", "STEP補足 · キャプション", "steps.detail.caption", true, 3),
+  idxSimple("wr-steps-detail-note", "STEP補足 注記", 4, "steps.detail.notes"),
+  ...Array.from({ length: 3 }, (_, i) => [
+    t(`wr-steps-detail-stat-${i}-value`, `STEP補足 統計${i + 1} · 数値`, `steps.detail.statChips[${i}].value`),
+    t(`wr-steps-detail-stat-${i}-label`, `STEP補足 統計${i + 1} · ラベル`, `steps.detail.statChips[${i}].label`),
+  ]).flat(),
+
+  t("wr-culture-eyebrow", "カルチャー · ラベル", "culture.eyebrow"),
+  t("wr-culture-title", "カルチャー · 見出し", "culture.title", true, 3),
+  t("wr-culture-lead", "カルチャー · リード", "culture.lead"),
+  idxFields("wr-culture-row", "カルチャー比較", 4, "culture.rows", [
+    { suffix: "label", label: "項目" },
+    { suffix: "general", label: "一般的なインターン" },
+    { suffix: "here", label: "KANPAI Hütte" },
+  ]),
+  t("wr-culture-pullquote-text", "カルチャーCTA · 文言", "culture.pullQuote.textHtml", true, 3),
+  t("wr-culture-pullquote-arrow", "カルチャーCTA · 矢印文言", "culture.pullQuote.arrowLabel"),
+
+  img("wr-photoband2-image", "写真2 · 画像", "photoBand2.imageUrl", "/works_recruiting/photo-band-2.jpg"),
+  t("wr-photoband2-image-alt", "写真2 · 画像alt", "photoBand2.imageAlt"),
+
+  t("wr-proof-eyebrow", "実績 · ラベル", "proof.eyebrow"),
+  t("wr-proof-title", "実績 · 見出し", "proof.title", true, 3),
+  t("wr-proof-universities-title", "実績 出身大学 · 見出し", "proof.universitiesTitle"),
+  img("wr-proof-universities-image", "実績 出身大学 · 画像", "proof.universitiesImageUrl", "/works_recruiting/proof-universities.png"),
+  t("wr-proof-universities-image-alt", "実績 出身大学 · 画像alt", "proof.universitiesImageAlt"),
+  t("wr-proof-offers-title", "実績 内定先 · 見出し", "proof.offersTitle"),
+  img("wr-proof-offers-image", "実績 内定先 · 画像", "proof.offersImageUrl", "/works_recruiting/proof-offers.png"),
+  t("wr-proof-offers-image-alt", "実績 内定先 · 画像alt", "proof.offersImageAlt"),
+  t("wr-proof-voices-title", "実績 声 · 見出し", "proof.voicesTitle"),
+  ...Array.from({ length: 3 }, (_, i) => [
+    img(`wr-proof-testimonial-${i}-image`, `声${i + 1} · 写真`, `proof.testimonials[${i}].imageUrl`, `/works_recruiting/testimonial-0${i + 1}.jpg`),
+    t(`wr-proof-testimonial-${i}-image-alt`, `声${i + 1} · 写真alt`, `proof.testimonials[${i}].imageAlt`),
+    t(`wr-proof-testimonial-${i}-name`, `声${i + 1} · 名前`, `proof.testimonials[${i}].name`),
+    t(`wr-proof-testimonial-${i}-uni`, `声${i + 1} · 大学`, `proof.testimonials[${i}].uni`),
+    ...Array.from({ length: 3 }, (_, j) =>
+      t(`wr-proof-testimonial-${i}-quote-${j}`, `声${i + 1} · コメント${j + 1}`, `proof.testimonials[${i}].quotes[${j}]`, true, 4),
+    ),
+  ]).flat(),
+
+  t("wr-cta-eyebrow", "CTA · ラベル", "cta.eyebrow"),
+  t("wr-cta-title", "CTA · 見出し", "cta.title", true, 2),
+  t("wr-cta-label", "CTA · ボタン", "cta.ctaLabel"),
+  ...Array.from({ length: 2 }, (_, i) => [
+    t(`wr-cta-flow-${i}-num`, `選考フロー${i + 1} · 番号`, `cta.flow[${i}].num`),
+    t(`wr-cta-flow-${i}-title`, `選考フロー${i + 1} · タイトル`, `cta.flow[${i}].title`),
+    t(`wr-cta-flow-${i}-desc`, `選考フロー${i + 1} · 説明`, `cta.flow[${i}].desc`),
+  ]).flat(),
+  ...Array.from({ length: 3 }, (_, i) => [
+    t(`wr-cta-info-${i}-label`, `募集情報${i + 1} · ラベル`, `cta.infoStrip[${i}].label`),
+    t(`wr-cta-info-${i}-value`, `募集情報${i + 1} · 値`, `cta.infoStrip[${i}].value`),
+  ]).flat(),
+
+  t("wr-stickycta-label", "追尾CTA · 文言", "stickyCta.label"),
+  t("wr-footer-text", "フッター · 文言", "footer.textHtml", true, 2),
+]);
+
 console.log("Generated LP field definitions in", outDir);

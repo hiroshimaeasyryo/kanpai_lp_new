@@ -8,6 +8,7 @@ import type { BtobSeminarContent } from "@/types/btob-seminar";
 import type { StartingJobHuntingContent } from "@/types/starting-job-hunting";
 import type { SelfStanceContent } from "@/types/self-stance";
 import type { JsSelfAnalysisContent } from "@/types/js-self-analysis";
+import type { WorksRecruitingContent } from "@/types/works-recruiting";
 
 interface GlobalSettingsPanelProps {
   selectedSlug: string;
@@ -19,6 +20,8 @@ interface GlobalSettingsPanelProps {
   onSelfStanceChange: (c: SelfStanceContent) => void;
   jsSelfAnalysisContent: JsSelfAnalysisContent | null;
   onJsSelfAnalysisChange: (c: JsSelfAnalysisContent) => void;
+  worksRecruitingContent: WorksRecruitingContent | null;
+  onWorksRecruitingChange: (c: WorksRecruitingContent) => void;
 }
 
 export function GlobalSettingsPanel({
@@ -31,6 +34,8 @@ export function GlobalSettingsPanel({
   onSelfStanceChange,
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
+  worksRecruitingContent,
+  onWorksRecruitingChange,
 }: GlobalSettingsPanelProps) {
   const { paletteId, setPaletteId } = usePalette();
 
@@ -151,6 +156,27 @@ export function GlobalSettingsPanel({
           onJsSelfAnalysisChange({
             ...jsSelfAnalysisContent,
             seo: { ...jsSelfAnalysisContent.seo, description },
+          })
+        }
+      />
+    );
+  }
+
+  if (selectedSlug === "works_recruiting" && worksRecruitingContent) {
+    return (
+      <SeoFields
+        title={worksRecruitingContent.seo.title}
+        description={worksRecruitingContent.seo.description}
+        onTitleChange={(title) =>
+          onWorksRecruitingChange({
+            ...worksRecruitingContent,
+            seo: { ...worksRecruitingContent.seo, title },
+          })
+        }
+        onDescriptionChange={(description) =>
+          onWorksRecruitingChange({
+            ...worksRecruitingContent,
+            seo: { ...worksRecruitingContent.seo, description },
           })
         }
       />

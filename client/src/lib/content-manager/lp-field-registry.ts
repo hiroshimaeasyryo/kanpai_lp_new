@@ -5,6 +5,7 @@ import { SJH_LP_FIELDS } from "@/lib/content-manager/generated/sjh-lp-fields";
 import { SR_LP_FIELDS } from "@/lib/content-manager/generated/sr-lp-fields";
 import { SS_LP_FIELDS } from "@/lib/content-manager/generated/ss-lp-fields";
 import { JSA_LP_FIELDS } from "@/lib/content-manager/generated/jsa-lp-fields";
+import { WR_LP_FIELDS } from "@/lib/content-manager/generated/wr-lp-fields";
 import { toElementDefinition, type LpFieldDef } from "@/lib/content-manager/lp-field-types";
 
 const FIELDS_BY_KIND: Record<Exclude<LpKind, "home">, LpFieldDef[]> = {
@@ -13,6 +14,7 @@ const FIELDS_BY_KIND: Record<Exclude<LpKind, "home">, LpFieldDef[]> = {
   starting_job_hunting: SJH_LP_FIELDS,
   self_stance: SS_LP_FIELDS,
   js_self_analysis: JSA_LP_FIELDS,
+  works_recruiting: WR_LP_FIELDS,
 };
 
 const FIELD_MAP_BY_KIND = Object.fromEntries(

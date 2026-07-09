@@ -7,6 +7,7 @@ import type { BtobSeminarContent } from "@/types/btob-seminar";
 import type { StartingJobHuntingContent } from "@/types/starting-job-hunting";
 import type { SelfStanceContent } from "@/types/self-stance";
 import type { JsSelfAnalysisContent } from "@/types/js-self-analysis";
+import type { WorksRecruitingContent } from "@/types/works-recruiting";
 
 export interface ElementEditorPanelProps {
   selectedSlug: string;
@@ -22,6 +23,8 @@ export interface ElementEditorPanelProps {
   onSelfStanceChange: Dispatch<SetStateAction<SelfStanceContent | null>>;
   jsSelfAnalysisContent: JsSelfAnalysisContent | null;
   onJsSelfAnalysisChange: Dispatch<SetStateAction<JsSelfAnalysisContent | null>>;
+  worksRecruitingContent: WorksRecruitingContent | null;
+  onWorksRecruitingChange: Dispatch<SetStateAction<WorksRecruitingContent | null>>;
 }
 
 export function ElementEditorPanel({
@@ -38,6 +41,8 @@ export function ElementEditorPanel({
   onSelfStanceChange,
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
+  worksRecruitingContent,
+  onWorksRecruitingChange,
 }: ElementEditorPanelProps) {
   const kind = getLpKind(selectedSlug);
 
@@ -123,6 +128,23 @@ export function ElementEditorPanel({
         onChange={(next) =>
           onJsSelfAnalysisChange((prev) => {
             const base = prev ?? jsSelfAnalysisContent;
+            return typeof next === "function" ? next(base) : next;
+          })
+        }
+      />
+    );
+  }
+
+  if (kind === "works_recruiting" && worksRecruitingContent) {
+    return (
+      <LpElementEditor
+        kind={kind}
+        slug={selectedSlug}
+        sectionId={editorSection}
+        content={worksRecruitingContent}
+        onChange={(next) =>
+          onWorksRecruitingChange((prev) => {
+            const base = prev ?? worksRecruitingContent;
             return typeof next === "function" ? next(base) : next;
           })
         }

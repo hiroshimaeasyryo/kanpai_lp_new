@@ -20,6 +20,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "starting_job_hunting",
   "self-stance",
   "js_self_analysis",
+  "works_recruiting",
   "404",
   "content",
   "api",

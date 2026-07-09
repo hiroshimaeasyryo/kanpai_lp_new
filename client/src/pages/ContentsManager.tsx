@@ -54,6 +54,10 @@ import {
   mergeJsSelfAnalysisContent,
   type JsSelfAnalysisContent,
 } from "@/types/js-self-analysis";
+import {
+  mergeWorksRecruitingContent,
+  type WorksRecruitingContent,
+} from "@/types/works-recruiting";
 import type { KanpaiEvent } from "@/types/events";
 import { getStoredEvents, setStoredEvents } from "@/types/events";
 import {
@@ -109,6 +113,8 @@ export default function ContentsManager() {
   const [selfStanceContent, setSelfStanceContent] = useState<SelfStanceContent | null>(null);
   const [jsSelfAnalysisContent, setJsSelfAnalysisContent] =
     useState<JsSelfAnalysisContent | null>(null);
+  const [worksRecruitingContent, setWorksRecruitingContent] =
+    useState<WorksRecruitingContent | null>(null);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() =>
     typeof window !== "undefined" ? getStoredHomeCopy() : DEFAULT_HOME_COPY,
   );
@@ -175,6 +181,9 @@ export default function ContentsManager() {
       if (selectedSlug === "js_self_analysis") {
         setJsSelfAnalysisContent(mergeJsSelfAnalysisContent(payload?.jsSelfAnalysis));
       }
+      if (selectedSlug === "works_recruiting") {
+        setWorksRecruitingContent(mergeWorksRecruitingContent(payload?.worksRecruiting));
+      }
     })();
   }, [unlocked, selectedSlug, setPaletteId]);
 
@@ -201,6 +210,11 @@ export default function ContentsManager() {
         jsSelfAnalysis: jsSelfAnalysisContent ?? mergeJsSelfAnalysisContent(undefined),
       };
     }
+    if (selectedSlug === "works_recruiting") {
+      return {
+        worksRecruiting: worksRecruitingContent ?? mergeWorksRecruitingContent(undefined),
+      };
+    }
     return {
       logo: logoUrl ?? null,
       hero: heroImageUrl ?? null,
@@ -221,6 +235,7 @@ export default function ContentsManager() {
     startingJobHuntingContent,
     selfStanceContent,
     jsSelfAnalysisContent,
+    worksRecruitingContent,
     logoUrl,
     heroImageUrl,
     heroImageUrlMobile,
@@ -572,6 +587,8 @@ export default function ContentsManager() {
             onSelfStanceChange={setSelfStanceContent}
             jsSelfAnalysisContent={jsSelfAnalysisContent}
             onJsSelfAnalysisChange={setJsSelfAnalysisContent}
+            worksRecruitingContent={worksRecruitingContent}
+            onWorksRecruitingChange={setWorksRecruitingContent}
           />
         </section>
 
@@ -636,6 +653,8 @@ export default function ContentsManager() {
         onSelfStanceChange={setSelfStanceContent}
         jsSelfAnalysisContent={jsSelfAnalysisContent}
         onJsSelfAnalysisChange={setJsSelfAnalysisContent}
+        worksRecruitingContent={worksRecruitingContent}
+        onWorksRecruitingChange={setWorksRecruitingContent}
       />
     </div>
   );

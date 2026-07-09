@@ -1,0 +1,187 @@
+{
+  "worksRecruiting": {
+    "seo": {
+      "title": "KANPAI Hütte（ワークス）長期インターン採用 | 株式会社ワークアズライフ",
+      "description": "プロを目指した経験を、ビジネスで開花させる長期インターン。KANPAI Hütte（ワークス事業部）採用ページ。"
+    },
+    "hero": {
+      "imageUrl": "/works_recruiting/hero.jpg",
+      "imageAlt": "KANPAI Hütte × マイナビ。競技経験はビジネスで真価を発揮する。大学でもう一度本気になれる場所がある。KANPAI Hütte長期インターンシップ。東京・名古屋・新潟・福岡／28卒・29卒・30卒／運営：株式会社ワークアズライフ（マイナビ出資）"
+    },
+    "empathy": {
+      "eyebrow": "01 / 05",
+      "title": "何かに挑戦して\n熱くなれる瞬間はありますか？",
+      "items": [
+        "部活・競技に、全てを注いだ日々があった。",
+        "でも今、大学生活に、どこか物足りなさを感じていないか。",
+        "バイトでも、サークルでも、あの頃の熱量は取り戻せていない。"
+      ],
+      "closeHtml": "なんか違う、がずっとある。<br>そんなあなたのために、挑戦の場として長期インターンを作りました。"
+    },
+    "reason": {
+      "eyebrow": "02 / 05",
+      "title": "競技に本気で向き合ってきた経験は\n仕事で真価を発揮する",
+      "lead": "なぜ体育会学生は仕事でも活躍できるのか",
+      "items": [
+        { "type": "no", "text": "体力と根性があるから", "note": "（AIなら24時間稼働できる）" },
+        { "type": "no", "text": "上下関係に慣れているから", "note": "（従順なソルジャーが評価される時代じゃない）" },
+        { "type": "yes", "text": "取るべきポジショニングを考えられるから", "note": "" },
+        { "type": "yes", "text": "努力が報われるとは限らないと知っているから", "note": "" },
+        { "type": "yes", "text": "不確実性の中でトライアンドエラーを繰り返せるから", "note": "" },
+        { "type": "yes", "text": "仲間と目標に向かって本気で走れるから", "note": "" }
+      ]
+    },
+    "midCta": {
+      "label": "本気の競技経験を、仕事に活かす",
+      "ctaHref": "https://liff.line.me/2003241442-NxYpOjpV?id=368yuidv1706&liff_id=2003241442-NxYpOjpV"
+    },
+    "photoBand1": {
+      "imageUrl": "/works_recruiting/photo-band-1.jpg",
+      "imageAlt": "オフィスで集合するインターン生・社員たちの記念写真"
+    },
+    "partner": {
+      "text": "KANPAI Hütteを運営する(株)ワークアズライフは『クリアソン新宿』のパートナー企業です",
+      "logoLeftUrl": "/works_recruiting/logo-worksaslife.png",
+      "logoLeftAlt": "ワークアズライフ ロゴ",
+      "logoRightUrl": "/works_recruiting/logo-criacao.jpg",
+      "logoRightAlt": "クリアソン ロゴ"
+    },
+    "steps": {
+      "eyebrow": "03 / 05",
+      "title": "入社してからの3つのSTEP",
+      "items": [
+        {
+          "num": "01",
+          "label": "STEP 01",
+          "title": "BtoB法人営業",
+          "imageUrl": "/works_recruiting/step-01.jpg",
+          "imageAlt": "ノートパソコンを前に打ち合わせをするインターン生たち",
+          "text": "楽天・コクヨ・Sansan 等\n大手SaaS／IT商材をメインで取り扱う"
+        },
+        {
+          "num": "02",
+          "label": "STEP 02",
+          "title": "採用・マーケ・マネジメント",
+          "imageUrl": "/works_recruiting/step-02.jpg",
+          "imageAlt": "仕事終わりに語り合うインターン生たち",
+          "text": "社会人1年目〜5年目の経験を、大学生のうちに。\n長期インターンを\"ガクチカ\"だけで終わらせるのは、もったいない。\n人生において意味のある時間に。"
+        },
+        {
+          "num": "03",
+          "label": "STEP 03",
+          "title": "拠点責任者",
+          "imageUrl": "/works_recruiting/step-03.jpg",
+          "imageAlt": "拠点を支えるメンバーたちの集合写真",
+          "text": "学生主導での組織運営によって\"経営視座\"を獲得する。\nKANPAI Hütteの拠点は、すべて学生が立ち上げた。\n本気の裁量と挑戦を、あなたに渡す。"
+        }
+      ],
+      "detail": {
+        "title": "なぜ、電話での法人営業から始めるのか。",
+        "compareRows": [
+          { "label": "電話での法人営業（認知＋興味）", "num": "100件 / 日", "target": 100, "fill": "calls" },
+          { "label": "商談", "num": "6件 / 日", "target": 6, "fill": "meetings" }
+        ],
+        "caption": "同じ1日で、これだけの試行回数の差がある。\nだから、圧倒的なスピードでPDCAを回せる。",
+        "notes": [
+          "\"認知＋興味\"という営業の根幹を、電話での法人営業で実践する。",
+          "与えられたことをこなすだけでは終わらない。自分で考え、実践し、失敗と成功のどちらも味わう。",
+          "その分、基礎となる教育はみっちりと。",
+          "単一商材ではなく複数の商材を扱うから、応用力まで身につく。"
+        ],
+        "statChips": [
+          { "value": "14", "label": "階級カリキュラム", "countUp": true },
+          { "value": "42", "label": "種類の研修制度", "countUp": true },
+          { "value": "毎日", "label": "振り返り・1on1", "countUp": false }
+        ]
+      }
+    },
+    "culture": {
+      "eyebrow": "04 / 05 — カルチャー",
+      "title": "部活のように、\n本気になれるKANPAI文化",
+      "lead": "KANPAIとは、本気の者同士が前を向くきっかけとなる時間",
+      "rows": [
+        { "label": "仲間", "general": "業務を通じた表面的な繋がり", "here": "「こいつすげーな」と思える仲間が隣にいる" },
+        { "label": "向き合い方", "general": "業務時間に淡々と仕事するだけ", "here": "垣根を超えて、毎日本気で語り合い、行動する" },
+        { "label": "環境", "general": "綺麗なオフィス、距離感のある関係", "here": "仲間と素でいられる。同じ釜の飯を食う" },
+        { "label": "裁量", "general": "与えられた業務をこなすだけ", "here": "学生で本物の裁量。組織づくりという最高難易度の挑戦" }
+      ],
+      "pullQuote": {
+        "textHtml": "挫折をしても、諦めずに目標を追いかけること<br>それでしか得られない「仲間」「誇れる生き様」「10年先も生きる成長」を手に入れる",
+        "arrowLabel": "ENTRY",
+        "ctaHref": "https://liff.line.me/2003241442-NxYpOjpV?id=368yuidv1706&liff_id=2003241442-NxYpOjpV"
+      }
+    },
+    "photoBand2": {
+      "imageUrl": "/works_recruiting/photo-band-2.jpg",
+      "imageAlt": "笑顔で肩を組む仲間たちの集合写真"
+    },
+    "proof": {
+      "eyebrow": "05 / 05 — 卒業生たちのその後",
+      "title": "挑戦した先輩たちは、\n今もそれぞれの場所で活躍している。",
+      "universitiesTitle": "在籍中の仲間たちの出身大学（一部）",
+      "universitiesImageUrl": "/works_recruiting/proof-universities.png",
+      "universitiesImageAlt": "在籍中の仲間たちの出身大学一覧：九州大学・名古屋大学・早稲田大学・新潟大学・明治大学・南山大学・福岡大学・中央大学・APU・大分大学・名古屋外国語大学・名城大学 ほか",
+      "offersTitle": "卒業生の内定先（一部）",
+      "offersImageUrl": "/works_recruiting/proof-offers.png",
+      "offersImageAlt": "卒業生の内定先一覧：Goldman Sachs・日本航空・HIS・JAC Recruitment・PERSOL・損保ジャパン・NTT DATA・CyberBuzz・Nintendo・RELO GROUP・クリナップ・ニトリ・リクルート・マイナビ・Sansan・Leverages・Link and Motivation Group・CyberAgent・accenture・Amazon・エン・ジャパン・Money Forward・Chatwork・BIZREACH ほか",
+      "voicesTitle": "先輩たちの声（一部）",
+      "testimonials": [
+        {
+          "imageUrl": "/works_recruiting/testimonial-01.jpg",
+          "imageAlt": "OB（ラクロス部）名古屋大学",
+          "name": "OB（ラクロス部）",
+          "uni": "名古屋大学",
+          "quotes": [
+            "大学の部活動を引退後、パチンコ屋と研究室を往復するだけの生活。このままじゃダメだと思いながらも、熱くなれずに、だらだらと生きていました。",
+            "そんな時に、学生でも本物の裁量を持って挑戦できる長期インターンがあると知って、ここで自分を変えたいと思いました。実際に入ってみると、BtoB営業だけでなく、支部のお金の管理やチームづくりにも関わる機会があります。学生なのに、ただの作業ではなく、事業を動かす側として考えることを求められます。",
+            "責任は大きいですが、その分、自分の行動が数字や組織に直結する面白さがあります。普通の大学生活では得られない、本気の環境だと思います。"
+          ]
+        },
+        {
+          "imageUrl": "/works_recruiting/testimonial-02.jpg",
+          "imageAlt": "現役インターン生（硬式テニス部）駒澤大学",
+          "name": "現役インターン生（硬式テニス部）",
+          "uni": "駒澤大学",
+          "quotes": [
+            "長期インターンを始めた理由は、自分と同じくらい、もしくはそれ以上に本気で頑張っている仲間と出会いたかったからです。",
+            "大学の中では、部活以外に何かに本気で打ち込むことが少し浮いてしまう感覚もありました。でも、KANPAI Hütteには、当たり前のように高い目標を持って行動している学生がいます。営業の成果が出た時も、うまくいかなくて悔しい時も、仲間や社員さんと本音で語り合える関係性があります。学生扱いされるのではなく、同じチームの一員として本気で向き合ってもらえるのが、この環境の一番の魅力です。",
+            "ただ仲が良いだけではなく、互いに刺激し合って、時には厳しいことも言い合える。そんな関係の中で、毎日自分の基準が引き上がっていると感じます。"
+          ]
+        },
+        {
+          "imageUrl": "/works_recruiting/testimonial-03.jpg",
+          "imageAlt": "OB（陸上部）高崎経済大学",
+          "name": "OB（陸上部）",
+          "uni": "高崎経済大学",
+          "quotes": [
+            "長期インターンを始めたのは、競技で本気になってきた経験を、次はビジネスの世界で試してみたいと思ったからです。",
+            "部活では、目標に向かって努力することや、仲間と本気でぶつかることは経験してきました。でも、それが社会でどこまで通用するのかは正直わかりませんでした。",
+            "KANPAI Hütteでは、BtoB営業を通して、結果に向き合う厳しさや、自分の言葉で相手を動かす難しさを毎日感じています。周りには「こいつすげーな」と思える仲間がいて、本気で成長を追いかけられる。競技とは違うフィールドで、もう一度熱くなれている感覚があります。"
+          ]
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "ENTRY",
+      "title": "どんな挑戦ができるか、\nお伝えします",
+      "ctaLabel": "選考説明会に応募する",
+      "ctaHref": "https://liff.line.me/2003241442-NxYpOjpV?id=368yuidv1706&liff_id=2003241442-NxYpOjpV",
+      "flow": [
+        { "num": "01", "title": "説明会 兼 一次面談", "desc": "会社・事業・あなたの想いを共有" },
+        { "num": "02", "title": "最終面談", "desc": "事業部長 or 支部責任者との対話" }
+      ],
+      "infoStrip": [
+        { "label": "稼働", "value": "月20h〜（没頭する仲間は月100h以上も）" },
+        { "label": "時間帯", "value": "平日 10:00 - 18:00" },
+        { "label": "期間", "value": "最低 3ヶ月" }
+      ]
+    },
+    "stickyCta": {
+      "label": "もう一度、あの頃の熱量を。公式LINEで応募する",
+      "ctaHref": "https://liff.line.me/2003241442-NxYpOjpV?id=368yuidv1706&liff_id=2003241442-NxYpOjpV"
+    },
+    "footer": {
+      "textHtml": "もう一度本気になれる舞台『KANPAI Hütte』<br>運営：株式会社ワークアズライフ（マイナビ出資）"
+    }
+  }
+}

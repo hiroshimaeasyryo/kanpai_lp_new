@@ -15,6 +15,7 @@ import type { BtobSeminarContent } from "@/types/btob-seminar";
 import type { StartingJobHuntingContent } from "@/types/starting-job-hunting";
 import type { SelfStanceContent } from "@/types/self-stance";
 import type { JsSelfAnalysisContent } from "@/types/js-self-analysis";
+import type { WorksRecruitingContent } from "@/types/works-recruiting";
 
 export interface EditPaletteSheetProps {
   open: boolean;
@@ -33,6 +34,8 @@ export interface EditPaletteSheetProps {
   onSelfStanceChange: Dispatch<SetStateAction<SelfStanceContent | null>>;
   jsSelfAnalysisContent: JsSelfAnalysisContent | null;
   onJsSelfAnalysisChange: Dispatch<SetStateAction<JsSelfAnalysisContent | null>>;
+  worksRecruitingContent: WorksRecruitingContent | null;
+  onWorksRecruitingChange: Dispatch<SetStateAction<WorksRecruitingContent | null>>;
 }
 
 export function EditPaletteSheet({
@@ -52,6 +55,8 @@ export function EditPaletteSheet({
   onSelfStanceChange,
   jsSelfAnalysisContent,
   onJsSelfAnalysisChange,
+  worksRecruitingContent,
+  onWorksRecruitingChange,
 }: EditPaletteSheetProps) {
   const def = elementId ? findElementDefinition(selectedSlug, elementId) : undefined;
   const tall = def?.tall ?? false;
@@ -88,6 +93,8 @@ export function EditPaletteSheet({
             onSelfStanceChange={onSelfStanceChange}
             jsSelfAnalysisContent={jsSelfAnalysisContent}
             onJsSelfAnalysisChange={onJsSelfAnalysisChange}
+            worksRecruitingContent={worksRecruitingContent}
+            onWorksRecruitingChange={onWorksRecruitingChange}
           />
         )}
         {elementId && isReadOnly && <ReadOnlyElementPanel label={title} />}
