@@ -337,6 +337,54 @@ export function resolveHomeTextBinding(sectionId: string, copy: HomeCopy): HomeT
     };
   }
 
+  if (sectionId === "student-screening-eyebrow") {
+    return {
+      text: copy.studentScreening.eyebrow,
+      multiline: false,
+      rows: 1,
+      applyText: (p, v) => ({ ...p, studentScreening: { ...p.studentScreening, eyebrow: v } }),
+    };
+  }
+  if (sectionId === "student-screening-heading") {
+    return {
+      text: copy.studentScreening.heading,
+      multiline: true,
+      rows: 2,
+      applyText: (p, v) => ({ ...p, studentScreening: { ...p.studentScreening, heading: v } }),
+    };
+  }
+  if (sectionId === "student-screening-intro") {
+    return {
+      text: copy.studentScreening.intro,
+      multiline: true,
+      rows: 6,
+      applyText: (p, v) => ({ ...p, studentScreening: { ...p.studentScreening, intro: v } }),
+    };
+  }
+  if (sectionId === "student-screening-note") {
+    return {
+      text: copy.studentScreening.note,
+      multiline: true,
+      rows: 4,
+      applyText: (p, v) => ({ ...p, studentScreening: { ...p.studentScreening, note: v } }),
+    };
+  }
+
+  const studentCriterionIdx = parseIndexedId(sectionId, "student-screening-criterion");
+  if (studentCriterionIdx !== null && copy.studentScreening.criteria[studentCriterionIdx] !== undefined) {
+    const i = studentCriterionIdx;
+    return {
+      text: copy.studentScreening.criteria[i],
+      multiline: false,
+      rows: 2,
+      applyText: (p, v) => {
+        const criteria = [...p.studentScreening.criteria];
+        criteria[i] = v;
+        return { ...p, studentScreening: { ...p.studentScreening, criteria } };
+      },
+    };
+  }
+
   if (sectionId === "safety-heading") {
     return {
       text: copy.safety.heading,
