@@ -7,7 +7,7 @@
    - タイポグラフィ: Shippori Mincho (見出し) + Zen Kaku Gothic New (本文)
 */
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { useCmPreviewPage } from "@/hooks/useCmPreviewPage";
 import { CmArrayItem } from "@/components/contents-manager/CmId";
@@ -61,6 +61,37 @@ function splitCampaign2603Notice(raw: string): { title: string; body: string } {
   const title = firstNewline >= 0 ? trimmed.slice(0, firstNewline).trim() : trimmed;
   const body = firstNewline >= 0 ? trimmed.slice(firstNewline + 1).trim() : "";
   return { title, body };
+}
+
+/** FAQ回答内のページ内リンク記法 `[表示テキスト](#anchor)` */
+const FAQ_ANCHOR_LINK_PATTERN = /\[([^\]\n]+)\]\((#[A-Za-z0-9_-]+)\)/g;
+
+/**
+ * FAQ回答をレンダリングする。
+ * コンテンツ管理画面ではプレーンテキストで編集させたいため、
+ * リッチテキストではなくページ内アンカーのみを対象にした最小の記法で扱う。
+ */
+function renderFaqAnswer(answer: string): ReactNode {
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+
+  // 共有の正規表現は lastIndex が持ち越されるため、実行のたびに複製する
+  const pattern = new RegExp(FAQ_ANCHOR_LINK_PATTERN.source, "g");
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(answer)) !== null) {
+    const start = match.index;
+    if (start > cursor) parts.push(answer.slice(cursor, start));
+    parts.push(
+      <a key={start} href={match[2]} className="text-lp-primary underline underline-offset-2">
+        {match[1]}
+      </a>,
+    );
+    cursor = start + match[0].length;
+  }
+
+  if (parts.length === 0) return answer;
+  if (cursor < answer.length) parts.push(answer.slice(cursor));
+  return parts;
 }
 
 export interface HomeProps {
@@ -893,6 +924,42 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
       </section>
 
+      {/* Student Screening Section — 企業基準セクションと同じ構成で「企業も学生も同じ土俵」を示す */}
+      <section id="student-screening" className="py-24 px-8 md:px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
+            <p className="text-xs font-medium text-lp-primary uppercase tracking-widest mb-2" data-cm-id="student-screening-eyebrow" style={cms("student-screening-eyebrow")}>{homeCopy.studentScreening.eyebrow}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lp-text-heading leading-tight whitespace-pre-line" style={cms("student-screening-heading", MINCHO_STYLE)} data-cm-id="student-screening-heading">
+              {homeCopy.studentScreening.heading}
+            </h2>
+          </div>
+          <div className="mx-6 md:mx-0">
+            <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.12s', animationFillMode: 'forwards' }}>
+              <p className="text-sm md:text-base text-lp-text-heading leading-loose text-left md:text-center mb-9 whitespace-pre-line" data-cm-id="student-screening-intro" style={cms("student-screening-intro")}>
+                {homeCopy.studentScreening.intro}
+              </p>
+            </div>
+            <div className="space-y-3 mb-9">
+            {homeCopy.studentScreening.criteria.map((item, i) => (
+              <div key={i} className="flex items-start gap-3 p-4 bg-white border border-lp-border rounded-2xl opacity-0 animate-fadeUp" style={{ animationDelay: `${0.12 + i * 0.12}s`, animationFillMode: 'forwards', borderWidth: '0.5px' }}>
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-lp-bg-warm flex items-center justify-center text-lp-primary mt-0.5">
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 4L6 11L3 8"/>
+                  </svg>
+                </div>
+                <p className="text-sm text-lp-text-heading pt-0.5" data-cm-id={`student-screening-criterion-${i}`} style={cms(`student-screening-criterion-${i}`)}>{item}</p>
+              </div>
+            ))}
+            </div>
+            <div className="p-6 bg-lp-bg-warm rounded-2xl text-center opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }} data-cm-id="student-screening-note">
+              <p className="text-sm text-lp-text-heading whitespace-pre-line" style={cms("student-screening-note")}>
+                {homeCopy.studentScreening.note}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Event Overview Section */}
       <section className="py-24 px-6 bg-lp-bg-warm">
         <div className="max-w-2xl mx-auto">
@@ -988,7 +1055,7 @@ export default function Home({ lpSlug }: HomeProps) {
                         data-cm-id={`faq-item-${i}-answer`}
                         style={cms(`faq-item-${i}-answer`)}
                       >
-                        {item.answer}
+                        {renderFaqAnswer(item.answer)}
                       </div>
                     )}
                   </CmArrayItem>
@@ -1019,7 +1086,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   data-cm-id={`faq-item-${i}-answer`}
                   style={cms(`faq-item-${i}-answer`)}
                 >
-                  {item.answer}
+                  {renderFaqAnswer(item.answer)}
                 </div>
               </details>
               </CmArrayItem>

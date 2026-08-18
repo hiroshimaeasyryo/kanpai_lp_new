@@ -78,6 +78,13 @@ export interface HomeCopy {
     criteria: string[];
     trustNote: string;
   };
+  studentScreening: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    criteria: string[];
+    note: string;
+  };
   safety: {
     heading: string;
     subheading: string;
@@ -234,6 +241,20 @@ export const DEFAULT_HOME_COPY: HomeCopy = {
     trustNote:
       "運営元は、マイナビ出資企業である株式会社ワークアズライフ。\nマイナビが実現できない深い部分にこだわった就活支援を行っています。\n上場企業も参加する、信頼のあるイベントです。",
   },
+  studentScreening: {
+    // 企業側の Screening と同一セクションに見えないよう、ラベル文言で区別する
+    eyebrow: "Student Screening",
+    heading: "学生のみなさんにも、\n参加いただく基準があります。",
+    intro:
+      "KANPAI就活では、より良い出会いの場を作るため、\n参加企業の皆様と同様に、学生の皆さんにも\n「参加審査」を受けていただいています。\n\nと言っても、学歴や実績は一切見ません。\n大切にしているのは、次の3つの姿勢です。",
+    criteria: [
+      "等身大で自分のことを話そうとする姿勢",
+      "人とのつながりを大切にできる姿勢",
+      "企業の方と本音で向き合おうとする姿勢",
+    ],
+    note:
+      "参加審査は30分・オンラインで実施します。\n面接のような準備は不要ですので、リラックスしてご参加ください。\n\n参加審査 兼 事前説明は、平日17時〜／19時〜でほぼ毎日実施中です。",
+  },
   safety: {
     heading: "安全開催のための取り組み",
     subheading: "安心して参加いただくために、以下のルールを設けています。",
@@ -277,6 +298,11 @@ export const DEFAULT_HOME_COPY: HomeCopy = {
         question: "当日エントリーや選考を強要されませんか？",
         answer:
           "一切ありません。対話を楽しんでいただくことが目的です。気になる企業があれば、その後のつながり方はあなた次第です。",
+      },
+      {
+        question: "応募すれば必ず参加できますか？",
+        answer:
+          "ご応募後は、30分ほどの「参加審査 兼 事前説明」を受けていただきます。学歴や実績は見ませんので、ご安心ください。詳しくは「[学生のみなさんにも、参加いただく基準があります](#student-screening)」をご覧ください。",
       },
       {
         question: "服装はスーツですか？",
@@ -370,6 +396,7 @@ export function mergeHomeCopy(raw: unknown): HomeCopy {
   const eventFlow = (c.eventFlow && typeof c.eventFlow === "object" ? c.eventFlow : {}) as Record<string, unknown>;
   const voices = (c.voices && typeof c.voices === "object" ? c.voices : {}) as Record<string, unknown>;
   const screening = (c.screening && typeof c.screening === "object" ? c.screening : {}) as Record<string, unknown>;
+  const studentScreening = (c.studentScreening && typeof c.studentScreening === "object" ? c.studentScreening : {}) as Record<string, unknown>;
   const safety = (c.safety && typeof c.safety === "object" ? c.safety : {}) as Record<string, unknown>;
   const faq = (c.faq && typeof c.faq === "object" ? c.faq : {}) as Record<string, unknown>;
   const finalCta = (c.finalCta && typeof c.finalCta === "object" ? c.finalCta : {}) as Record<string, unknown>;
@@ -466,6 +493,15 @@ export function mergeHomeCopy(raw: unknown): HomeCopy {
         () => "",
       ),
       trustNote: mergeString(screening.trustNote, base.screening.trustNote),
+    },
+    studentScreening: {
+      eyebrow: mergeString(studentScreening.eyebrow, base.studentScreening.eyebrow),
+      heading: mergeString(studentScreening.heading, base.studentScreening.heading),
+      intro: mergeString(studentScreening.intro, base.studentScreening.intro),
+      criteria: mergeItems(studentScreening.criteria, base.studentScreening.criteria, (item, fb) =>
+        mergeString(item, fb),
+      ),
+      note: mergeString(studentScreening.note, base.studentScreening.note),
     },
     safety: {
       heading: mergeString(safety.heading, base.safety.heading),

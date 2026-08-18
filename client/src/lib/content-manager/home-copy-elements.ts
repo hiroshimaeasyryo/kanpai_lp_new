@@ -155,6 +155,16 @@ export const HOME_COPY_ELEMENTS: ElementDefinition[] = [
 
   def("screening-trust", "Screening 運営元テキスト"),
 
+  def("student-screening-eyebrow", "学生参加審査 ラベル"),
+
+  def("student-screening-heading", "学生参加審査 見出し"),
+
+  def("student-screening-intro", "学生参加審査 リード文"),
+
+  ...indexedSimple("student-screening-criterion", "学生参加審査 基準", 3),
+
+  def("student-screening-note", "学生参加審査 補足テキスト"),
+
   def("safety-heading", "安全開催 見出し"),
 
   def("safety-subheading", "安全開催 サブ見出し"),
@@ -171,7 +181,7 @@ export const HOME_COPY_ELEMENTS: ElementDefinition[] = [
 
   def("faq-heading", "FAQ 見出し"),
 
-  ...indexedFields("faq-item", "FAQ", 8, [
+  ...indexedFields("faq-item", "FAQ", 9, [
 
     { suffix: "question", label: "質問" },
 
@@ -226,6 +236,8 @@ const HOME_COPY_FIELD_PATTERNS: RegExp[] = [
   /^faq-item-\d+-(question|answer)$/,
 
   /^screening-criterion-\d+$/,
+
+  /^student-screening-criterion-\d+$/,
 
 ];
 
