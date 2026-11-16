@@ -41,7 +41,9 @@ import { DefaultLogoIcon } from "@/components/DefaultLogoIcon";
 import { usePalette } from "@/contexts/PaletteContext";
 import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
-import { LINE_CAMPAIGN2603_SIGNUP_URL, LINE_KS_SIGNUP_URL } from "@/constants/line-ks-signup";
+import { useSearch } from "wouter";
+import { LINE_CAMPAIGN2603_SIGNUP_URL } from "@/constants/line-ks-signup";
+import { resolveKsCtaHref } from "@/lib/cta-flow";
 import { HomeCm } from "@/components/contents-manager/HomeCm";
 import {
   createHomeCopyStyleHelpers,
@@ -134,8 +136,9 @@ export default function Home({ lpSlug }: HomeProps) {
 
   const lineCtaLabel = homeCopy.cta.primaryLabel;
   const lineSignupLabel = homeCopy.cta.stickyLabel;
+  const search = useSearch();
   const defaultLineHref =
-    contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : LINE_KS_SIGNUP_URL;
+    contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : resolveKsCtaHref(search);
   const { cms, cmh } = createHomeCopyStyleHelpers(homeCopy, defaultLineHref);
   const homeRootRef = useRef<HTMLDivElement>(null);
 
