@@ -3,14 +3,18 @@
  * 審査ではなく事前説明として案内する運用に変わったため。コピーは確定文言（CM 編集対象外）。
  */
 
+import type { ReactNode } from "react";
+
 const MINCHO = { fontFamily: "'Shippori Mincho', serif" } as const;
 
 type Props = {
   /** 運営広告経由（flow=rin）か。STEP 01 の補足を予約導線に合わせて出し分ける */
   isRinFlow: boolean;
+  /** ステップを読んだ直後の予約導線 */
+  cta?: ReactNode;
 };
 
-export function JoinSteps({ isRinFlow }: Props) {
+export function JoinSteps({ isRinFlow, cta }: Props) {
   const steps = [
     {
       title: "事前説明を予約する",
@@ -48,6 +52,7 @@ export function JoinSteps({ isRinFlow }: Props) {
             </li>
           ))}
         </ol>
+        {cta && <div className="mt-10 md:mt-12">{cta}</div>}
       </div>
     </section>
   );

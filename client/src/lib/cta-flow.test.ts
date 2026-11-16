@@ -29,3 +29,20 @@ describe("resolveKsCtaLabel", () => {
     expect(resolveKsCtaLabel(search)).toBe(expected);
   });
 });
+
+describe("resolveKsCtaLabel（置き場所別）", () => {
+  it.each([
+    ["header", "", "LINEで案内を受け取る"],
+    ["header", "?flow=rin", "事前説明を予約"],
+    ["sticky", "?flow=pteam", "LINEで参加案内"],
+    ["sticky", "?flow=rin", "15分の説明を予約"],
+    ["afterCompanies", "", "LINEで参加案内を受け取る"],
+    ["afterCompanies", "?flow=rin", "事前説明を予約する"],
+    ["afterSteps", "?flow=pteam", "LINEで日程案内を受け取る"],
+    ["afterSteps", "?flow=rin&utm_source=meta", "日程を選んで予約する"],
+    ["final", "", "LINEで案内を受け取る"],
+    ["final", "?flow=rin", "事前説明を予約する"],
+  ] as const)("%s search=%s", (slot, search, expected) => {
+    expect(resolveKsCtaLabel(search, slot)).toBe(expected);
+  });
+});

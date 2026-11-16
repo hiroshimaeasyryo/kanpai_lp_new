@@ -20,7 +20,23 @@ export function resolveKsCtaHref(search: string): string {
   return isRinFlow(search) ? AITEMASU_KS_DIRECT_URL : LINE_KS_SIGNUP_URL;
 }
 
-/** 遷移先に合わせて CTA の文言も出し分ける（予約ページに LINE の文言・アイコンを出さないため） */
-export function resolveKsCtaLabel(search: string): string {
-  return isRinFlow(search) ? "事前説明を予約する" : "LINEで案内を受け取る";
+/**
+ * CTA の置き場所。直前のブロックの訴求とクリック後の行動を揃えるため、場所ごとに文言を変える。
+ * header=上部固定、sticky=下部追従（どちらも幅が狭いので短い文言）
+ */
+export type KsCtaSlot = "header" | "sticky" | "fv" | "afterCompanies" | "afterSteps" | "final";
+
+const KS_CTA_LABELS: Record<KsCtaSlot, { rin: string; line: string }> = {
+  header: { rin: "事前説明を予約", line: "LINEで案内を受け取る" },
+  sticky: { rin: "15分の説明を予約", line: "LINEで参加案内" },
+  fv: { rin: "事前説明を予約する", line: "LINEで案内を受け取る" },
+  afterCompanies: { rin: "事前説明を予約する", line: "LINEで参加案内を受け取る" },
+  afterSteps: { rin: "日程を選んで予約する", line: "LINEで日程案内を受け取る" },
+  final: { rin: "事前説明を予約する", line: "LINEで案内を受け取る" },
+};
+
+/** 遷移先に合わせて CTA の文言も出し分ける（予約ページに LINE の文言を出さないため） */
+export function resolveKsCtaLabel(search: string, slot: KsCtaSlot = "fv"): string {
+  const labels = KS_CTA_LABELS[slot];
+  return isRinFlow(search) ? labels.rin : labels.line;
 }

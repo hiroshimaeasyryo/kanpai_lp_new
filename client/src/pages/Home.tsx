@@ -43,7 +43,7 @@ import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { useSearch } from "wouter";
 import { LINE_CAMPAIGN2603_SIGNUP_URL } from "@/constants/line-ks-signup";
-import { isRinFlow, resolveKsCtaHref, resolveKsCtaLabel } from "@/lib/cta-flow";
+import { isRinFlow, resolveKsCtaHref, resolveKsCtaLabel, type KsCtaSlot } from "@/lib/cta-flow";
 import { ParticipatingCompanies } from "@/components/ks/ParticipatingCompanies";
 import { JoinSteps } from "@/components/ks/JoinSteps";
 import { HomeCm } from "@/components/contents-manager/HomeCm";
@@ -54,6 +54,8 @@ import {
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
 
 /** KANPAI就活 LP の主要 CTA（ファーストビュー・最下部）周辺の確定コピー。flow によらず共通 */
+/** 固定ナビの高さ（h-14）。FV を通過したかの判定でナビの裏に隠れた分を除くため */
+const NAV_HEIGHT_PX = 56;
 const KS_CTA_LEAD = "人事と話すコツがわかる、15分の事前説明。";
 const KS_CTA_SUB = "オンライン・準備不要・スマホOK";
 const KS_CTA_NOTE = "説明を聞いてから参加を決めてもOK！";
@@ -139,6 +141,11 @@ export default function Home({ lpSlug }: HomeProps) {
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   /** モバイル用: 少しスクロールしたら下部固定CTAを表示するか */
   const [showStickyCta, setShowStickyCta] = useState(false);
+  /** 固定 CTA の表示制御用（KANPAI就活 LP） */
+  const [heroInView, setHeroInView] = useState(true);
+  const [inlineCtaInView, setInlineCtaInView] = useState(false);
+  const [footerInView, setFooterInView] = useState(false);
+  const footerRef = useRef<HTMLElement | null>(null);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() => getStoredHomeCopy());
   const [campaign2603Notice, setCampaign2603Notice] = useState<string>(() => {
     if (typeof window === "undefined") return DEFAULT_CAMPAIGN2603_NOTICE;
@@ -151,10 +158,15 @@ export default function Home({ lpSlug }: HomeProps) {
   /** KANPAI就活 LP（/campaign2603 以外）は CTA を flow で出し分ける。URL から同期的に決まるので初期表示から正しい */
   const isKsLp = contentSlug !== "campaign2603";
   const ksRinFlow = isKsLp && isRinFlow(search);
-  const ksCtaLabel = resolveKsCtaLabel(search);
-  const lineCtaLabel = isKsLp ? ksCtaLabel : homeCopy.cta.primaryLabel;
-  const lineSignupLabel = isKsLp ? ksCtaLabel : homeCopy.cta.stickyLabel;
-  const headerCtaLabel = isKsLp ? ksCtaLabel : homeCopy.nav.headerCta;
+  const ksLabel = (slot: KsCtaSlot) => resolveKsCtaLabel(search, slot);
+  /** FV と PC のみ表示の中間 CTA */
+  const lineCtaLabel = isKsLp ? ksLabel("fv") : homeCopy.cta.primaryLabel;
+  const finalCtaLabel = isKsLp ? ksLabel("final") : homeCopy.cta.primaryLabel;
+  /** 下部追従 CTA */
+  const lineSignupLabel = isKsLp ? ksLabel("sticky") : homeCopy.cta.stickyLabel;
+  /** 最下部の開催情報の直後。開催情報・参加企業ブロック後と同じ訴求 */
+  const eventDetailCtaLabel = isKsLp ? ksLabel("afterCompanies") : homeCopy.cta.stickyLabel;
+  const headerCtaLabel = isKsLp ? ksLabel("header") : homeCopy.nav.headerCta;
   /** flow=rin は予約ページへ飛ぶため、LINE ロゴではなく右矢印を出す */
   const renderCtaIcon = (lineImgClassName: string, alt = "LINE") =>
     ksRinFlow ? (
@@ -228,14 +240,52 @@ export default function Home({ lpSlug }: HomeProps) {
 
   useHomeDynamicLinks(homeRootRef, homeCopy, isCmPreview);
 
-  // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）
+  /*
+   * KANPAI就活 LP の固定 CTA 制御。同じような CTA が同時に並ばないよう、
+   * FV 表示中は上部固定 CTA、FV 通過後は下部追従 CTA に切り替え、
+   * ブロック内 CTA やフッターが見えている間は下部追従 CTA を隠す（スクロール量ではなく要素の可視状態で判定し、ちらつきを防ぐ）
+   */
   useEffect(() => {
+    if (!isKsLp || typeof IntersectionObserver === "undefined") return;
+    const root = homeRootRef.current;
+    const hero = heroSectionRef.current;
+    const footer = footerRef.current;
+    if (!root || !hero || !footer) return;
+
+    const heroObserver = new IntersectionObserver(([entry]) => setHeroInView(entry.isIntersecting), {
+      rootMargin: `-${NAV_HEIGHT_PX}px 0px 0px 0px`,
+    });
+    heroObserver.observe(hero);
+
+    const visibleInlineCtas = new Set<Element>();
+    const inlineCtaObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) visibleInlineCtas.add(entry.target);
+        else visibleInlineCtas.delete(entry.target);
+      }
+      setInlineCtaInView(visibleInlineCtas.size > 0);
+    });
+    root.querySelectorAll("[data-inline-cta]").forEach((el) => inlineCtaObserver.observe(el));
+
+    const footerObserver = new IntersectionObserver(([entry]) => setFooterInView(entry.isIntersecting));
+    footerObserver.observe(footer);
+
+    return () => {
+      heroObserver.disconnect();
+      inlineCtaObserver.disconnect();
+      footerObserver.disconnect();
+    };
+  }, [isKsLp]);
+
+  // モバイル: スクロール量に応じて下部固定CTAの表示を切り替え（閾値: 200px）。KANPAI就活 LP 以外の従来挙動
+  useEffect(() => {
+    if (isKsLp) return;
     const threshold = 200;
     const onScroll = () => setShowStickyCta(window.scrollY > threshold);
     onScroll(); // 初期状態
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [isKsLp]);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -324,6 +374,24 @@ export default function Home({ lpSlug }: HomeProps) {
     return () => link.remove();
   }, [heroImageUrl]);
 
+  /** 参加企業・3ステップの直後に置くブロック内 CTA（KANPAI就活 LP のみ） */
+  const renderInlineCta = (slot: KsCtaSlot, note?: string) => (
+    <div className="w-full max-w-sm mx-auto text-center">
+      <a
+        href={cmh("hero-cta")}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={trackMetaPixelLead}
+        data-inline-cta
+        className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+      >
+        {ksLabel(slot)}
+        {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
+      </a>
+      {note && <p className="mt-2 text-xs text-lp-text-body">{note}</p>}
+    </div>
+  );
+
   /** FV の CTA ボタン。onPhoto=写真上（PC）、onWhite=写真の下の白地（スマホ） */
   const renderHeroCtaGroup = (tone: "onPhoto" | "onWhite") => {
     const onPhoto = tone === "onPhoto";
@@ -339,6 +407,7 @@ export default function Home({ lpSlug }: HomeProps) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={trackMetaPixelLead}
+          data-inline-cta
           data-cm-id="hero-cta"
           style={cms("hero-cta")}
           className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
@@ -378,7 +447,7 @@ export default function Home({ lpSlug }: HomeProps) {
               onClick={trackMetaPixelLead}
               data-cm-id="nav-header-cta"
               style={cms("nav-header-cta")}
-              className="inline-flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
+              className={`${isKsLp && !heroInView ? "max-md:opacity-0 max-md:pointer-events-none" : ""} transition-opacity duration-300 inline-flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap`}
             >
               {headerCtaLabel}
               {isKsLp && renderCtaIcon("w-4 h-4 sm:w-5 sm:h-5 object-contain", "")}
@@ -390,7 +459,7 @@ export default function Home({ lpSlug }: HomeProps) {
       {/* モバイル用: スクロール時に表示する下部固定LINE登録CTA（CVR改善） */}
       <div
         className={`fixed left-0 right-0 z-40 md:hidden transition-all duration-300 ease-out ${
-          showStickyCta ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+          (isKsLp ? !heroInView && !inlineCtaInView && !footerInView : showStickyCta) ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
         }`}
         style={{ bottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
@@ -465,19 +534,23 @@ export default function Home({ lpSlug }: HomeProps) {
               background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.1) 55%, color-mix(in srgb, var(--lp-bg-warm) 88%, transparent) 88%, var(--lp-bg-warm) 100%)',
             }}
           />
-          {/* コンテンツ: 画像表示エリアの縦横中央に配置（モバイル・PC共通） */}
-          <div className="absolute inset-0 z-10 flex flex-col justify-center items-center px-4 md:px-6">
+          {/*
+            コンテンツ: 画像表示エリアの縦横中央に配置（PC 共通）。
+            KANPAI就活 LP のスマホは、写真上で顔に被らない唯一の帯（女性の顔の下〜ポスターの上）に見出しだけを置く。
+            位置・文字サイズ・左余白は写真と同じく画面幅に比例させ、375〜430px 幅で人物との位置関係を保つ
+          */}
+          <div className={`absolute inset-0 z-10 flex flex-col items-center px-4 md:px-6 ${isKsLp ? "justify-start pt-[48vw] md:pt-0 md:justify-center" : "justify-center"}`}>
             <div className="w-full max-w-2xl text-center">
               <h1
-                className="lp-hero-title font-bold leading-[1.25] opacity-0 animate-fadeUp md:whitespace-nowrap text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)] mb-3 md:mb-8"
+                className={`lp-hero-title font-bold leading-[1.25] opacity-0 animate-fadeUp md:whitespace-nowrap ${isKsLp ? "text-[7vw] md:text-[clamp(1.75rem,8vw,3.75rem)] pl-[10vw] md:pl-0" : ""} text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)] mb-3 md:mb-8`}
                 style={{
                   animationDelay: '0.2s',
                   animationFillMode: 'forwards',
                   fontFamily: "'Shippori Mincho', serif",
-                  fontSize: 'clamp(1.75rem, 8vw, 3.75rem)',
+                  ...(isKsLp ? {} : { fontSize: 'clamp(1.75rem, 8vw, 3.75rem)' }),
                 }}
               >
-                <HomeCm id="hero-title-line1" as="span" copy={homeCopy} cms={cms} className="inline min-[400px]:block md:inline">{homeCopy.hero.titleLine1}</HomeCm>
+                <HomeCm id="hero-title-line1" as="span" copy={homeCopy} cms={cms} className={isKsLp ? "block md:inline" : "inline min-[400px]:block md:inline"}>{homeCopy.hero.titleLine1}</HomeCm>
                 <HomeCm id="hero-title-line2" as="span" copy={homeCopy} cms={cms}>{homeCopy.hero.titleLine2}</HomeCm>
               </h1>
               <HomeCm
@@ -485,7 +558,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 as="p"
                 copy={homeCopy}
                 cms={cms}
-                className="text-sm md:text-lg leading-relaxed md:leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] whitespace-pre-line [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]"
+                className={`${isKsLp ? "hidden md:block" : ""} text-sm md:text-lg leading-relaxed md:leading-loose opacity-0 animate-fadeUp text-[var(--lp-bg-warm)] whitespace-pre-line [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4),0_18px_18px_rgba(0,0,0,.6)]`}
                 style={{
                   animationDelay: '0.4s',
                   animationFillMode: 'forwards',
@@ -499,7 +572,7 @@ export default function Home({ lpSlug }: HomeProps) {
                  * タイトル・本文が人物の顔に被らないよう、元のボタン1個分の高さだけを確保して元の位置に保つ。
                  * PC は CTA 群をその位置から下へ伸ばし、スマホは写真の下の白地に出す（写真上に面やグラデーションを足さないため）
                  */
-                <div className="mt-6 md:mt-8 h-[68px] w-full max-w-sm mx-auto relative">
+                <div className="hidden md:block mt-8 h-[68px] w-full max-w-sm mx-auto relative">
                   <div className="absolute top-0 inset-x-0 hidden md:block opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
                     {renderHeroCtaGroup("onPhoto")}
                   </div>
@@ -511,6 +584,7 @@ export default function Home({ lpSlug }: HomeProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={trackMetaPixelLead}
+                  data-inline-cta
                   data-cm-id="hero-cta"
                   style={cms("hero-cta")}
                   className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
@@ -525,6 +599,17 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
         {isKsLp && (
           <div className="md:hidden relative z-10 bg-white px-4 pt-2 pb-10 text-center">
+            {/* 本文は写真上だと顔かポスターに重なるため、スマホは写真の下の白地に置く */}
+            <HomeCm
+              id="hero-subcopy"
+              as="p"
+              copy={homeCopy}
+              cms={cms}
+              className="text-sm leading-relaxed text-lp-text-heading whitespace-pre-line mb-7 opacity-0 animate-fadeUp"
+              style={{ animationDelay: '0.4s', animationFillMode: 'forwards', ...MINCHO_STYLE }}
+            >
+              {homeCopy.hero.subcopy}
+            </HomeCm>
             <div className="w-full max-w-sm mx-auto opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
               {renderHeroCtaGroup("onWhite")}
             </div>
@@ -685,7 +770,7 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
       </section>
 
-      {isKsLp && <ParticipatingCompanies />}
+      {isKsLp && <ParticipatingCompanies cta={renderInlineCta("afterCompanies", "オンライン15分・準備不要")} />}
 
       {/* Problem Section */}
       <section className="py-24 px-8 md:px-6">
@@ -733,6 +818,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
+                data-inline-cta
                 data-cm-id="about-cta"
                 style={cms("about-cta")}
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
@@ -877,6 +963,7 @@ export default function Home({ lpSlug }: HomeProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
+              data-inline-cta
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
@@ -959,6 +1046,7 @@ export default function Home({ lpSlug }: HomeProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={trackMetaPixelLead}
+              data-inline-cta
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
@@ -1006,7 +1094,7 @@ export default function Home({ lpSlug }: HomeProps) {
 
       {/* KANPAI就活 LP は事前説明で案内する運用のため、学生の参加審査ブロックを3ステップに置き換える */}
       {isKsLp ? (
-        <JoinSteps isRinFlow={ksRinFlow} />
+        <JoinSteps isRinFlow={ksRinFlow} cta={renderInlineCta("afterSteps")} />
       ) : (
       /* Student Screening Section — 企業基準セクションと同じ構成で「企業も学生も同じ土俵」を示す */
       <section id="student-screening" className="py-24 px-8 md:px-6">
@@ -1197,22 +1285,17 @@ export default function Home({ lpSlug }: HomeProps) {
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
-              {isKsLp && (
-                <div className="mb-4 text-lp-text-heading">
-                  <p className="text-base md:text-lg font-bold" style={MINCHO_STYLE}>{ksCtaLeadLines}</p>
-                  <p className="text-xs md:text-sm text-lp-text-body mt-1">{KS_CTA_SUB}</p>
-                </div>
-              )}
               <a
                 href={cmh("hero-cta")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
+                data-inline-cta
                 data-cm-id="hero-cta"
                 style={cms("hero-cta")}
                 className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
               >
-                {lineCtaLabel}
+                {finalCtaLabel}
                 {renderCtaIcon("w-7 h-7 object-contain")}
               </a>
               {isKsLp && <p className="text-sm text-lp-text-heading mb-2">{KS_CTA_NOTE}</p>}
@@ -1316,9 +1399,10 @@ export default function Home({ lpSlug }: HomeProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={trackMetaPixelLead}
+                data-inline-cta
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
-                {lineSignupLabel}
+                {eventDetailCtaLabel}
                 {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
               </a>
             </div>
@@ -1327,7 +1411,7 @@ export default function Home({ lpSlug }: HomeProps) {
       </section>
 
       {/* Footer */}
-      <footer className="py-11 px-6 border-t border-lp-border bg-white">
+      <footer ref={footerRef} className="py-11 px-6 border-t border-lp-border bg-white">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
           <div className="flex items-center text-lp-text-heading" data-cm-id="brand-logo">
             {logoUrl ? (
