@@ -5,21 +5,23 @@
 
 /** 臙脂。参加企業ブロックは白・黒・臙脂を基調にする指定のため、パレットとは独立させる */
 const ENJI = "#8B2500";
+/** 枠線だけだと情報の強弱が出ないため、臙脂をごく薄く敷いた面でカードを作る */
+const ENJI_TINT = "rgba(139, 37, 0, 0.05)";
 const MINCHO = { fontFamily: "'Shippori Mincho', serif" } as const;
 
 const HEADING_PARTS = ["東証プライム上場3社を含む、", "大手からベンチャーまで", "6社・6業界が参加。"];
 
-/** copy は確定文言。「｜」の前後で改行して見せるが、文字は変えない */
+/** 確定文言（旧「補足文｜メインコピー」を補足文とメインコピーに分けて持つ） */
 const MAIN_COMPANIES = [
-  { industry: "企業支援・BPO", copy: "福利厚生・海外赴任支援など幅広く77社のグループを展開｜若手から新規事業にも挑戦できる会社" },
-  { industry: "IT商社", copy: "大手×ベンチャーの良いとこどり｜日本の中小企業をITの力で強くするIT商社" },
-  { industry: "メーカー", copy: "創業60年・フラットな社風｜街を守り、未来を塗り替えるペイントメーカー" },
+  { industry: "企業支援・BPO", lead: "福利厚生・海外赴任支援など幅広く77社のグループを展開", main: "若手から新規事業にも挑戦できる会社" },
+  { industry: "IT商社", lead: "大手×ベンチャーの良いとこどり", main: "日本の中小企業をITの力で強くするIT商社" },
+  { industry: "メーカー", lead: "創業60年・フラットな社風", main: "街を守り、未来を塗り替えるペイントメーカー" },
 ];
 
-/** 「福祉系コンサル」をスマホの3列で語の途中改行させないため、改行位置を明示する */
-const OTHER_INDUSTRIES = [["不動産"], ["福祉系", "コンサル"], ["飲食"]];
+const OTHER_INDUSTRIES = ["不動産", "福祉系コンサル", "飲食"];
 
-const CARD_CLASS = "bg-white border border-lp-border rounded-2xl";
+/** 上3社と下3業界で業界名の見た目を揃え、6社が同じ並びに見えるようにする */
+const INDUSTRY_CLASS = "text-base md:text-lg font-bold leading-snug";
 
 export function ParticipatingCompanies() {
   return (
@@ -37,34 +39,32 @@ export function ParticipatingCompanies() {
         </h2>
         <div className="opacity-0 animate-fadeUp" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
           <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            {MAIN_COMPANIES.map(({ industry, copy }) => {
-              const [lead, main] = copy.split("｜");
-              return (
-                <li key={industry} className={`${CARD_CLASS} p-5 md:p-6`} style={{ borderWidth: "0.5px", borderTop: `3px solid ${ENJI}` }}>
-                  <p className="text-base md:text-lg font-bold mb-2" style={{ ...MINCHO, color: ENJI }}>
-                    {industry}
-                  </p>
-                  <p className="text-xs md:text-sm text-lp-text-body leading-relaxed mb-1">{lead}</p>
-                  <p className="text-sm md:text-base font-bold text-lp-text-heading leading-relaxed" style={MINCHO}>
-                    {main}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-          <ul className="grid grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
-            {OTHER_INDUSTRIES.map((parts) => (
-              <li
-                key={parts.join("")}
-                className={`${CARD_CLASS} flex items-center justify-center text-center px-2 py-5 md:py-6`}
-                style={{ borderWidth: "0.5px", borderTop: `3px solid ${ENJI}` }}
-              >
-                <p className="text-base md:text-lg font-bold leading-snug" style={{ ...MINCHO, color: ENJI }}>
-                  {parts.map((p) => (
-                    <span key={p} className="inline-block">
-                      {p}
+            {MAIN_COMPANIES.map(({ industry, lead, main }) => (
+              <li key={industry} className="rounded-2xl px-5 py-6 md:px-6 md:py-7" style={{ backgroundColor: ENJI_TINT }}>
+                <p className={`${INDUSTRY_CLASS} mb-3`} style={{ color: ENJI }}>
+                  {industry}
+                </p>
+                <p className="text-xs md:text-sm text-lp-text-body leading-relaxed mb-1.5">{lead}</p>
+                <p className="text-base md:text-xl font-bold text-lp-text-heading leading-snug" style={MINCHO}>
+                  {/* 読点の後で折り返し、語の途中や1文字だけの改行を防ぐ */}
+                  {main.split(/(?<=、)/).map((part) => (
+                    <span key={part} className="inline-block">
+                      {part}
                     </span>
                   ))}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
+            {OTHER_INDUSTRIES.map((industry) => (
+              <li
+                key={industry}
+                className="rounded-2xl px-5 py-4 md:px-6 md:py-5 md:text-center"
+                style={{ backgroundColor: ENJI_TINT }}
+              >
+                <p className={INDUSTRY_CLASS} style={{ color: ENJI }}>
+                  {industry}
                 </p>
               </li>
             ))}

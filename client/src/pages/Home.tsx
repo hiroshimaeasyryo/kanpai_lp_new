@@ -324,6 +324,34 @@ export default function Home({ lpSlug }: HomeProps) {
     return () => link.remove();
   }, [heroImageUrl]);
 
+  /** FV の CTA ボタン。onPhoto=写真上（PC）、onWhite=写真の下の白地（スマホ） */
+  const renderHeroCtaGroup = (tone: "onPhoto" | "onWhite") => {
+    const onPhoto = tone === "onPhoto";
+    const photoText = "text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4)]";
+    return (
+      <>
+        <div className={`mb-3 ${onPhoto ? photoText : "text-lp-text-heading"}`}>
+          <p className="text-sm md:text-base font-bold" style={MINCHO_STYLE}>{ksCtaLeadLines}</p>
+          <p className={`text-xs md:text-sm mt-1 ${onPhoto ? "" : "text-lp-text-body"}`}>{KS_CTA_SUB}</p>
+        </div>
+        <a
+          href={cmh("hero-cta")}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={trackMetaPixelLead}
+          data-cm-id="hero-cta"
+          style={cms("hero-cta")}
+          className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
+        >
+          {lineCtaLabel}
+          {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
+        </a>
+        {/* ボタン下は写真が白くフェードし始める位置なので、写真上でも濃い文字にする */}
+        <p className={`mt-2 text-xs md:text-sm text-lp-text-heading ${onPhoto ? "font-medium [text-shadow:0_0_6px_rgba(255,255,255,.9)]" : ""}`}>{KS_CTA_NOTE}</p>
+      </>
+    );
+  };
+
   return (
     <div ref={homeRootRef} className="min-h-screen bg-white" style={{ fontFamily: "'Zen Kaku Gothic New', sans-serif" }}>
       {homeCopy.fieldStyles && Object.keys(homeCopy.fieldStyles).length > 0 ? (
@@ -466,13 +494,18 @@ export default function Home({ lpSlug }: HomeProps) {
               >
                 {homeCopy.hero.subcopy}
               </HomeCm>
-              <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-                {isKsLp && (
-                  <div className="mb-3 text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4)]">
-                    <p className="text-sm md:text-base font-bold" style={MINCHO_STYLE}>{ksCtaLeadLines}</p>
-                    <p className="text-xs md:text-sm mt-1">{KS_CTA_SUB}</p>
+              {isKsLp ? (
+                /*
+                 * タイトル・本文が人物の顔に被らないよう、元のボタン1個分の高さだけを確保して元の位置に保つ。
+                 * PC は CTA 群をその位置から下へ伸ばし、スマホは写真の下の白地に出す（写真上に面やグラデーションを足さないため）
+                 */
+                <div className="mt-6 md:mt-8 h-[68px] w-full max-w-sm mx-auto relative">
+                  <div className="absolute top-0 inset-x-0 hidden md:block opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+                    {renderHeroCtaGroup("onPhoto")}
                   </div>
-                )}
+                </div>
+              ) : (
+              <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
                 <a
                   href={cmh("hero-cta")}
                   target="_blank"
@@ -485,13 +518,18 @@ export default function Home({ lpSlug }: HomeProps) {
                   {lineCtaLabel}
                   {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
                 </a>
-                {isKsLp && (
-                  <p className="mt-2 text-xs md:text-sm text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4)]">{KS_CTA_NOTE}</p>
-                )}
               </div>
+              )}
             </div>
           </div>
         </div>
+        {isKsLp && (
+          <div className="md:hidden relative z-10 bg-white px-4 pt-2 pb-10 text-center">
+            <div className="w-full max-w-sm mx-auto opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              {renderHeroCtaGroup("onWhite")}
+            </div>
+          </div>
+        )}
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
         </div>
