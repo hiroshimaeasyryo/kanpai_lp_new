@@ -43,13 +43,26 @@ import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { useSearch } from "wouter";
 import { LINE_CAMPAIGN2603_SIGNUP_URL } from "@/constants/line-ks-signup";
-import { resolveKsCtaHref } from "@/lib/cta-flow";
+import { isRinFlow, resolveKsCtaHref, resolveKsCtaLabel } from "@/lib/cta-flow";
+import { ParticipatingCompanies } from "@/components/ks/ParticipatingCompanies";
+import { JoinSteps } from "@/components/ks/JoinSteps";
 import { HomeCm } from "@/components/contents-manager/HomeCm";
 import {
   createHomeCopyStyleHelpers,
   MINCHO_STYLE,
 } from "@/lib/content-manager/home-copy-preview-styles";
 import { trackMetaPixelLead } from "@/lib/meta-pixel";
+
+/** KANPAI就活 LP の主要 CTA（ファーストビュー・最下部）周辺の確定コピー。flow によらず共通 */
+const KS_CTA_LEAD = "人事と話すコツがわかる、15分の事前説明。";
+const KS_CTA_SUB = "オンライン・準備不要・スマホOK";
+const KS_CTA_NOTE = "説明を聞いてから参加を決めてもOK！";
+/** スマホで「事前説明」が語の途中で折り返されないよう、読点の後で改行させる */
+const ksCtaLeadLines = KS_CTA_LEAD.split(/(?<=、)/).map((part) => (
+  <span key={part} className="inline-block">
+    {part}
+  </span>
+));
 
 /** campaign2603用: キャンペーン文言のデフォルト（未設定時表示） */
 const DEFAULT_CAMPAIGN2603_NOTICE =
@@ -134,9 +147,23 @@ export default function Home({ lpSlug }: HomeProps) {
   /** コンテンツ管理プレビュー: FAQ の開閉状態 */
   const [previewOpenFaq, setPreviewOpenFaq] = useState<Set<number>>(() => new Set());
 
-  const lineCtaLabel = homeCopy.cta.primaryLabel;
-  const lineSignupLabel = homeCopy.cta.stickyLabel;
   const search = useSearch();
+  /** KANPAI就活 LP（/campaign2603 以外）は CTA を flow で出し分ける。URL から同期的に決まるので初期表示から正しい */
+  const isKsLp = contentSlug !== "campaign2603";
+  const ksRinFlow = isKsLp && isRinFlow(search);
+  const ksCtaLabel = resolveKsCtaLabel(search);
+  const lineCtaLabel = isKsLp ? ksCtaLabel : homeCopy.cta.primaryLabel;
+  const lineSignupLabel = isKsLp ? ksCtaLabel : homeCopy.cta.stickyLabel;
+  const headerCtaLabel = isKsLp ? ksCtaLabel : homeCopy.nav.headerCta;
+  /** flow=rin は予約ページへ飛ぶため、LINE ロゴではなく右矢印を出す */
+  const renderCtaIcon = (lineImgClassName: string, alt = "LINE") =>
+    ksRinFlow ? (
+      <svg className={lineImgClassName.replace(/w-\d+ h-\d+/, "w-5 h-5")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    ) : (
+      <img src="/line-logo.png" alt={alt} className={lineImgClassName} loading="lazy" />
+    );
   const defaultLineHref =
     contentSlug === "campaign2603" ? LINE_CAMPAIGN2603_SIGNUP_URL : resolveKsCtaHref(search);
   const { cms, cmh } = createHomeCopyStyleHelpers(homeCopy, defaultLineHref);
@@ -307,10 +334,10 @@ export default function Home({ lpSlug }: HomeProps) {
       ) : null}
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-transparent transition-all duration-300 pt-[env(safe-area-inset-top)]" id="nav">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="#" className="flex items-center text-lp-text-heading no-underline" data-cm-id="brand-logo">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+          <a href="#" className="flex items-center text-lp-text-heading no-underline min-w-0" data-cm-id="brand-logo">
             {logoUrl ? (
-              <img src={logoUrl} alt="ロゴ" className="h-6 w-auto object-contain" onError={handleLogoError} />
+              <img src={logoUrl} alt="ロゴ" className="h-5 min-[400px]:h-6 w-auto object-contain" onError={handleLogoError} />
             ) : (
               <DefaultLogoIcon size="md" />
             )}
@@ -323,9 +350,10 @@ export default function Home({ lpSlug }: HomeProps) {
               onClick={trackMetaPixelLead}
               data-cm-id="nav-header-cta"
               style={cms("nav-header-cta")}
-              className="inline-flex items-center gap-1.5 px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap"
             >
-              {homeCopy.nav.headerCta}
+              {headerCtaLabel}
+              {isKsLp && renderCtaIcon("w-4 h-4 sm:w-5 sm:h-5 object-contain", "")}
             </a>
           </div>
         </div>
@@ -349,7 +377,7 @@ export default function Home({ lpSlug }: HomeProps) {
             className="flex items-center justify-center gap-2 w-full py-3.5 bg-lp-primary text-white rounded-full font-medium text-sm transition-all active:bg-lp-primary-hover shadow-[0_-2px_12px_rgba(92,61,46,0.15),0_4px_24px_rgba(0,0,0,0.12)]"
           >
             {lineSignupLabel}
-            <img src="/line-logo.png" alt="" className="w-8 h-8 object-contain" loading="lazy" />
+            {renderCtaIcon("w-8 h-8 object-contain", "")}
           </a>
         </div>
       </div>
@@ -439,6 +467,12 @@ export default function Home({ lpSlug }: HomeProps) {
                 {homeCopy.hero.subcopy}
               </HomeCm>
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+                {isKsLp && (
+                  <div className="mb-3 text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4)]">
+                    <p className="text-sm md:text-base font-bold" style={MINCHO_STYLE}>{ksCtaLeadLines}</p>
+                    <p className="text-xs md:text-sm mt-1">{KS_CTA_SUB}</p>
+                  </div>
+                )}
                 <a
                   href={cmh("hero-cta")}
                   target="_blank"
@@ -449,8 +483,11 @@ export default function Home({ lpSlug }: HomeProps) {
                   className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
                 >
                   {lineCtaLabel}
-                  <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
+                  {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
                 </a>
+                {isKsLp && (
+                  <p className="mt-2 text-xs md:text-sm text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.55),0_2px_8px_rgba(0,0,0,.4)]">{KS_CTA_NOTE}</p>
+                )}
               </div>
             </div>
           </div>
@@ -610,6 +647,8 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
       </section>
 
+      {isKsLp && <ParticipatingCompanies />}
+
       {/* Problem Section */}
       <section className="py-24 px-8 md:px-6">
         <div className="max-w-2xl mx-auto text-left md:text-center">
@@ -661,7 +700,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
                 {lineCtaLabel}
-                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
+                {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
               </a>
             </div>
             {eventImages.length > 0 && (
@@ -803,7 +842,7 @@ export default function Home({ lpSlug }: HomeProps) {
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
-              <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
+              {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
             </a>
           </div>
         </div>
@@ -885,7 +924,7 @@ export default function Home({ lpSlug }: HomeProps) {
               className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
             >
               {lineCtaLabel}
-              <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
+              {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
             </a>
           </div>
         </div>
@@ -927,7 +966,11 @@ export default function Home({ lpSlug }: HomeProps) {
         </div>
       </section>
 
-      {/* Student Screening Section — 企業基準セクションと同じ構成で「企業も学生も同じ土俵」を示す */}
+      {/* KANPAI就活 LP は事前説明で案内する運用のため、学生の参加審査ブロックを3ステップに置き換える */}
+      {isKsLp ? (
+        <JoinSteps isRinFlow={ksRinFlow} />
+      ) : (
+      /* Student Screening Section — 企業基準セクションと同じ構成で「企業も学生も同じ土俵」を示す */
       <section id="student-screening" className="py-24 px-8 md:px-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12 opacity-0 animate-fadeUp" style={{ animationFillMode: 'forwards' }}>
@@ -962,6 +1005,7 @@ export default function Home({ lpSlug }: HomeProps) {
           </div>
         </div>
       </section>
+      )}
 
       {/* Event Overview Section */}
       <section className="py-24 px-6 bg-lp-bg-warm">
@@ -1115,6 +1159,12 @@ export default function Home({ lpSlug }: HomeProps) {
               </p>
             </div>
             <div className="opacity-0 animate-fadeUp" style={{ animationDelay: '0.24s', animationFillMode: 'forwards' }}>
+              {isKsLp && (
+                <div className="mb-4 text-lp-text-heading">
+                  <p className="text-base md:text-lg font-bold" style={MINCHO_STYLE}>{ksCtaLeadLines}</p>
+                  <p className="text-xs md:text-sm text-lp-text-body mt-1">{KS_CTA_SUB}</p>
+                </div>
+              )}
               <a
                 href={cmh("hero-cta")}
                 target="_blank"
@@ -1125,8 +1175,9 @@ export default function Home({ lpSlug }: HomeProps) {
                 className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-lp-primary text-white rounded-full font-medium text-xs sm:text-sm md:text-base whitespace-nowrap transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5 mb-4"
               >
                 {lineCtaLabel}
-                <img src="/line-logo.png" alt="LINE" className="w-7 h-7 object-contain" loading="lazy" />
+                {renderCtaIcon("w-7 h-7 object-contain")}
               </a>
+              {isKsLp && <p className="text-sm text-lp-text-heading mb-2">{KS_CTA_NOTE}</p>}
               <p className="text-xs text-lp-primary font-medium tracking-wide" data-cm-id="final-cta-note" style={cms("final-cta-note")}>
                 {homeCopy.cta.footerNote}
               </p>
@@ -1230,7 +1281,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 className="block w-full text-center py-4 bg-lp-primary text-white rounded-full font-medium transition-all hover:bg-lp-primary-hover hover:shadow-lg hover:-translate-y-0.5"
               >
                 {lineSignupLabel}
-                <img src="/line-logo.png" alt="LINE" className="inline-block w-9 h-9 ml-2 align-middle object-contain" loading="lazy" />
+                {renderCtaIcon("inline-block w-9 h-9 ml-2 align-middle object-contain")}
               </a>
             </div>
           </div>
