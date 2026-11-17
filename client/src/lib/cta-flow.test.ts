@@ -34,7 +34,7 @@ describe("resolveKsCtaLabel（置き場所別）", () => {
   it.each([
     ["header", "", "LINEで案内を受け取る"],
     ["header", "?flow=rin", "事前説明を予約"],
-    ["sticky", "?flow=pteam", "LINEで参加案内"],
+    ["sticky", "?flow=pteam", "LINEで事前説明の案内を受け取る"],
     ["sticky", "?flow=rin", "15分の説明を予約"],
     ["afterCompanies", "", "LINEで参加案内を受け取る"],
     ["afterCompanies", "?flow=rin", "事前説明を予約する"],

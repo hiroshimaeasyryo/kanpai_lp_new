@@ -28,7 +28,7 @@ export type KsCtaSlot = "header" | "sticky" | "fv" | "afterCompanies" | "afterSt
 
 const KS_CTA_LABELS: Record<KsCtaSlot, { rin: string; line: string }> = {
   header: { rin: "事前説明を予約", line: "LINEで案内を受け取る" },
-  sticky: { rin: "15分の説明を予約", line: "LINEで参加案内" },
+  sticky: { rin: "15分の説明を予約", line: "LINEで事前説明の案内を受け取る" },
   fv: { rin: "事前説明を予約する", line: "LINEで案内を受け取る" },
   afterCompanies: { rin: "事前説明を予約する", line: "LINEで参加案内を受け取る" },
   afterSteps: { rin: "日程を選んで予約する", line: "LINEで日程案内を受け取る" },
