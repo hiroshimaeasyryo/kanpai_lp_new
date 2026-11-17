@@ -42,6 +42,8 @@ describe("resolveKsCtaLabel（置き場所別）", () => {
     ["afterSteps", "?flow=rin&utm_source=meta", "日程を選んで予約する"],
     ["final", "", "LINEで案内を受け取る"],
     ["final", "?flow=rin", "事前説明を予約する"],
+    ["eventDetail", "", "LINEで参加案内を受け取る"],
+    ["eventDetail", "?flow=rin", "日程を選んで予約する"],
   ] as const)("%s search=%s", (slot, search, expected) => {
     expect(resolveKsCtaLabel(search, slot)).toBe(expected);
   });

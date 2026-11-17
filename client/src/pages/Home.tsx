@@ -143,7 +143,8 @@ export default function Home({ lpSlug }: HomeProps) {
   const [showStickyCta, setShowStickyCta] = useState(false);
   /** 固定 CTA の表示制御用（KANPAI就活 LP） */
   const [heroInView, setHeroInView] = useState(true);
-  const [inlineCtaInView, setInlineCtaInView] = useState(false);
+  /** 画面内に見えているブロック内 CTA の文言（同じ文言の固定 CTA を抑制するため文言で持つ） */
+  const [visibleInlineCtaLabels, setVisibleInlineCtaLabels] = useState<string[]>([]);
   const [footerInView, setFooterInView] = useState(false);
   const footerRef = useRef<HTMLElement | null>(null);
   const [homeCopy, setHomeCopy] = useState<HomeCopy>(() => getStoredHomeCopy());
@@ -164,9 +165,15 @@ export default function Home({ lpSlug }: HomeProps) {
   const finalCtaLabel = isKsLp ? ksLabel("final") : homeCopy.cta.primaryLabel;
   /** 下部追従 CTA */
   const lineSignupLabel = isKsLp ? ksLabel("sticky") : homeCopy.cta.stickyLabel;
-  /** 最下部の開催情報の直後。開催情報・参加企業ブロック後と同じ訴求 */
-  const eventDetailCtaLabel = isKsLp ? ksLabel("afterCompanies") : homeCopy.cta.stickyLabel;
+  /** 最下部の開催情報の直後 */
+  const eventDetailCtaLabel = isKsLp ? ksLabel("eventDetail") : homeCopy.cta.stickyLabel;
   const headerCtaLabel = isKsLp ? ksLabel("header") : homeCopy.nav.headerCta;
+  /**
+   * 同時に見える CTA を最大2つにし、同じ文言の CTA を並べないため、
+   * 同じ文言のブロック内 CTA が見えているとき・ブロック内 CTA が2つ以上見えているときは上部固定 CTA を隠す
+   */
+  const hideHeaderCta =
+    isKsLp && (visibleInlineCtaLabels.includes(headerCtaLabel) || visibleInlineCtaLabels.length >= 2);
   /** flow=rin は予約ページへ飛ぶため、LINE ロゴではなく右矢印を出す */
   const renderCtaIcon = (lineImgClassName: string, alt = "LINE") =>
     ksRinFlow ? (
@@ -263,7 +270,7 @@ export default function Home({ lpSlug }: HomeProps) {
         if (entry.isIntersecting) visibleInlineCtas.add(entry.target);
         else visibleInlineCtas.delete(entry.target);
       }
-      setInlineCtaInView(visibleInlineCtas.size > 0);
+      setVisibleInlineCtaLabels(Array.from(visibleInlineCtas).map((el) => (el as HTMLElement).innerText.trim()));
     });
     root.querySelectorAll("[data-inline-cta]").forEach((el) => inlineCtaObserver.observe(el));
 
@@ -447,7 +454,7 @@ export default function Home({ lpSlug }: HomeProps) {
               onClick={trackMetaPixelLead}
               data-cm-id="nav-header-cta"
               style={cms("nav-header-cta")}
-              className={`${isKsLp && !heroInView ? "max-md:opacity-0 max-md:pointer-events-none" : ""} transition-opacity duration-300 inline-flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full transition-colors hover:bg-lp-primary-hover whitespace-nowrap`}
+              className={`${isKsLp && !heroInView ? "max-md:opacity-0 max-md:pointer-events-none" : ""} ${hideHeaderCta ? "opacity-0 pointer-events-none" : ""} transition-all duration-300 inline-flex items-center gap-1 sm:gap-1.5 px-3.5 sm:px-5 h-10 bg-lp-primary text-white text-xs sm:text-sm font-medium rounded-full hover:bg-lp-primary-hover whitespace-nowrap`}
             >
               {headerCtaLabel}
               {isKsLp && renderCtaIcon("w-4 h-4 sm:w-5 sm:h-5 object-contain", "")}
@@ -459,7 +466,7 @@ export default function Home({ lpSlug }: HomeProps) {
       {/* モバイル用: スクロール時に表示する下部固定LINE登録CTA（CVR改善） */}
       <div
         className={`fixed left-0 right-0 z-40 md:hidden transition-all duration-300 ease-out ${
-          (isKsLp ? !heroInView && !inlineCtaInView && !footerInView : showStickyCta) ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+          (isKsLp ? !heroInView && visibleInlineCtaLabels.length === 0 && !footerInView : showStickyCta) ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
         }`}
         style={{ bottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
@@ -535,14 +542,15 @@ export default function Home({ lpSlug }: HomeProps) {
             }}
           />
           {/*
-            コンテンツ: 画像表示エリアの縦横中央に配置（PC 共通）。
-            KANPAI就活 LP のスマホは、写真上で顔に被らない唯一の帯（女性の顔の下〜ポスターの上）に見出しだけを置く。
-            位置・文字サイズ・左余白は写真と同じく画面幅に比例させ、375〜430px 幅で人物との位置関係を保つ
+            コンテンツ: 画像表示エリアの縦横中央に配置。
+            KANPAI就活 LP は人物の顔に文字を重ねないため、写真上で顔に被らない帯に置く。
+            - スマホ: 見出しだけを女性の顔の下〜ポスターの上に置く。位置・文字サイズ・左余白は写真と同じく画面幅に比例させ、375〜430px 幅で人物との位置関係を保つ
+            - PC: 見出しは頭より上の壁の帯（主要解像度でナビ下 80px 以上確保できる）、本文と CTA 群は顔より下の白くフェードしていく帯に分ける
           */}
-          <div className={`absolute inset-0 z-10 flex flex-col items-center px-4 md:px-6 ${isKsLp ? "justify-start pt-[48vw] md:pt-0 md:justify-center" : "justify-center"}`}>
-            <div className="w-full max-w-2xl text-center">
+          <div className={`absolute inset-0 z-10 flex flex-col items-center px-4 md:px-6 ${isKsLp ? "justify-start pt-[48vw] md:pt-[80px] md:pb-[4vh]" : "justify-center"}`}>
+            <div className={`w-full max-w-2xl text-center ${isKsLp ? "md:h-full md:flex md:flex-col md:justify-between" : ""}`}>
               <h1
-                className={`lp-hero-title font-bold leading-[1.25] opacity-0 animate-fadeUp md:whitespace-nowrap ${isKsLp ? "text-[7vw] md:text-[clamp(1.75rem,8vw,3.75rem)] pl-[10vw] md:pl-0" : ""} text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)] mb-3 md:mb-8`}
+                className={`lp-hero-title font-bold leading-[1.25] opacity-0 animate-fadeUp md:whitespace-nowrap ${isKsLp ? "text-[7vw] md:text-[clamp(1.75rem,4vw,3rem)] pl-[10vw] md:pl-0" : ""} text-[var(--lp-bg-warm)] [text-shadow:0_1px_3px_rgba(92,61,46,.6),0_2px_10px_rgba(0,0,0,.45),0_4px_20px_rgba(0,0,0,.35),0_6px_28px_rgba(0,0,0,.25)] mb-3 md:mb-8`}
                 style={{
                   animationDelay: '0.2s',
                   animationFillMode: 'forwards',
@@ -553,6 +561,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 <HomeCm id="hero-title-line1" as="span" copy={homeCopy} cms={cms} className={isKsLp ? "block md:inline" : "inline min-[400px]:block md:inline"}>{homeCopy.hero.titleLine1}</HomeCm>
                 <HomeCm id="hero-title-line2" as="span" copy={homeCopy} cms={cms}>{homeCopy.hero.titleLine2}</HomeCm>
               </h1>
+              <div>
               <HomeCm
                 id="hero-subcopy"
                 as="p"
@@ -568,14 +577,9 @@ export default function Home({ lpSlug }: HomeProps) {
                 {homeCopy.hero.subcopy}
               </HomeCm>
               {isKsLp ? (
-                /*
-                 * タイトル・本文が人物の顔に被らないよう、元のボタン1個分の高さだけを確保して元の位置に保つ。
-                 * PC は CTA 群をその位置から下へ伸ばし、スマホは写真の下の白地に出す（写真上に面やグラデーションを足さないため）
-                 */
-                <div className="hidden md:block mt-8 h-[68px] w-full max-w-sm mx-auto relative">
-                  <div className="absolute top-0 inset-x-0 hidden md:block opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-                    {renderHeroCtaGroup("onPhoto")}
-                  </div>
+                /* PC は本文の下に CTA 群を続ける。スマホは写真の下の白地に出す（写真上に面やグラデーションを足さないため） */
+                <div className="hidden md:block mt-6 w-full max-w-sm mx-auto opacity-0 animate-fadeUp" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+                  {renderHeroCtaGroup("onWhite")}
                 </div>
               ) : (
               <div className="mt-6 md:mt-8 opacity-0 animate-fadeUp w-full max-w-sm mx-auto" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
@@ -594,6 +598,7 @@ export default function Home({ lpSlug }: HomeProps) {
                 </a>
               </div>
               )}
+              </div>
             </div>
           </div>
         </div>
@@ -615,7 +620,8 @@ export default function Home({ lpSlug }: HomeProps) {
             </div>
           </div>
         )}
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+        {/* KANPAI就活 LP は FV 下部に CTA 群を置いたため、スクロール誘導の線が補足文に重なるので出さない */}
+        <div className={`absolute bottom-7 left-1/2 -translate-x-1/2 z-10 opacity-0 animate-fadeIn hidden ${isKsLp ? "" : "md:block"}`} style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
           <div className="w-0.5 h-9 bg-lp-primary mx-auto opacity-50 animate-float"></div>
         </div>
       </section>

@@ -24,7 +24,7 @@ export function resolveKsCtaHref(search: string): string {
  * CTA の置き場所。直前のブロックの訴求とクリック後の行動を揃えるため、場所ごとに文言を変える。
  * header=上部固定、sticky=下部追従（どちらも幅が狭いので短い文言）
  */
-export type KsCtaSlot = "header" | "sticky" | "fv" | "afterCompanies" | "afterSteps" | "final";
+export type KsCtaSlot = "header" | "sticky" | "fv" | "afterCompanies" | "afterSteps" | "final" | "eventDetail";
 
 const KS_CTA_LABELS: Record<KsCtaSlot, { rin: string; line: string }> = {
   header: { rin: "事前説明を予約", line: "LINEで案内を受け取る" },
@@ -33,6 +33,8 @@ const KS_CTA_LABELS: Record<KsCtaSlot, { rin: string; line: string }> = {
   afterCompanies: { rin: "事前説明を予約する", line: "LINEで参加案内を受け取る" },
   afterSteps: { rin: "日程を選んで予約する", line: "LINEで日程案内を受け取る" },
   final: { rin: "事前説明を予約する", line: "LINEで案内を受け取る" },
+  /** 最下部の開催情報の直後。最終 CTA と同時に見えるため、rin は最終 CTA と同じ文言を避けて日程の行動に寄せる */
+  eventDetail: { rin: "日程を選んで予約する", line: "LINEで参加案内を受け取る" },
 };
 
 /** 遷移先に合わせて CTA の文言も出し分ける（予約ページに LINE の文言を出さないため） */

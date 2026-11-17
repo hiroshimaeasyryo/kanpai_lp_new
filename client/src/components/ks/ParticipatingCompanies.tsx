@@ -17,21 +17,15 @@ const HEADING_PARTS = ["東証プライム上場3社を含む、", "大手から
 /** 6社を同じ重要度で見せるため、特徴を紹介する3社も他の3社と同じ並びに入れる */
 const INDUSTRIES = ["企業支援・BPO", "IT商社", "メーカー", "不動産", "福祉系コンサル", "飲食"];
 
-/** 確定文言 */
+/**
+ * 確定文言。メインコピーは文節ごとに分けて持ち、その区切りでだけ折り返す
+ * （スマホで「IT商／社」のような語の途中・1文字だけの改行を防ぐため。連結すると確定文言と一致する）
+ */
 const FEATURED_COMPANIES = [
-  { industry: "企業支援・BPO", lead: "福利厚生・海外赴任支援など幅広く77社のグループを展開", main: "若手から新規事業にも挑戦できる会社" },
-  { industry: "IT商社", lead: "大手×ベンチャーの良いとこどり", main: "日本の中小企業をITの力で強くするIT商社" },
-  { industry: "メーカー", lead: "創業60年・フラットな社風", main: "街を守り、未来を塗り替えるペイントメーカー" },
+  { industry: "企業支援・BPO", lead: "福利厚生・海外赴任支援など幅広く77社のグループを展開", mainParts: ["若手から新規事業にも", "挑戦できる会社"] },
+  { industry: "IT商社", lead: "大手×ベンチャーの良いとこどり", mainParts: ["日本の中小企業を", "ITの力で強くする", "IT商社"] },
+  { industry: "メーカー", lead: "創業60年・フラットな社風", mainParts: ["街を守り、", "未来を塗り替える", "ペイントメーカー"] },
 ];
-
-/** 読点の後で折り返し、語の途中や1文字だけの改行を防ぐ */
-function breakAfterComma(text: string) {
-  return text.split(/(?<=、)/).map((part) => (
-    <span key={part} className="inline-block">
-      {part}
-    </span>
-  ));
-}
 
 type Props = {
   /** ブロック直後の CTA（開催情報・参加企業を見たあとの申し込み導線） */
@@ -75,7 +69,7 @@ export function ParticipatingCompanies({ cta }: Props) {
             参加企業の特徴
           </h3>
           <ul className="md:grid md:grid-cols-3">
-            {FEATURED_COMPANIES.map(({ industry, lead, main }, i) => (
+            {FEATURED_COMPANIES.map(({ industry, lead, mainParts }, i) => (
               <li
                 key={industry}
                 className={`py-6 md:py-2 md:px-6 ${i > 0 ? "border-t md:border-t-0 md:border-l" : ""}`}
@@ -86,7 +80,11 @@ export function ParticipatingCompanies({ cta }: Props) {
                 </p>
                 <p className="text-xs md:text-sm text-lp-text-body leading-relaxed mb-2">{lead}</p>
                 <p className="text-lg md:text-xl font-bold text-lp-text-heading leading-snug" style={MINCHO}>
-                  {breakAfterComma(main)}
+                  {mainParts.map((part) => (
+                    <span key={part} className="inline-block">
+                      {part}
+                    </span>
+                  ))}
                 </p>
               </li>
             ))}
