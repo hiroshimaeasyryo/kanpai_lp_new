@@ -22,7 +22,7 @@ export function resolveKsCtaHref(search: string): string {
 
 /**
  * CTA の置き場所。直前のブロックの訴求とクリック後の行動を揃えるため、場所ごとに文言を変える。
- * header=上部固定、sticky=下部追従（どちらも幅が狭いので短い文言）
+ * header=上部固定（ロゴと並ぶので短い文言）、sticky=下部追従
  */
 export type KsCtaSlot = "header" | "sticky" | "fv" | "afterCompanies" | "afterSteps" | "final" | "eventDetail";
 
