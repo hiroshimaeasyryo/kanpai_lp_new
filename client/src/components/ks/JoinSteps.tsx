@@ -8,17 +8,17 @@ import type { ReactNode } from "react";
 const MINCHO = { fontFamily: "'Shippori Mincho', serif" } as const;
 
 type Props = {
-  /** 運営広告経由（flow=rin）か。STEP 01 の補足を予約導線に合わせて出し分ける */
-  isRinFlow: boolean;
+  /** CTA が直予約版か。STEP 01 の補足を予約導線に合わせて出し分ける */
+  isBookingStyle: boolean;
   /** ステップを読んだ直後の予約導線 */
   cta?: ReactNode;
 };
 
-export function JoinSteps({ isRinFlow, cta }: Props) {
+export function JoinSteps({ isBookingStyle, cta }: Props) {
   const steps = [
     {
       title: "事前説明を予約する",
-      body: isRinFlow ? "都合の良い日時を選ぶだけでOK！" : "LINEの案内から都合の良い日時を選べます。",
+      body: isBookingStyle ? "都合の良い日時を選ぶだけでOK！" : "LINEの案内から都合の良い日時を選べます。",
     },
     { title: "15分のオンライン事前説明", body: "当日の流れや、人事と話すコツをご案内します。準備は不要です。" },
     { title: "参加を決めて、イベント当日へ！", body: "説明を聞いてから参加を決めても大丈夫です。" },
