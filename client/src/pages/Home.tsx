@@ -43,7 +43,7 @@ import type { KanpaiEvent } from "@/types/events";
 import { defaultEvents, getNextEvents } from "@/types/events";
 import { useSearch } from "wouter";
 import { LINE_CAMPAIGN2603_SIGNUP_URL } from "@/constants/line-ks-signup";
-import { isRinFlow, resolveKsCtaHref, resolveKsCtaLabel, type KsCtaSlot } from "@/lib/cta-flow";
+import { isKsBookingStyle, resolveKsCtaHref, resolveKsCtaLabel, type KsCtaSlot } from "@/lib/cta-flow";
 import { ParticipatingCompanies } from "@/components/ks/ParticipatingCompanies";
 import { JoinSteps } from "@/components/ks/JoinSteps";
 import { HomeCm } from "@/components/contents-manager/HomeCm";
@@ -158,7 +158,7 @@ export default function Home({ lpSlug }: HomeProps) {
   const search = useSearch();
   /** KANPAI就活 LP（/campaign2603 以外）は CTA を flow で出し分ける。URL から同期的に決まるので初期表示から正しい */
   const isKsLp = contentSlug !== "campaign2603";
-  const ksRinFlow = isKsLp && isRinFlow(search);
+  const ksBookingStyle = isKsLp && isKsBookingStyle(search);
   const ksLabel = (slot: KsCtaSlot) => resolveKsCtaLabel(search, slot);
   /** FV と PC のみ表示の中間 CTA */
   const lineCtaLabel = isKsLp ? ksLabel("fv") : homeCopy.cta.primaryLabel;
@@ -174,9 +174,9 @@ export default function Home({ lpSlug }: HomeProps) {
    */
   const hideHeaderCta =
     isKsLp && (visibleInlineCtaLabels.includes(headerCtaLabel) || visibleInlineCtaLabels.length >= 2);
-  /** flow=rin は予約ページへ飛ぶため、LINE ロゴではなく右矢印を出す */
+  /** 直予約版は予約ページへ飛ぶため、LINE ロゴではなく右矢印を出す */
   const renderCtaIcon = (lineImgClassName: string, alt = "LINE") =>
-    ksRinFlow ? (
+    ksBookingStyle ? (
       <svg className={lineImgClassName.replace(/w-\d+ h-\d+/, "w-5 h-5")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M5 12h14M13 6l6 6-6 6" />
       </svg>
@@ -1100,7 +1100,7 @@ export default function Home({ lpSlug }: HomeProps) {
 
       {/* KANPAI就活 LP は事前説明で案内する運用のため、学生の参加審査ブロックを3ステップに置き換える */}
       {isKsLp ? (
-        <JoinSteps isRinFlow={ksRinFlow} cta={renderInlineCta("afterSteps")} />
+        <JoinSteps isBookingStyle={ksBookingStyle} cta={renderInlineCta("afterSteps")} />
       ) : (
       /* Student Screening Section — 企業基準セクションと同じ構成で「企業も学生も同じ土俵」を示す */
       <section id="student-screening" className="py-24 px-8 md:px-6">
